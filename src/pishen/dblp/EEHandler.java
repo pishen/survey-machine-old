@@ -2,10 +2,14 @@ package pishen.dblp;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,7 +33,55 @@ public class EEHandler {
 			return true;
 		}
 		
+		if(ee.startsWith("db")){
+			ee = "http://www.sigmod.org/dblp/" + ee;
+		}
+		
+		URL eeURL = null;
+		try {
+			eeURL = new URL(ee);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		
+		URL pdfURL = null;
+		//handle different cases of publishers
+		if(eeURL.getHost().equals("doi.acm.org")){
+			String documentID = ee.substring(ee.lastIndexOf(".") + 1);
+			try {
+				pdfURL = new URL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID + "&type=pdf");
+				URLConnection pdfConnect = pdfURL.openConnection();
+				addUserAgent(pdfConnect);
+				if(pdfConnect.getContentType().equals("application/pdf")){
+					byte[] buffer = new byte[4096];
+					InputStream in = pdfConnect.getInputStream();
+					OutputStream out = new FileOutputStream("record-archive/" + recordKey + ".pdf");
+					int n = 0;
+					while((n = in.read(buffer)) > 0){
+						out.write(buffer, 0, n);
+					}
+					in.close();
+					out.close();
+					return true;
+				}else{
+					//TODO wrong rule
+					System.out.println("rule error!");
+					System.out.println("ee: " + ee);
+					System.out.println("pdfConnect: " + pdfConnect.getURL());
+				}
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
 		return false;
+	}
+	
+	private void addUserAgent(URLConnection urlc){
+		urlc.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:17.0) Gecko/20100101 Firefox/17.0");
 	}
 	
 	//analysis

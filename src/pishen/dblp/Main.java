@@ -1,5 +1,13 @@
 package pishen.dblp;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+
+
 
 public class Main {
 	public static void main(String[] args) {
@@ -7,7 +15,16 @@ public class Main {
 		
 		/*
 		try {
-			URL test = new URL("http://dx.doi.org/10.3991/ijet.v3i1.750");
+			PDFTextStripper stripper = new PDFTextStripper();
+			stripper.writeText(PDDocument.load("wsdm11-citation-recommend.pdf"), new BufferedWriter(new FileWriter("pdf-output")));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		*/
+		
+		/*
+		try {
+			URL test = new URL("http://dl.acm.org/ft_gateway.cfm?id=1376809&type=pdf");
 			URLConnection con = test.openConnection();
 			con.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:17.0) Gecko/20100101 Firefox/17.0");
 			System.out.println("content-type=" + con.getContentType());
