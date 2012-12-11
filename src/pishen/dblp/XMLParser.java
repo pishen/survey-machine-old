@@ -11,16 +11,13 @@ public class XMLParser {
 	private EEHandler eeHandler = new EEHandler();
 	private XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 	private XMLStreamReader streamReader;
-	int eeCount = 0;
-	boolean stop = false;
+	private int recordCount = 0;
+	private boolean stop = false;
 	
 	public void startParsing(){
 		try {
 			streamReader = inputFactory.createXMLStreamReader(new FileReader("dblp.xml"));
-			parseForRecords();
-			//\\//\\
-			eeHandler.printResult();
-			//\\//\\
+			parseAllRecords();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (XMLStreamException e) {
@@ -28,13 +25,13 @@ public class XMLParser {
 		}
 	}
 	
-	private void parseForRecords(){
+	private void parseAllRecords(){
 		try {
 			while(streamReader.hasNext() && stop == false){
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT && 
 						isTargetPaperType(streamReader.getLocalName())){
-					//match a target type record
+					//match the record of <article> or <inproceedings>
 					parseSingleRecord();
 				}
 			}
@@ -45,9 +42,13 @@ public class XMLParser {
 	
 	private void parseSingleRecord(){
 		try {
-			System.out.println("parsing record " + (++eeCount));
-			String recordKey = streamReader.getAttributeValue(null, "key");
-			recordKey = recordKey.replaceAll("/", "-");
+			System.out.println("parsing record " + (++recordCount));
+			
+			String recordKey = streamReader.getAttributeValue(null, "key").replaceAll("/", "-");
+			String recordEE = null;
+			boolean recordDownloaded = false;
+			
+			//grabing information from the xml
 			while(streamReader.hasNext()){
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT &&
@@ -55,13 +56,7 @@ public class XMLParser {
 					//ee found
 					streamReader.next();
 					if(streamReader.getEventType() == XMLStreamReader.CHARACTERS){
-						//handle a single record with ee value
-						//TODO transfer the slash in KEY to dash
-						//TODO move out as a function
-						if(eeHandler.downloadRecord(recordKey, streamReader.getText())){
-							stop = true;
-						}
-						//\\//\\//
+						recordEE = streamReader.getText();
 						/*
 						eeHandler.addEE(streamReader.getText());
 						System.out.println("# of ee read=" + (++eeCount));
@@ -71,9 +66,15 @@ public class XMLParser {
 					}
 				}else if(streamReader.getEventType() == XMLStreamReader.END_ELEMENT &&
 						isTargetPaperType(streamReader.getLocalName())){
-					//exit this record
+					//finish parsing record
 					break;
 				}
+			}
+			
+			//try to download the PDF in text version
+			recordDownloaded = eeHandler.downloadRecord(recordKey, recordEE);
+			if(recordDownloaded){
+				//TODO 
 			}
 		} catch (XMLStreamException e) {
 			e.printStackTrace();

@@ -10,9 +10,9 @@ public class Controller {
 		currentController = this;
 		
 		xmlParser = new XMLParser();
-		//dbHandler = new DBHandler();
+		dbHandler = new DBHandler();
 		
-		//dbHandler.startGraphDB();
+		dbHandler.startGraphDB();
 		
 		xmlParser.startParsing();
 		

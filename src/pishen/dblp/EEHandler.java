@@ -37,19 +37,14 @@ public class EEHandler {
 			ee = "http://www.sigmod.org/dblp/" + ee;
 		}
 		
-		URL eeURL = null;
-		try {
-			eeURL = new URL(ee);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+		URL eeURL = createURL(ee);
 		
 		URL pdfURL = null;
 		//handle different cases of publishers
 		if(eeURL.getHost().equals("doi.acm.org")){
 			String documentID = ee.substring(ee.lastIndexOf(".") + 1);
 			try {
-				pdfURL = new URL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID + "&type=pdf");
+				pdfURL = createURL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID + "&type=pdf");
 				URLConnection pdfConnect = pdfURL.openConnection();
 				addUserAgent(pdfConnect);
 				if(pdfConnect.getContentType().equals("application/pdf")){
@@ -69,8 +64,6 @@ public class EEHandler {
 					System.out.println("ee: " + ee);
 					System.out.println("pdfConnect: " + pdfConnect.getURL());
 				}
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -78,6 +71,16 @@ public class EEHandler {
 		}
 		
 		return false;
+	}
+	
+	private URL createURL(String urlStr){
+		URL url = null;
+		try {
+			url = new URL(urlStr);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return url;
 	}
 	
 	private void addUserAgent(URLConnection urlc){

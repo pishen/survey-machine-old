@@ -14,7 +14,11 @@ public class DBHandler {
 	public void startGraphDB(){
 		graphDB = new GraphDatabaseFactory().newEmbeddedDatabase("graph-db");
 		nodeRecordIndex = graphDB.index().forNodes(RECORD_KEY);
-		registerShutdownHook(graphDB);
+		Runtime.getRuntime().addShutdownHook(new Thread(){
+			public void run(){
+				graphDB.shutdown();
+			}
+		});
 	}
 	
 	public void addNode(String key, String title){
@@ -29,14 +33,4 @@ public class DBHandler {
 		}
 	}
 	
-	private void registerShutdownHook(final GraphDatabaseService graphDB){
-		Runtime.getRuntime().addShutdownHook(new Thread(){
-
-			@Override
-			public void run() {
-				graphDB.shutdown();
-			}
-			
-		});
-	}
 }
