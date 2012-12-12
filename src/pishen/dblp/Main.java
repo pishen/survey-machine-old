@@ -1,24 +1,18 @@
 package pishen.dblp;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
 
 public class Main {
 	public static void main(String[] args) {
-		//new Controller().start();
+		new Controller().start();
 		
-		
+		/*
 		try {
 			PDFTextStripper stripper = new PDFTextStripper();
 			stripper.writeText(PDDocument.load("pdf-records/journals-toct-Razborov09.pdf"), new BufferedWriter(new FileWriter("pdf-output")));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+		*/
 		
 		/*
 		try {

@@ -4,7 +4,7 @@ public class Controller {
 	public static Controller currentController;
 	
 	private XMLParser xmlParser;
-	private DBHandler dbHandler;
+	//private DBHandler dbHandler;
 	
 	public void start(){
 		currentController = this;

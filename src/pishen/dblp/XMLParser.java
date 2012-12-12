@@ -40,13 +40,15 @@ public class XMLParser {
 		}
 	}
 	
+	//handling records of <article> or <inproceedings>
 	private void parseSingleRecord(){
 		try {
-			System.out.println("parsing record " + (++recordCount));
-			
-			String recordKey = streamReader.getAttributeValue(null, "key").replaceAll("/", "-");
+			String recordKeySlash = streamReader.getAttributeValue(null, "key");
+			String recordKeyDash = recordKeySlash.replaceAll("/", "-");
 			String recordEE = null;
 			boolean recordDownloaded = false;
+			
+			System.out.println("# of record=" + (++recordCount) + " key=" + recordKeySlash);
 			
 			//grabing information from the xml
 			while(streamReader.hasNext()){
@@ -57,10 +59,6 @@ public class XMLParser {
 					streamReader.next();
 					if(streamReader.getEventType() == XMLStreamReader.CHARACTERS){
 						recordEE = streamReader.getText();
-						/*
-						eeHandler.addEE(streamReader.getText());
-						System.out.println("# of ee read=" + (++eeCount));
-						*/
 					}else{
 						System.out.println("content of ee is not CHARACTERS!");
 					}
@@ -71,11 +69,11 @@ public class XMLParser {
 				}
 			}
 			
-			//try to download the PDF in text version
+			//try to download the record in text version
 			if(recordEE != null){
-				recordDownloaded = eeHandler.downloadRecord(recordKey, recordEE);
+				recordDownloaded = eeHandler.downloadRecord(recordKeyDash, recordEE);
 				if(recordDownloaded){
-					//TODO 
+					//TODO add the record to graphDB
 				}
 			}
 		} catch (XMLStreamException e) {
