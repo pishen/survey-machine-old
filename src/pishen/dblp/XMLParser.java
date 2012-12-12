@@ -72,9 +72,11 @@ public class XMLParser {
 			}
 			
 			//try to download the PDF in text version
-			recordDownloaded = eeHandler.downloadRecord(recordKey, recordEE);
-			if(recordDownloaded){
-				//TODO 
+			if(recordEE != null){
+				recordDownloaded = eeHandler.downloadRecord(recordKey, recordEE);
+				if(recordDownloaded){
+					//TODO 
+				}
 			}
 		} catch (XMLStreamException e) {
 			e.printStackTrace();

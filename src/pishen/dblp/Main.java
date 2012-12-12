@@ -1,24 +1,24 @@
 package pishen.dblp;
 
-import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFTextStripper;
 
 public class Main {
 	public static void main(String[] args) {
-		new Controller().start();
+		//new Controller().start();
 		
-		/*
+		
 		try {
 			PDFTextStripper stripper = new PDFTextStripper();
-			stripper.writeText(PDDocument.load("wsdm11-citation-recommend.pdf"), new BufferedWriter(new FileWriter("pdf-output")));
+			stripper.writeText(PDDocument.load("pdf-records/journals-toct-Razborov09.pdf"), new BufferedWriter(new FileWriter("pdf-output")));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		*/
+		
 		
 		/*
 		try {
