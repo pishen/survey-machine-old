@@ -2,7 +2,7 @@ package pishen.dblp;
 
 
 public class Main {
-	public static void main(String[] args) {
+	public static void main(String[] args){
 		new Controller().start();
 		
 		/*
@@ -36,4 +36,5 @@ public class Main {
 		}
 		*/
 	}
+	
 }

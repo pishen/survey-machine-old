@@ -1,21 +1,23 @@
 package pishen.dblp;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+
+import pishen.exception.ConnectionFailException;
+import pishen.exception.DownloadFailException;
+import pishen.exception.UndefinedRuleException;
 
 public class EEHandler {
 	private static final String TEXT_RECORD_DIR = "text-records";
 	private static final String PDF_RECORD_DIR = "pdf-records";
-	private PrintWriter wrongRuleWriter;
+	private Record record;
+	private File textRecord, pdfRecord;
 	
 	public EEHandler(){
 		File textRecordDir = new File(TEXT_RECORD_DIR);
@@ -26,97 +28,101 @@ public class EEHandler {
 		if(!pdfRecordDir.exists()){
 			pdfRecordDir.mkdir();
 		}
-		
-		try {
-			wrongRuleWriter = new PrintWriter(new BufferedWriter(new FileWriter("wrong-rules")));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
 	}
 	
-	public boolean downloadRecord(String recordKey, String ee){
-		File textRecord = new File(TEXT_RECORD_DIR + "/" + recordKey);
+	public void downloadRecord(Record record) throws DownloadFailException, InterruptedException, IOException{		
+		this.record = record;
+		textRecord = new File(TEXT_RECORD_DIR + "/" + record.getDashKey());
 		
 		if(textRecord.exists()){
-			return true;
+			System.out.println("file exists");
+			return;
 		}
 		
-		if(ee.startsWith("db")){
-			ee = "http://www.sigmod.org/dblp/" + ee;
-		}
+		pdfRecord = new File(PDF_RECORD_DIR + "/" + record.getDashKey() + ".pdf");
 		
-		File pdfRecord = downloadPDF(recordKey, ee);
-		
-		if(pdfRecord.exists()){
+		downloadPDFWithRetry();
+		pdfToText();
+
+	}
+	
+	private void downloadPDFWithRetry() throws DownloadFailException, InterruptedException, IOException{
+		int retryPeriod = 2000;
+		while(true){
 			try {
-				Process pdftotext = new ProcessBuilder("pdftotext", pdfRecord.getAbsolutePath(), textRecord.getAbsolutePath()).start();
-				pdftotext.waitFor();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				downloadPDF();
+				break; //finish download if there's no exceptions
+			} catch (ConnectionFailException e) {
+				//sleep and retry, if fail too many times, print fail messages
+				if(retryPeriod <= 32000){
+					System.out.println("connection failed, retry in " + retryPeriod + " seconds");
+					Thread.sleep(retryPeriod);
+					retryPeriod *= 2;
+				}else{
+					System.out.println("connection permanently failed");
+					System.out.println("URL: " + e.getFailConnection().getURL());
+					System.out.println("response: " + e.getFailConnection().getResponseMessage());
+					throw new DownloadFailException();
+				}
+			} catch (UndefinedRuleException e) {
+				//content type is wrong
+				System.out.println("undefined rule");
+				System.out.println("content type: " + e.getUndefinedConnection().getContentType());
+				throw new DownloadFailException();
 			}
-			pdfRecord.delete();
-			return true;
-		}else{
-			return false;
 		}
 	}
 	
-	private File downloadPDF(String recordKey, String eeStr){
-		File pdfRecord = new File(PDF_RECORD_DIR + "/" + recordKey + ".pdf");
-		URL eeURL = createURL(eeStr);
+	private void downloadPDF() throws ConnectionFailException, UndefinedRuleException, IOException, DownloadFailException {
+		URL eeURL = new URL(record.getEEStr());
 		//handle different cases of publishers
 		if(eeURL.getHost().equals("doi.acm.org")){
-			String documentID = eeStr.substring(eeStr.lastIndexOf(".") + 1);
-			URL pdfURL = createURL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID + "&type=pdf");
-			URLConnection pdfConnect = createURLConnect(pdfURL);
-			if(pdfConnect.getContentType().equals("application/pdf")){
-				downloadFromURLConnect(pdfConnect, pdfRecord);
-			}else{
-				//wrong rule
-				wrongRuleWriter.println(recordKey);
+			String documentID = record.getEEStr().substring(record.getEEStr().lastIndexOf(".") + 1);
+			URL pdfURL = new URL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID + "&type=pdf");
+			HttpURLConnection pdfConnection = createURLConnection(pdfURL);
+			
+			if(pdfConnection.getContentType() == null){
+				throw new ConnectionFailException(pdfConnection);
 			}
+			
+			String contentType = pdfConnection.getContentType();
+			if(!contentType.equals("application/pdf") && !contentType.equals("text/html")){
+				throw new UndefinedRuleException(pdfConnection);
+			}
+			
+			if(pdfConnection.getContentType().equals("application/pdf")){
+				downloadFromURLConnect(pdfConnection, pdfRecord);
+			}
+			//TODO other useful content types?
+		}else{
+			throw new DownloadFailException();
 		}
 		//TODO handle other domain names
-		return pdfRecord;
 	}
 	
-	private URL createURL(String urlStr){
-		URL url = null;
-		try {
-			url = new URL(urlStr);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-		return url;
+	private void pdfToText() throws InterruptedException, IOException{
+		//TODO check if the PDF is scanned version?
+		Process pdftotext = new ProcessBuilder("pdftotext", pdfRecord.getAbsolutePath(), textRecord.getAbsolutePath()).start();
+		pdftotext.waitFor();
+		pdfRecord.delete();
 	}
 	
-	private URLConnection createURLConnect(URL url){
-		try {
-			URLConnection urlc = url.openConnection();
-			urlc.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:17.0) Gecko/20100101 Firefox/17.0");
-			return urlc;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
+	private HttpURLConnection createURLConnection(URL url) throws IOException{
+		HttpURLConnection urlc = (HttpURLConnection)url.openConnection();
+		urlc.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:17.0) Gecko/20100101 Firefox/17.0");
+		return urlc;
 	}
 	
-	private void downloadFromURLConnect(URLConnection urlc, File outputFile){
+	private void downloadFromURLConnect(URLConnection urlc, File outputFile) throws IOException{
 		byte[] buffer = new byte[4096];
-
-		try {
-			InputStream in = urlc.getInputStream();
-			OutputStream out = new FileOutputStream(outputFile);
-			int n = 0;
-			while((n = in.read(buffer)) > 0){
-				out.write(buffer, 0, n);
-			}
-			in.close();
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		InputStream in = urlc.getInputStream();
+		OutputStream out = new FileOutputStream(outputFile);
+		int n = 0;
+		while((n = in.read(buffer)) > 0){
+			out.write(buffer, 0, n);
 		}
+		in.close();
+		out.close();
 	}
+	
 }
