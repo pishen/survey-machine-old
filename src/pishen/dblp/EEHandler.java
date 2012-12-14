@@ -43,7 +43,8 @@ public class EEHandler {
 		
 		downloadPDFWithRetry();
 		pdfToText();
-
+		
+		System.out.println("download success");
 	}
 	
 	private void downloadPDFWithRetry() throws DownloadFailException, InterruptedException, IOException{
@@ -51,6 +52,7 @@ public class EEHandler {
 		while(true){
 			try {
 				downloadPDF();
+				Thread.sleep(2000); //sleep 2 secs for not querying the server too frequently
 				break; //finish download if there's no exceptions
 			} catch (ConnectionFailException e) {
 				//sleep and retry, if fail too many times, print fail messages
@@ -86,11 +88,11 @@ public class EEHandler {
 			}
 			
 			String contentType = pdfConnection.getContentType();
-			if(!contentType.equals("application/pdf") && !contentType.equals("text/html")){
+			if(!contentType.startsWith("application/pdf") && !contentType.startsWith("text/html")){
 				throw new UndefinedRuleException(pdfConnection);
 			}
 			
-			if(pdfConnection.getContentType().equals("application/pdf")){
+			if(pdfConnection.getContentType().startsWith("application/pdf")){
 				downloadFromURLConnect(pdfConnection, pdfRecord);
 			}
 			//TODO other useful content types?
