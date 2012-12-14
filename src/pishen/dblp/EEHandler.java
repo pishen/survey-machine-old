@@ -55,13 +55,13 @@ public class EEHandler {
 			} catch (ConnectionFailException e) {
 				//sleep and retry, if fail too many times, print fail messages
 				if(retryPeriod <= 32000){
-					System.out.println("connection failed, retry in " + retryPeriod + " seconds");
+					System.out.println("connection failed, retry in " + (retryPeriod / 1000) + " seconds");
 					Thread.sleep(retryPeriod);
 					retryPeriod *= 2;
 				}else{
 					System.out.println("connection permanently failed");
 					System.out.println("URL: " + e.getFailConnection().getURL());
-					System.out.println("response: " + e.getFailConnection().getResponseMessage());
+					System.out.println("response: " + (e.getFailConnection().getResponseCode()));
 					throw new DownloadFailException();
 				}
 			} catch (UndefinedRuleException e) {
