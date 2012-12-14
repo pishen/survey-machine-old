@@ -1,5 +1,5 @@
 compile: bin
-	javac -d bin -cp "lib/*" src/pishen/dblp/*.java
+	javac -d bin -cp "lib/*" src/pishen/dblp/*.java src/pishen/exception/*.java
 bin:
 	mkdir bin
 runBG:
