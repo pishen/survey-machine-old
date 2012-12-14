@@ -106,7 +106,7 @@ public class EEHandler {
 		//TODO check if the PDF is scanned version?
 		Process pdftotext = new ProcessBuilder("pdftotext", pdfRecord.getAbsolutePath(), textRecord.getAbsolutePath()).start();
 		pdftotext.waitFor();
-		pdfRecord.delete();
+		//pdfRecord.delete();
 	}
 	
 	private HttpURLConnection createURLConnection(URL url) throws IOException{
