@@ -69,7 +69,7 @@ public class EEHandler {
 			} catch (UndefinedRuleException e) {
 				//content type is wrong
 				System.out.println("undefined rule");
-				System.out.println("content type: " + e.getUndefinedConnection().getContentType());
+				System.out.println("content type: [" + e.getUndefinedConnection().getContentType() + "]");
 				throw new DownloadFailException();
 			}
 		}
@@ -87,14 +87,10 @@ public class EEHandler {
 				throw new ConnectionFailException(pdfConnection);
 			}
 			
-			String contentType = pdfConnection.getContentType();
-			System.out.println("content type: [" + contentType + "]");
-			if(!contentType.equals("application/pdf") && !contentType.equals("text/html")){
-				throw new UndefinedRuleException(pdfConnection);
-			}
-			
 			if(pdfConnection.getContentType().equals("application/pdf")){
 				downloadFromURLConnect(pdfConnection, pdfRecord);
+			}else{
+				throw new UndefinedRuleException(pdfConnection);
 			}
 			//TODO other useful content types?
 		}else{
@@ -107,7 +103,7 @@ public class EEHandler {
 		//TODO check if the PDF is scanned version?
 		Process pdftotext = new ProcessBuilder("pdftotext", pdfRecord.getAbsolutePath(), textRecord.getAbsolutePath()).start();
 		pdftotext.waitFor();
-		//pdfRecord.delete();
+		pdfRecord.delete();
 	}
 	
 	private HttpURLConnection createURLConnection(URL url) throws IOException{
