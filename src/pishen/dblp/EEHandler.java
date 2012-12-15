@@ -80,7 +80,7 @@ public class EEHandler {
 		//handle different cases of publishers
 		if(eeURL.getHost().equals("doi.acm.org")){
 			String documentID = record.getEEStr().substring(record.getEEStr().lastIndexOf(".") + 1);
-			URL pdfURL = new URL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID + "&type=pdf");
+			URL pdfURL = new URL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID);
 			HttpURLConnection pdfConnection = createURLConnection(pdfURL);
 			
 			if(pdfConnection.getContentType() == null){
@@ -88,11 +88,12 @@ public class EEHandler {
 			}
 			
 			String contentType = pdfConnection.getContentType();
-			if(!contentType.startsWith("application/pdf") && !contentType.startsWith("text/html")){
+			System.out.println("content type: [" + contentType + "]");
+			if(!contentType.equals("application/pdf") && !contentType.equals("text/html")){
 				throw new UndefinedRuleException(pdfConnection);
 			}
 			
-			if(pdfConnection.getContentType().startsWith("application/pdf")){
+			if(pdfConnection.getContentType().equals("application/pdf")){
 				downloadFromURLConnect(pdfConnection, pdfRecord);
 			}
 			//TODO other useful content types?
