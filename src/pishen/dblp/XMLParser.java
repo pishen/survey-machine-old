@@ -73,9 +73,10 @@ public class XMLParser {
 	private void handleRecord(){
 		try {
 			eeHandler.downloadRecord(record);
+			System.out.println("download success");
 			//TODO add the record to graphDB
 		} catch (DownloadFailException e) {
-			
+			//System.out.println("download fail");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

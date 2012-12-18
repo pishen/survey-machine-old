@@ -15,6 +15,7 @@ import org.apache.commons.exec.ExecuteWatchdog;
 
 import pishen.exception.ConnectionFailException;
 import pishen.exception.DownloadFailException;
+import pishen.exception.MismatchedRuleException;
 import pishen.exception.UndefinedRuleException;
 
 public class EEHandler {
@@ -39,7 +40,6 @@ public class EEHandler {
 		textRecord = new File(TEXT_RECORD_DIR + "/" + record.getDashKey());
 		
 		if(textRecord.exists()){
-			System.out.println("file exists");
 			return;
 		}
 		
@@ -48,8 +48,6 @@ public class EEHandler {
 		downloadPDFWithRetry();
 		pdfToText();
 		
-		//if no exception happened, the function enters here
-		System.out.println("download success");
 	}
 	
 	private void downloadPDFWithRetry() throws DownloadFailException, InterruptedException, IOException{
@@ -71,16 +69,18 @@ public class EEHandler {
 					System.out.println("response: " + (e.getFailConnection().getResponseCode()));
 					throw new DownloadFailException();
 				}
-			} catch (UndefinedRuleException e) {
+			} catch (MismatchedRuleException e) {
 				//content type is wrong
 				System.out.println("undefined rule");
 				System.out.println("content type: [" + e.getUndefinedConnection().getContentType() + "]");
+				throw new DownloadFailException();
+			} catch (UndefinedRuleException e) {
 				throw new DownloadFailException();
 			}
 		}
 	}
 	
-	private void downloadPDF() throws ConnectionFailException, UndefinedRuleException, IOException, DownloadFailException {
+	private void downloadPDF() throws ConnectionFailException, MismatchedRuleException, IOException, UndefinedRuleException {
 		URL eeURL = new URL(record.getEEStr());
 		//handle different cases of publishers
 		if(eeURL.getHost().equals("doi.acm.org")){
@@ -96,11 +96,11 @@ public class EEHandler {
 			if(pdfConnection.getContentType().equals("application/pdf")){
 				downloadFromURLConnect(pdfConnection, pdfRecord);
 			}else{
-				throw new UndefinedRuleException(pdfConnection);
+				throw new MismatchedRuleException(pdfConnection);
 			}
 			
 		}else{
-			throw new DownloadFailException();
+			throw new UndefinedRuleException();
 		}
 		//TODO handle other domain names
 	}
