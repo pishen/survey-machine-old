@@ -9,6 +9,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteWatchdog;
+
 import pishen.exception.ConnectionFailException;
 import pishen.exception.DownloadFailException;
 import pishen.exception.UndefinedRuleException;
@@ -44,6 +48,7 @@ public class EEHandler {
 		downloadPDFWithRetry();
 		pdfToText();
 		
+		//if no exception happened, the function enters here
 		System.out.println("download success");
 	}
 	
@@ -87,23 +92,37 @@ public class EEHandler {
 				throw new ConnectionFailException(pdfConnection);
 			}
 			
+			//TODO other useful content types?
 			if(pdfConnection.getContentType().equals("application/pdf")){
 				downloadFromURLConnect(pdfConnection, pdfRecord);
 			}else{
 				throw new UndefinedRuleException(pdfConnection);
 			}
-			//TODO other useful content types?
+			
 		}else{
 			throw new DownloadFailException();
 		}
 		//TODO handle other domain names
 	}
 	
-	private void pdfToText() throws InterruptedException, IOException{
+	private void pdfToText() throws InterruptedException, IOException, DownloadFailException{
 		//TODO check if the PDF is scanned version?
-		Process pdftotext = new ProcessBuilder("pdftotext", pdfRecord.getAbsolutePath(), textRecord.getAbsolutePath()).start();
-		pdftotext.waitFor();
+		String line = "pdftotext " + pdfRecord.getAbsolutePath() + " " + textRecord.getAbsolutePath();
+		CommandLine cmdLine = CommandLine.parse(line);
+		
+		DefaultExecutor executor = new DefaultExecutor();
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(10000); //timeout in 10s 
+		executor.setWatchdog(watchdog);
+		
+		executor.execute(cmdLine);
+		
 		pdfRecord.delete();
+		
+		if(watchdog.killedProcess()){
+			System.out.println("pdftotext is killed by watchdog");
+			textRecord.delete();
+			throw new DownloadFailException();
+		}
 	}
 	
 	private HttpURLConnection createURLConnection(URL url) throws IOException{

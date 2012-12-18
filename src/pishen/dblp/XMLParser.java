@@ -16,6 +16,7 @@ public class XMLParser {
 	private int recordCount = 0;
 	private Record record;
 	
+	//TODO extract some higher level code to Controller, left only the parsing function here
 	public void startParsing(){
 		try {
 			streamReader = inputFactory.createXMLStreamReader(new FileReader("dblp.xml"));
