@@ -105,24 +105,29 @@ public class EEHandler {
 		//TODO handle other domain names
 	}
 	
-	private void pdfToText() throws InterruptedException, IOException, DownloadFailException{
+	private void pdfToText() throws DownloadFailException{
 		//TODO check if the PDF is scanned version?
 		String line = "pdftotext " + pdfRecord.getAbsolutePath() + " " + textRecord.getAbsolutePath();
 		CommandLine cmdLine = CommandLine.parse(line);
 		
 		DefaultExecutor executor = new DefaultExecutor();
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(10000); //timeout in 10s 
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(3000); //timeout in 10s 
 		executor.setWatchdog(watchdog);
 		
-		executor.execute(cmdLine);
-		
-		pdfRecord.delete();
-		
-		if(watchdog.killedProcess()){
-			System.out.println("pdftotext is killed by watchdog");
+		try {
+			executor.execute(cmdLine);
+		} catch (IOException e) {
+			if(watchdog.killedProcess()){
+				System.out.println("error on pdftotext, killed by watchdog");
+			}else{
+				System.out.println("error on pdftotext");
+			}
 			textRecord.delete();
 			throw new DownloadFailException();
+		} finally {
+			pdfRecord.delete();
 		}
+		
 	}
 	
 	private HttpURLConnection createURLConnection(URL url) throws IOException{
