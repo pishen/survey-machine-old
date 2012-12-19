@@ -55,7 +55,7 @@ public class EEHandler {
 		while(true){
 			try {
 				downloadPDF();
-				Thread.sleep(2000); //sleep 2 secs for not querying the server too frequently
+				Thread.sleep(1000); //sleep 1s for not querying the server too frequently
 				break; //finish download if there's no exceptions
 			} catch (ConnectionFailException e) {
 				//sleep and retry, if fail too many times, print fail messages
@@ -71,6 +71,7 @@ public class EEHandler {
 				}
 			} catch (MismatchedRuleException e) {
 				//content type is wrong
+				Thread.sleep(1000); //sleep 1s for not querying the server too frequently
 				System.out.println("undefined rule");
 				System.out.println("content type: [" + e.getUndefinedConnection().getContentType() + "]");
 				throw new DownloadFailException();
@@ -111,7 +112,7 @@ public class EEHandler {
 		CommandLine cmdLine = CommandLine.parse(line);
 		
 		DefaultExecutor executor = new DefaultExecutor();
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(3000); //timeout in 10s 
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(10000); //timeout in 10s 
 		executor.setWatchdog(watchdog);
 		
 		try {
