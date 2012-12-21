@@ -7,48 +7,42 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import pishen.exception.DownloadFailException;
-
 public class XMLParser {
-	private EEHandler eeHandler = new EEHandler();
+	
 	private XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 	private XMLStreamReader streamReader;
 	private int recordCount = 0;
-	private Record record;
+	private Record currentRecord;
 	
-	//TODO extract some higher level code to Controller, left only the parsing function here
-	public void startParsing(){
-		try {
-			streamReader = inputFactory.createXMLStreamReader(new FileReader("dblp.xml"));
-			parseAllRecords();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
+	public void setupReader() throws FileNotFoundException, XMLStreamException{
+		streamReader = inputFactory.createXMLStreamReader(new FileReader("dblp.xml"));
 	}
 	
-	private void parseAllRecords() throws XMLStreamException{
+	/** Find the next record with record type "article" or "inproceedings",
+	 * which also contains an EE url 
+	 * 
+	 * @return true if the next record is found
+	 * @throws XMLStreamException
+	 */
+	public boolean parseForNextRecord() throws XMLStreamException{
 		while(streamReader.hasNext()){
 			streamReader.next();
 			if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT && 
 					isTargetPaperType(streamReader.getLocalName())){
-				//match the record of <article> or <inproceedings>
-				parseSingleRecord();
-				//try to download the record and add it to DB
-				if(record.getEEStr() != null){
-					handleRecord();
+				grabInfoFromRecord();
+				if(currentRecord.getEEStr() != null){
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 	
-	//handling records of <article> or <inproceedings>
-	private void parseSingleRecord() throws XMLStreamException{
-		record = new Record();
-		record.setSlashKey(streamReader.getAttributeValue(null, "key"));
+	private void grabInfoFromRecord() throws XMLStreamException{
+		currentRecord = new Record();
+		currentRecord.setSlashKey(streamReader.getAttributeValue(null, "key"));
 		
-		System.out.println("# of record=" + (++recordCount) + " key=" + record.getSlashKey());
+		System.out.println("# " + (++recordCount) + " key=" + currentRecord.getSlashKey());
 		
 		//grabing information from the xml
 		while(streamReader.hasNext()){
@@ -58,7 +52,7 @@ public class XMLParser {
 				//ee found
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS){
-					record.setEEStr(streamReader.getText());
+					currentRecord.setEEStr(streamReader.getText());
 				}else{
 					System.out.println("content of ee is not CHARACTERS!");
 				}
@@ -70,19 +64,11 @@ public class XMLParser {
 		}
 	}
 	
-	private void handleRecord(){
-		try {
-			eeHandler.downloadRecord(record);
-			System.out.println("download success");
-			//TODO add the record to graphDB
-		} catch (DownloadFailException e) {
-			//System.out.println("download fail");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	private boolean isTargetPaperType(String localName){
 		return localName.equals("article") || localName.equals("inproceedings");
+	}
+	
+	public Record getCurrentRecord(){
+		return currentRecord;
 	}
 }

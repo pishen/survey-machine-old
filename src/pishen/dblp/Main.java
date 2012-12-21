@@ -1,8 +1,12 @@
 package pishen.dblp;
 
+import java.io.FileNotFoundException;
+
+import javax.xml.stream.XMLStreamException;
+
 
 public class Main {
-	public static void main(String[] args){
+	public static void main(String[] args) throws FileNotFoundException, XMLStreamException{
 		new Controller().start();
 		
 		/*
