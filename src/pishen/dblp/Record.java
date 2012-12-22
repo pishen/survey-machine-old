@@ -1,9 +1,17 @@
 package pishen.dblp;
 
+
 public class Record {
+	public static final String KEY = "record_key";
+	public static final String FILENAME = "filename";
+	
 	private String slashKey;
 	private String dashKey;
 	private String eeStr;
+	
+	public static String getConcatenatedKey(){
+		return KEY + "," + FILENAME;
+	}
 	
 	public String getSlashKey(){
 		return slashKey;

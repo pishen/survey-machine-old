@@ -41,4 +41,8 @@ public class Controller {
 			e.printStackTrace();
 		}
 	}
+	
+	public DBHandler getDBHandler(){
+		return this.dbHandler;
+	}
 }
