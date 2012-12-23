@@ -37,15 +37,16 @@ public class EEHandler {
 	
 	public void downloadRecord(Record record) throws DownloadFailException, InterruptedException, IOException{		
 		this.record = record;
-		textRecord = new File(TEXT_RECORD_DIR + "/" + record.getDashKey());
+		textRecord = new File(TEXT_RECORD_DIR + "/" + record.getProperty(Key.FILENAME));
 		
 		if(textRecord.exists()){
 			return;
 		}
 		
-		pdfRecord = new File(PDF_RECORD_DIR + "/" + record.getDashKey() + ".pdf");
+		pdfRecord = new File(PDF_RECORD_DIR + "/" + record.getProperty(Key.FILENAME) + ".pdf");
 		
 		downloadPDFWithRetry();
+		//TODO check the embedded fonts by pdffonts
 		pdfToText();
 		
 	}
@@ -82,10 +83,11 @@ public class EEHandler {
 	}
 	
 	private void downloadPDF() throws ConnectionFailException, MismatchedRuleException, IOException, UndefinedRuleException {
-		URL eeURL = new URL(record.getEEStr());
+		String eeStr = (String)record.getProperty(Key.EE);
+		URL eeURL = new URL(eeStr);
 		//handle different cases of publishers
 		if(eeURL.getHost().equals("doi.acm.org")){
-			String documentID = record.getEEStr().substring(record.getEEStr().lastIndexOf(".") + 1);
+			String documentID = eeStr.substring(eeStr.lastIndexOf(".") + 1);
 			URL pdfURL = new URL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID);
 			HttpURLConnection pdfConnection = createURLConnection(pdfURL);
 			

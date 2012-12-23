@@ -7,34 +7,28 @@ import javax.xml.stream.XMLStreamException;
 import pishen.exception.DownloadFailException;
 
 public class Controller {
-	public static Controller currentController;
-	
 	private XMLParser xmlParser = new XMLParser();
 	private EEHandler eeHandler = new EEHandler();
 	private DBHandler dbHandler = new DBHandler();
 	
-	public Controller(){
-		currentController = this;
-	}
-	
 	public void start() throws FileNotFoundException, XMLStreamException{
 		dbHandler.startGraphDB();
 		
+		xmlParser.setupReader("dblp.xml", dbHandler);
 		
-		
-		/*
-		xmlParser.setupReader();
-		while(xmlParser.parseForNextRecord() == true){
-			handleRecord();
+		while(xmlParser.hasNextRecord()){
+			Record record = xmlParser.getNextRecord();
+			if(record.getProperty(Key.EE) != null){
+				tryDownloadRecord(record);
+			}
 		}
-		*/
+		
 	}
 	
-	private void handleRecord(){
+	private void tryDownloadRecord(Record record){
 		try {
-			eeHandler.downloadRecord(xmlParser.getCurrentRecord());
+			eeHandler.downloadRecord(record);
 			System.out.println("download success");
-			//TODO add the record to graphDB
 		} catch (DownloadFailException e) {
 			//System.out.println("download fail");
 		} catch (Exception e) {
@@ -42,7 +36,6 @@ public class Controller {
 		}
 	}
 	
-	public DBHandler getDBHandler(){
-		return this.dbHandler;
-	}
+	//TODO updating property value by XMLParser and delete the record that's not exist anymore 
+	
 }
