@@ -3,6 +3,7 @@ package pishen.dblp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -12,16 +13,21 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.ReadableIndex;
 
 public class DBHandler {
+	private static final Logger log = Logger.getLogger(DBHandler.class);
 	private static final String RECORD_KEY = "RECORD_KEY";
 	private GraphDatabaseService graphDB;
 	private ReadableIndex<Node> autoNodeIndex;
 	
 	public void startGraphDB(){
+		log.info("starting graph DB...");
 		graphDB = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder("graph-db")
 				.setConfig(GraphDatabaseSettings.node_keys_indexable, createConcatenatedKey())
 				.setConfig(GraphDatabaseSettings.node_auto_indexing, "true")
 				.newGraphDatabase();
+		//link Record with graphDB for Record to create Transaction by graphDB
 		Record.setGraphDB(graphDB);
+		
+		//auto-indexing all the keys in record except RECORD_KEY
 		autoNodeIndex = graphDB.index().getNodeAutoIndexer().getAutoIndex();
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
@@ -31,10 +37,10 @@ public class DBHandler {
 		});
 	}
 	
-	public Record getRecordWithKey(String recordKey){
-		Node node = autoNodeIndex.get(RECORD_KEY, recordKey).getSingle();
+	public Record getRecordWithKey(String recordKeyValue){
+		Node node = autoNodeIndex.get(RECORD_KEY, recordKeyValue).getSingle();
 		if(node == null){
-			node = createNodeWithRecordKey(recordKey);
+			node = createNodeWithRecordKey(recordKeyValue);
 		}
 		return new Record(node);
 	}
@@ -52,11 +58,11 @@ public class DBHandler {
 		}
 	}
 	
-	private Node createNodeWithRecordKey(String recordKey){
+	private Node createNodeWithRecordKey(String recordKeyValue){
 		Transaction tx = graphDB.beginTx();
 		try {
 			Node node = graphDB.createNode();
-			node.setProperty(RECORD_KEY, recordKey);
+			node.setProperty(RECORD_KEY, recordKeyValue);
 			tx.success();
 			return node;
 		} finally {

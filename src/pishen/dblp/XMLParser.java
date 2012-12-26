@@ -7,13 +7,17 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.apache.log4j.Logger;
+
 public class XMLParser {
+	private static final Logger log = Logger.getLogger(XMLParser.class);
 	private XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 	private XMLStreamReader streamReader;
 	private int recordCount = 0;
 	private DBHandler dbHandler;
 	
 	public void setupReader(String inputFilename, DBHandler dbHandler) throws FileNotFoundException, XMLStreamException{
+		log.info("setting up XML reader...");
 		streamReader = inputFactory.createXMLStreamReader(new FileReader(inputFilename));
 		this.dbHandler = dbHandler;
 	}
@@ -38,8 +42,9 @@ public class XMLParser {
 	public Record getNextRecord() throws XMLStreamException{
 		String recordKey = streamReader.getAttributeValue(null, "key");
 		
-		System.out.println("# " + (++recordCount) + " key=" + recordKey);
+		log.info("# " + (++recordCount) + " key=" + recordKey);
 		
+		//the properties stored in the record will be updated if the record already exists in DB
 		Record record = dbHandler.getRecordWithKey(recordKey);
 		record.setProperty(Key.FILENAME, recordKey.replaceAll("/", "-"));
 		
@@ -57,7 +62,7 @@ public class XMLParser {
 						record.setProperty(Key.EE, streamReader.getText());
 					}
 				}else{
-					System.out.println("content of ee is wrong!");
+					log.warn("content of ee is wrong");
 				}
 			}else if(streamReader.getEventType() == XMLStreamReader.END_ELEMENT &&
 					isTargetPaperType(streamReader.getLocalName())){

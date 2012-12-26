@@ -12,6 +12,7 @@ import java.net.URLConnection;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.log4j.Logger;
 
 import pishen.exception.ConnectionFailException;
 import pishen.exception.DownloadFailException;
@@ -19,6 +20,7 @@ import pishen.exception.MismatchedRuleException;
 import pishen.exception.UndefinedRuleException;
 
 public class EEHandler {
+	private static final Logger log = Logger.getLogger(EEHandler.class);
 	private static final String TEXT_RECORD_DIR = "text-records";
 	private static final String PDF_RECORD_DIR = "pdf-records";
 	private Record record;
@@ -40,13 +42,18 @@ public class EEHandler {
 		textRecord = new File(TEXT_RECORD_DIR + "/" + record.getProperty(Key.FILENAME));
 		
 		if(textRecord.exists()){
+			log.info("record exists");
 			return;
 		}
 		
 		pdfRecord = new File(PDF_RECORD_DIR + "/" + record.getProperty(Key.FILENAME) + ".pdf");
 		
+		log.info("downloading PDF");
 		downloadPDFWithRetry();
+		
 		//TODO check the embedded fonts by pdffonts
+		
+		log.info("converting PDF to Text");
 		pdfToText();
 		
 	}
@@ -61,20 +68,20 @@ public class EEHandler {
 			} catch (ConnectionFailException e) {
 				//sleep and retry, if fail too many times, print fail messages
 				if(retryPeriod <= 32000){
-					System.out.println("connection failed, retry in " + (retryPeriod / 1000) + " seconds");
+					log.warn("connection failed, retry in " + (retryPeriod / 1000) + "s");
 					Thread.sleep(retryPeriod);
 					retryPeriod *= 2;
 				}else{
-					System.out.println("connection permanently failed");
-					System.out.println("URL: " + e.getFailConnection().getURL());
-					System.out.println("response: " + (e.getFailConnection().getResponseCode()));
+					log.warn("connection permanently failed");
+					log.warn("--URL: " + e.getFailConnection().getURL());
+					log.warn("--response: " + (e.getFailConnection().getResponseCode()));
 					throw new DownloadFailException();
 				}
 			} catch (MismatchedRuleException e) {
 				//content type is wrong
 				Thread.sleep(1000); //sleep 1s for not querying the server too frequently
-				System.out.println("undefined rule");
-				System.out.println("content type: [" + e.getUndefinedConnection().getContentType() + "]");
+				log.warn("undefined rule");
+				log.warn("--content type: [" + e.getUndefinedConnection().getContentType() + "]");
 				throw new DownloadFailException();
 			} catch (UndefinedRuleException e) {
 				throw new DownloadFailException();

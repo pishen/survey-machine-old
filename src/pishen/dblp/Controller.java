@@ -4,9 +4,12 @@ import java.io.FileNotFoundException;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.log4j.Logger;
+
 import pishen.exception.DownloadFailException;
 
 public class Controller {
+	private static final Logger log = Logger.getLogger(Controller.class);
 	private XMLParser xmlParser = new XMLParser();
 	private EEHandler eeHandler = new EEHandler();
 	private DBHandler dbHandler = new DBHandler();
@@ -16,6 +19,7 @@ public class Controller {
 		
 		xmlParser.setupReader("dblp.xml", dbHandler);
 		
+		log.info("parse through all the records in dblp.xml");
 		while(xmlParser.hasNextRecord()){
 			Record record = xmlParser.getNextRecord();
 			if(record.getProperty(Key.EE) != null){
@@ -28,7 +32,7 @@ public class Controller {
 	private void tryDownloadRecord(Record record){
 		try {
 			eeHandler.downloadRecord(record);
-			System.out.println("download success");
+			log.info("download success");
 		} catch (DownloadFailException e) {
 			//System.out.println("download fail");
 		} catch (Exception e) {
