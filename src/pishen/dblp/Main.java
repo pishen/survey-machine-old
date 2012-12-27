@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
@@ -13,7 +14,8 @@ public class Main {
 	//private static final Logger log = Logger.getLogger(Main.class);
 	
 	public static void main(String[] args) throws FileNotFoundException, XMLStreamException{
-		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%-5p [%d{MM-dd HH:mm:ss}] %m%n")));
+		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("[%-5p] %m%n")));
+		Logger.getRootLogger().setLevel(Level.DEBUG);
 		
 		new Controller().start();
 		

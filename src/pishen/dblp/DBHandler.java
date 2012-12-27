@@ -59,6 +59,7 @@ public class DBHandler {
 	}
 	
 	private Node createNodeWithRecordKey(String recordKeyValue){
+		log.debug("creating new Node");
 		Transaction tx = graphDB.beginTx();
 		try {
 			Node node = graphDB.createNode();

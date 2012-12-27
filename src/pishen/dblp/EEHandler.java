@@ -116,7 +116,6 @@ public class EEHandler {
 	}
 	
 	private void pdfToText() throws DownloadFailException{
-		//TODO check if the PDF is scanned version?
 		String line = "pdftotext " + pdfRecord.getAbsolutePath() + " " + textRecord.getAbsolutePath();
 		CommandLine cmdLine = CommandLine.parse(line);
 		
@@ -125,12 +124,13 @@ public class EEHandler {
 		executor.setWatchdog(watchdog);
 		
 		try {
+			log.debug("exec pdftotext");
 			executor.execute(cmdLine);
 		} catch (IOException e) {
 			if(watchdog.killedProcess()){
-				System.out.println("error on pdftotext, killed by watchdog");
+				log.error("error on pdftotext, killed by watchdog");
 			}else{
-				System.out.println("error on pdftotext");
+				log.error("error on pdftotext");
 			}
 			textRecord.delete();
 			throw new DownloadFailException();
