@@ -17,21 +17,27 @@ public class Controller {
 	public void start() throws FileNotFoundException, XMLStreamException{
 		dbHandler.startGraphDB();
 		
-		xmlParser.setupReader("dblp.xml", dbHandler);
+		xmlParser.setupReader("dblp.xml");
 		
 		log.info("parse through all the records in dblp.xml");
-		while(xmlParser.hasNextRecord()){
-			Record record = xmlParser.getNextRecord();
-			if(record.getProperty(Key.EE) != null){
-				tryDownloadRecord(record);
+		while(xmlParser.hasNextXMLRecord()){
+			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
+			if(eeHandler.containsRuleForEE(xmlRecord.getProperty(Key.EE))){
+				//copy the key-value pairs from XMLRecord to DBRecord
+				DBRecord dbRecord = dbHandler.getRecordWithKey(xmlRecord.getRecordKey());
+				for(Key key: Key.values()){
+					dbRecord.setProperty(key, xmlRecord.getProperty(key));
+				}
+				//try to download EE
+				tryDownloadRecord(dbRecord);
 			}
 		}
 		
 	}
 	
-	private void tryDownloadRecord(Record record){
+	private void tryDownloadRecord(DBRecord dbRecord){
 		try {
-			eeHandler.downloadRecord(record);
+			eeHandler.downloadRecord(dbRecord);
 			log.info("download success");
 		} catch (DownloadFailException e) {
 			//System.out.println("download fail");

@@ -14,7 +14,7 @@ public class Main {
 	//private static final Logger log = Logger.getLogger(Main.class);
 	
 	public static void main(String[] args) throws FileNotFoundException, XMLStreamException{
-		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("[%-5p] %m%n")));
+		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%-5p [%d{MM-dd HH:mm:ss}] %m%n")));
 		Logger.getRootLogger().setLevel(Level.DEBUG);
 		
 		new Controller().start();

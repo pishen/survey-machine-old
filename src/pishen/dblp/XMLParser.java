@@ -14,12 +14,10 @@ public class XMLParser {
 	private XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 	private XMLStreamReader streamReader;
 	private int recordCount = 0;
-	private DBHandler dbHandler;
 	
-	public void setupReader(String inputFilename, DBHandler dbHandler) throws FileNotFoundException, XMLStreamException{
+	public void setupReader(String inputFilename) throws FileNotFoundException, XMLStreamException{
 		log.info("setting up XML reader...");
 		streamReader = inputFactory.createXMLStreamReader(new FileReader(inputFilename));
-		this.dbHandler = dbHandler;
 	}
 	
 	/** Find the next record with record type "article" or "inproceedings",
@@ -28,7 +26,7 @@ public class XMLParser {
 	 * @return true if the next record is found
 	 * @throws XMLStreamException
 	 */
-	public boolean hasNextRecord() throws XMLStreamException{
+	public boolean hasNextXMLRecord() throws XMLStreamException{
 		while(streamReader.hasNext()){
 			streamReader.next();
 			if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT && 
@@ -39,14 +37,13 @@ public class XMLParser {
 		return false;
 	}
 	
-	public Record getNextRecord() throws XMLStreamException{
+	public XMLRecord getNextXMLRecord() throws XMLStreamException{
 		String recordKey = streamReader.getAttributeValue(null, "key");
 		
 		log.info("# " + (++recordCount) + " key=" + recordKey);
 		
-		//the properties stored in the record will be updated if the record already exists in DB
-		Record record = dbHandler.getRecordWithKey(recordKey);
-		record.setProperty(Key.FILENAME, recordKey.replaceAll("/", "-"));
+		XMLRecord xmlRecord = new XMLRecord(recordKey);
+		xmlRecord.setProperty(Key.FILENAME, recordKey.replaceAll("/", "-"));
 		
 		//grabing information from the xml
 		while(streamReader.hasNext()){
@@ -57,9 +54,9 @@ public class XMLParser {
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
 					if(streamReader.getText().startsWith("db")){
-						record.setProperty(Key.EE, "http://www.sigmod.org/dblp/" + streamReader.getText());
+						xmlRecord.setProperty(Key.EE, "http://www.sigmod.org/dblp/" + streamReader.getText());
 					}else{
-						record.setProperty(Key.EE, streamReader.getText());
+						xmlRecord.setProperty(Key.EE, streamReader.getText());
 					}
 				}else{
 					log.warn("content of ee is wrong");
@@ -71,7 +68,7 @@ public class XMLParser {
 			}
 		}
 		
-		return record;
+		return xmlRecord;
 	}
 	
 	private boolean isTargetPaperType(String localName){

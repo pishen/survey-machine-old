@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -17,13 +18,12 @@ import org.apache.log4j.Logger;
 import pishen.exception.ConnectionFailException;
 import pishen.exception.DownloadFailException;
 import pishen.exception.MismatchedRuleException;
-import pishen.exception.UndefinedRuleException;
 
 public class EEHandler {
 	private static final Logger log = Logger.getLogger(EEHandler.class);
 	private static final String TEXT_RECORD_DIR = "text-records";
 	private static final String PDF_RECORD_DIR = "pdf-records";
-	private Record record;
+	private DBRecord record;
 	private File textRecord, pdfRecord;
 	
 	public EEHandler(){
@@ -37,7 +37,24 @@ public class EEHandler {
 		}
 	}
 	
-	public void downloadRecord(Record record) throws DownloadFailException, InterruptedException, IOException{		
+	public boolean containsRuleForEE(String eeStr){
+		String domainName = null;
+		
+		try {
+			domainName = new URL(eeStr).getHost();
+		} catch (MalformedURLException e) {
+			return false;
+		}
+		
+		if(domainName.equals("doi.acm.org")){
+			return true;
+		}else{
+			return false;
+		}
+		//TODO handle other domain names
+	}
+	
+	public void downloadRecord(DBRecord record) throws DownloadFailException, InterruptedException, IOException{		
 		this.record = record;
 		textRecord = new File(TEXT_RECORD_DIR + "/" + record.getProperty(Key.FILENAME));
 		
@@ -83,13 +100,11 @@ public class EEHandler {
 				log.warn("undefined rule");
 				log.warn("--content type: [" + e.getUndefinedConnection().getContentType() + "]");
 				throw new DownloadFailException();
-			} catch (UndefinedRuleException e) {
-				throw new DownloadFailException();
 			}
 		}
 	}
 	
-	private void downloadPDF() throws ConnectionFailException, MismatchedRuleException, IOException, UndefinedRuleException {
+	private void downloadPDF() throws ConnectionFailException, MismatchedRuleException, IOException {
 		String eeStr = (String)record.getProperty(Key.EE);
 		URL eeURL = new URL(eeStr);
 		//handle different cases of publishers
@@ -109,8 +124,6 @@ public class EEHandler {
 				throw new MismatchedRuleException(pdfConnection);
 			}
 			
-		}else{
-			throw new UndefinedRuleException();
 		}
 		//TODO handle other domain names
 	}

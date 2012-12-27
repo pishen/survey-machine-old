@@ -25,7 +25,7 @@ public class DBHandler {
 				.setConfig(GraphDatabaseSettings.node_auto_indexing, "true")
 				.newGraphDatabase();
 		//link Record with graphDB for Record to create Transaction by graphDB
-		Record.setGraphDB(graphDB);
+		DBRecord.setGraphDB(graphDB);
 		
 		//auto-indexing all the keys in record except RECORD_KEY
 		autoNodeIndex = graphDB.index().getNodeAutoIndexer().getAutoIndex();
@@ -37,20 +37,20 @@ public class DBHandler {
 		});
 	}
 	
-	public Record getRecordWithKey(String recordKeyValue){
+	public DBRecord getRecordWithKey(String recordKeyValue){
 		Node node = autoNodeIndex.get(RECORD_KEY, recordKeyValue).getSingle();
 		if(node == null){
 			node = createNodeWithRecordKey(recordKeyValue);
 		}
-		return new Record(node);
+		return new DBRecord(node);
 	}
 	
-	public List<Record> getRecords(Key key, Object value){
+	public List<DBRecord> getRecords(Key key, Object value){
 		IndexHits<Node> hits = autoNodeIndex.get(key.toString(), value);
-		List<Record> list = new ArrayList<Record>();
+		List<DBRecord> list = new ArrayList<DBRecord>();
 		try {
 			for(Node node: hits){
-				list.add(new Record(node));
+				list.add(new DBRecord(node));
 			}
 			return list;
 		} finally {
