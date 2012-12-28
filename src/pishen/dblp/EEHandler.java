@@ -1,5 +1,6 @@
 package pishen.dblp;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,7 +13,9 @@ import java.net.URLConnection;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
 
 import pishen.exception.ConnectionFailException;
@@ -57,22 +60,27 @@ public class EEHandler {
 	public void downloadRecord(DBRecord record) throws DownloadFailException, InterruptedException, IOException{		
 		this.record = record;
 		textRecord = new File(TEXT_RECORD_DIR + "/" + record.getProperty(Key.FILENAME));
+		pdfRecord = new File(PDF_RECORD_DIR + "/" + record.getProperty(Key.FILENAME) + ".pdf");
 		
 		if(textRecord.exists()){
-			log.info("record exists");
+			log.info("text record exists");
 			return;
 		}
 		
-		pdfRecord = new File(PDF_RECORD_DIR + "/" + record.getProperty(Key.FILENAME) + ".pdf");
+		if(pdfRecord.exists()){
+			log.info("pdf record exists");
+		}else{
+			log.info("downloading PDF");
+			downloadPDFWithRetry();
+		}
 		
-		log.info("downloading PDF");
-		downloadPDFWithRetry();
-		
-		//TODO check the embedded fonts by pdffonts
-		
-		log.info("converting PDF to Text");
-		pdfToText();
-		
+		try {
+			checkEmbeddedFonts();
+			pdfToText();
+		} finally {
+			//TODO delete the PDF when scaling
+			//pdfRecord.delete();
+		} 
 	}
 	
 	private void downloadPDFWithRetry() throws DownloadFailException, InterruptedException, IOException{
@@ -128,29 +136,51 @@ public class EEHandler {
 		//TODO handle other domain names
 	}
 	
-	private void pdfToText() throws DownloadFailException{
-		String line = "pdftotext " + pdfRecord.getAbsolutePath() + " " + textRecord.getAbsolutePath();
-		CommandLine cmdLine = CommandLine.parse(line);
-		
-		DefaultExecutor executor = new DefaultExecutor();
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(10000); //timeout in 10s 
-		executor.setWatchdog(watchdog);
+	private void checkEmbeddedFonts() throws DownloadFailException{
+		String cmdLineStr = "pdffonts " + pdfRecord.getAbsolutePath();
+		ByteArrayOutputStream pdffontsOutput = new ByteArrayOutputStream();
 		
 		try {
-			log.debug("exec pdftotext");
+			execWithTimeout(cmdLineStr, pdffontsOutput);
+		} catch (IOException e) {
+			throw new DownloadFailException();
+		}
+		
+		//TODO check result of pdffonts
+	}
+	
+	private void pdfToText() throws DownloadFailException{
+		String cmdLineStr = "pdftotext " + pdfRecord.getAbsolutePath() + " " + textRecord.getAbsolutePath();
+		
+		try {
+			execWithTimeout(cmdLineStr, System.out);
+		} catch (IOException e) {
+			textRecord.delete();
+			throw new DownloadFailException();
+		}
+	}
+	
+	private void execWithTimeout(String cmdLineStr, OutputStream subProcessOutput) throws IOException{
+		CommandLine cmdLine = CommandLine.parse(cmdLineStr);
+		
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(10000); //timeout in 10s 
+		ExecuteStreamHandler streamHandler = new PumpStreamHandler(subProcessOutput);
+		
+		DefaultExecutor executor = new DefaultExecutor();
+		executor.setWatchdog(watchdog);
+		executor.setStreamHandler(streamHandler);
+
+		log.info(cmdLineStr);
+		try {
 			executor.execute(cmdLine);
 		} catch (IOException e) {
 			if(watchdog.killedProcess()){
-				log.error("error on pdftotext, killed by watchdog");
+				log.error("error: killed by watchdog");
 			}else{
-				log.error("error on pdftotext");
+				log.error("error: unknown");
 			}
-			textRecord.delete();
-			throw new DownloadFailException();
-		} finally {
-			pdfRecord.delete();
+			throw e;
 		}
-		
 	}
 	
 	private HttpURLConnection createURLConnection(URL url) throws IOException{

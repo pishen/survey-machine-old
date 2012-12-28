@@ -1,5 +1,5 @@
 package pishen.dblp;
 
 public enum Key {
-	FILENAME, EE
+	FILENAME, EE, EMB
 }

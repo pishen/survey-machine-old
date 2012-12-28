@@ -20,9 +20,20 @@ public class Main {
 		new Controller().start();
 		
 		/*
+		String cmdLineStr = "cat dblp.dtd";
+		CommandLine cmdLine = CommandLine.parse(cmdLineStr);
+		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ExecuteStreamHandler streamHandler = new PumpStreamHandler(out);
+		
 		try {
-			PDFTextStripper stripper = new PDFTextStripper();
-			stripper.writeText(PDDocument.load("pdf-records/journals-toct-Razborov09.pdf"), new BufferedWriter(new FileWriter("pdf-output")));
+			DefaultExecutor executor = new DefaultExecutor();
+			executor.setStreamHandler(streamHandler);
+			
+			log.debug("exec");
+			executor.execute(cmdLine);
+			
+			System.out.println("buffer size=" + out.size());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
