@@ -200,7 +200,7 @@ public class EEHandler {
 		executor.setWatchdog(watchdog);
 		executor.setStreamHandler(streamHandler);
 
-		log.info(cmdLineStr.split(" "));
+		log.info(cmdLineStr);
 		try {
 			executor.execute(cmdLine);
 		} catch (IOException e) {
