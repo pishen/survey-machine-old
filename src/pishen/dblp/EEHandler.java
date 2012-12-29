@@ -139,7 +139,7 @@ public class EEHandler {
 	}
 	
 	private void checkEmbeddedFonts() throws DownloadFailException{
-		String cmdLineStr = "pdffonts " + pdfRecord.getAbsolutePath();
+		String cmdLineStr = "pdffonts " + pdfRecord.getPath();
 		ByteArrayOutputStream pdffontsOutput = new ByteArrayOutputStream();
 		
 		try {
@@ -180,7 +180,7 @@ public class EEHandler {
 	}
 	
 	private void pdfToText() throws DownloadFailException{
-		String cmdLineStr = "pdftotext " + pdfRecord.getAbsolutePath() + " " + textRecord.getAbsolutePath();
+		String cmdLineStr = "pdftotext " + pdfRecord.getPath() + " " + textRecord.getPath();
 		
 		try {
 			execWithTimeout(cmdLineStr, System.out);
@@ -200,7 +200,7 @@ public class EEHandler {
 		executor.setWatchdog(watchdog);
 		executor.setStreamHandler(streamHandler);
 
-		log.info(cmdLineStr);
+		log.info(cmdLineStr.split(" "));
 		try {
 			executor.execute(cmdLine);
 		} catch (IOException e) {
