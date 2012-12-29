@@ -20,7 +20,7 @@ public class Main {
 		new Controller().start();
 		
 		/*
-		String cmdLineStr = "cat dblp.dtd";
+		String cmdLineStr = "pdffonts fonts-test.pdf";
 		CommandLine cmdLine = CommandLine.parse(cmdLineStr);
 		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -33,7 +33,18 @@ public class Main {
 			log.debug("exec");
 			executor.execute(cmdLine);
 			
-			System.out.println("buffer size=" + out.size());
+			BufferedReader resultReader = new BufferedReader(new StringReader(out.toString()));
+			String line = null;
+			for(int i = 0; i < 3; i++){
+				if((line = resultReader.readLine()) == null){
+					log.error("EOF before three lines");
+				}
+			}
+			
+			String[] strArray = line.split(" ");
+			for(String str: strArray){
+				log.info("token:[" + str + "] isEmpty=" + str.isEmpty());
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -1,11 +1,13 @@
 package pishen.dblp;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -142,11 +144,39 @@ public class EEHandler {
 		
 		try {
 			execWithTimeout(cmdLineStr, pdffontsOutput);
+			
+			BufferedReader resultReader = new BufferedReader(new StringReader(pdffontsOutput.toString()));
+			String line = null;
+			for(int i = 0; i < 3; i++){
+				if((line = resultReader.readLine()) == null){
+					throw new DownloadFailException();
+				}
+			}
+			
+			int tokenCount = 0;
+			String token = "";
+			for(String str: line.split(" ")){
+				if(!str.isEmpty()){
+					token = str;
+					tokenCount++;
+					if(tokenCount == 4){
+						break;
+					}
+				}
+			}
+			
+			if(token.equals("yes")){
+				log.info("EMB=yes");
+				record.setProperty(Key.EMB, "yes");
+			}else if(token.equals("no")){
+				log.info("EMB=no");
+				record.setProperty(Key.EMB, "no");
+			}else{
+				throw new DownloadFailException();
+			}
 		} catch (IOException e) {
 			throw new DownloadFailException();
 		}
-		
-		//TODO check result of pdffonts
 	}
 	
 	private void pdfToText() throws DownloadFailException{
