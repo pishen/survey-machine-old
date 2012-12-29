@@ -22,7 +22,7 @@ public class Controller {
 		log.info("parse through all the records in dblp.xml");
 		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
-			if(eeHandler.containsRuleForEE(xmlRecord.getProperty(Key.EE))){
+			if(xmlRecord.isValid() && eeHandler.containsRuleForEE(xmlRecord.getProperty(Key.EE))){
 				//copy the key-value pairs from XMLRecord to DBRecord
 				DBRecord dbRecord = dbHandler.getRecordWithKey(xmlRecord.getRecordKey());
 				for(Key key: Key.values()){
@@ -38,7 +38,7 @@ public class Controller {
 	private void tryDownloadRecord(DBRecord dbRecord){
 		try {
 			eeHandler.downloadRecord(dbRecord);
-			log.info("download success");
+			log.info("===SUCCESS===");
 		} catch (DownloadFailException e) {
 			//System.out.println("download fail");
 		} catch (Exception e) {

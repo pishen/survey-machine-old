@@ -21,4 +21,12 @@ public class XMLRecord {
 	public String getProperty(Key key){
 		return recordMap.get(key);
 	}
+	
+	public boolean isValid(){
+		if(recordMap.get(Key.TITLE) != null && recordMap.get(Key.YEAR) != null){
+			return true;
+		}else{
+			return false;
+		}
+	}
 }

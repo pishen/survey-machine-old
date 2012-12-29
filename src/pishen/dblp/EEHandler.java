@@ -166,10 +166,8 @@ public class EEHandler {
 			}
 			
 			if(token.equals("yes")){
-				log.info("EMB=yes");
 				record.setProperty(Key.EMB, "yes");
 			}else if(token.equals("no")){
-				log.info("EMB=no");
 				record.setProperty(Key.EMB, "no");
 			}else{
 				throw new DownloadFailException();
@@ -200,7 +198,7 @@ public class EEHandler {
 		executor.setWatchdog(watchdog);
 		executor.setStreamHandler(streamHandler);
 
-		log.info(cmdLineStr);
+		log.info(cmdLineStr.split(" ")[0]);
 		try {
 			executor.execute(cmdLine);
 		} catch (IOException e) {

@@ -59,7 +59,25 @@ public class XMLParser {
 						xmlRecord.setProperty(Key.EE, streamReader.getText());
 					}
 				}else{
-					log.warn("content of ee is wrong");
+					log.error("content of ee is wrong");
+				}
+			}else if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT &&
+					streamReader.getLocalName().equals("year")){
+				//year found
+				streamReader.next();
+				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
+					xmlRecord.setProperty(Key.YEAR, streamReader.getText());
+				}else{
+					log.error("content of year is wrong");
+				}
+			}else if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT &&
+					streamReader.getLocalName().equals("title")){
+				//title found
+				streamReader.next();
+				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
+					xmlRecord.setProperty(Key.TITLE, streamReader.getText());
+				}else{
+					log.error("content of title is wrong");
 				}
 			}else if(streamReader.getEventType() == XMLStreamReader.END_ELEMENT &&
 					isTargetPaperType(streamReader.getLocalName())){
