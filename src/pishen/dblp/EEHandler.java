@@ -81,7 +81,7 @@ public class EEHandler {
 			pdfToText();
 		} finally {
 			//TODO delete the PDF when scaling
-			//pdfRecord.delete();
+			pdfRecord.delete();
 		} 
 	}
 	
