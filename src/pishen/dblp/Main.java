@@ -11,13 +11,14 @@ import org.apache.log4j.PatternLayout;
 
 
 public class Main {
-	//private static final Logger log = Logger.getLogger(Main.class);
+	private static final Logger log = Logger.getLogger(Main.class);
 	
 	public static void main(String[] args) throws FileNotFoundException, XMLStreamException{
 		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%-5p [%d{MM-dd HH:mm:ss}] %m%n")));
 		Logger.getRootLogger().setLevel(Level.INFO);
 		
-		new Controller().start();
+		//new Controller().start();
+		log.info("TEST.");
 		
 		/*
 		String cmdLineStr = "pdffonts fonts-test.pdf";
