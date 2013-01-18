@@ -45,6 +45,7 @@ public class Controller {
 		while(xmlParser.hasNextXMLRecord() && !found){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
 			File textRecord = EEHandler.getTextRecord(xmlRecord.getProperty(Key.FILENAME).toString());
+			log.info("parsing name:" + textRecord.getName());
 			if(textRecord.getName().equals("journals-toct-BeameIPS10")){
 				log.info("file found");
 				BufferedReader in = new BufferedReader(new FileReader(textRecord));
