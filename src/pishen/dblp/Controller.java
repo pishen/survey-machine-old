@@ -57,7 +57,7 @@ public class Controller {
 					in.close();
 					if(found){
 						numOfFound++;
-						if(numOfFound < 2){
+						if(numOfFound < limit){
 							found = false;
 						}else{
 							log.info("found: " + textRecord.getName());
