@@ -46,9 +46,10 @@ public class Controller {
 				BufferedReader in = new BufferedReader(new FileReader(textRecord));
 				String line = null;
 				try {
+					found = true;
 					while((line = in.readLine()) != null){
 						if(line.equals("REFERENCES")){
-							found = true;
+							found = false;
 							break;
 						}
 					}
