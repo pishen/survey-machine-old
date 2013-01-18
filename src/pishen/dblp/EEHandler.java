@@ -24,23 +24,17 @@ import pishen.exception.ConnectionFailException;
 import pishen.exception.DownloadFailException;
 import pishen.exception.MismatchedRuleException;
 
-//TODO change the usage to static
 public class EEHandler {
 	private static final Logger log = Logger.getLogger(EEHandler.class);
 	private static final String TEXT_RECORD_DIR = "text-records";
 	private static final String PDF_RECORD_DIR = "pdf-records";
-	private DBRecord record;
-	private File textRecord, pdfRecord;
+	private static DBRecord record;
+	private static File textRecord, pdfRecord;
 	
-	public EEHandler(){
-		File textRecordDir = new File(TEXT_RECORD_DIR);
-		if(!textRecordDir.exists()){
-			textRecordDir.mkdir();
-		}
-		File pdfRecordDir = new File(PDF_RECORD_DIR);
-		if(!pdfRecordDir.exists()){
-			pdfRecordDir.mkdir();
-		}
+	static{
+		//create the dir for text and pdf records
+		createDirIfNotExist(PDF_RECORD_DIR);
+		createDirIfNotExist(TEXT_RECORD_DIR);
 	}
 	
 	public static boolean containsRuleForEE(String eeStr){
@@ -60,9 +54,9 @@ public class EEHandler {
 		//TODO handle other domain names
 	}
 	
-	public void downloadRecord(DBRecord record) throws DownloadFailException, InterruptedException, IOException{		
-		this.record = record;
-		textRecord = new File(TEXT_RECORD_DIR + "/" + record.getProperty(Key.FILENAME));
+	public static void downloadRecord(DBRecord record) throws DownloadFailException, InterruptedException, IOException{		
+		EEHandler.record = record;
+		textRecord = getTextRecord(record.getProperty(Key.FILENAME).toString());
 		pdfRecord = new File(PDF_RECORD_DIR + "/" + record.getProperty(Key.FILENAME) + ".pdf");
 		
 		if(textRecord.exists()){
@@ -86,7 +80,7 @@ public class EEHandler {
 		} 
 	}
 	
-	private void downloadPDFWithRetry() throws DownloadFailException, InterruptedException, IOException{
+	private static void downloadPDFWithRetry() throws DownloadFailException, InterruptedException, IOException{
 		int retryPeriod = 2000;
 		while(true){
 			try {
@@ -115,7 +109,7 @@ public class EEHandler {
 		}
 	}
 	
-	private void downloadPDF() throws ConnectionFailException, MismatchedRuleException, IOException {
+	private static void downloadPDF() throws ConnectionFailException, MismatchedRuleException, IOException {
 		String eeStr = (String)record.getProperty(Key.EE);
 		URL eeURL = new URL(eeStr);
 		//handle different cases of publishers
@@ -139,7 +133,7 @@ public class EEHandler {
 		//TODO handle other domain names
 	}
 	
-	private void checkEmbeddedFonts() throws DownloadFailException{
+	private static void checkEmbeddedFonts() throws DownloadFailException{
 		String cmdLineStr = "pdffonts " + pdfRecord.getPath();
 		ByteArrayOutputStream pdffontsOutput = new ByteArrayOutputStream();
 		
@@ -178,7 +172,7 @@ public class EEHandler {
 		}
 	}
 	
-	private void pdfToText() throws DownloadFailException{
+	private static void pdfToText() throws DownloadFailException{
 		String cmdLineStr = "pdftotext " + pdfRecord.getPath() + " " + textRecord.getPath();
 		
 		try {
@@ -189,7 +183,7 @@ public class EEHandler {
 		}
 	}
 	
-	private void execWithTimeout(String cmdLineStr, OutputStream subProcessOutput) throws IOException{
+	private static void execWithTimeout(String cmdLineStr, OutputStream subProcessOutput) throws IOException{
 		CommandLine cmdLine = CommandLine.parse(cmdLineStr);
 		
 		ExecuteWatchdog watchdog = new ExecuteWatchdog(10000); //timeout in 10s 
@@ -212,13 +206,13 @@ public class EEHandler {
 		}
 	}
 	
-	private HttpURLConnection createURLConnection(URL url) throws IOException{
+	private static HttpURLConnection createURLConnection(URL url) throws IOException{
 		HttpURLConnection urlc = (HttpURLConnection)url.openConnection();
 		urlc.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:17.0) Gecko/20100101 Firefox/17.0");
 		return urlc;
 	}
 	
-	private void downloadFromURLConnect(URLConnection urlc, File outputFile) throws IOException{
+	private static void downloadFromURLConnect(URLConnection urlc, File outputFile) throws IOException{
 		byte[] buffer = new byte[4096];
 		InputStream in = urlc.getInputStream();
 		OutputStream out = new FileOutputStream(outputFile);
@@ -228,6 +222,17 @@ public class EEHandler {
 		}
 		in.close();
 		out.close();
+	}
+	
+	private static void createDirIfNotExist(String filename){
+		File dir = new File(filename);
+		if(!dir.exists()){
+			dir.mkdir();
+		}
+	}
+	
+	public static File getTextRecord(String filename){
+		return new File(TEXT_RECORD_DIR + "/" + filename);
 	}
 	
 }

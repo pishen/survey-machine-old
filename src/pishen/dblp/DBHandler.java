@@ -15,13 +15,14 @@ import org.neo4j.graphdb.index.ReadableIndex;
 public class DBHandler {
 	private static final Logger log = Logger.getLogger(DBHandler.class);
 	private static final String RECORD_KEY = "RECORD_KEY";
-	private GraphDatabaseService graphDB;
-	private ReadableIndex<Node> autoNodeIndex;
+	private static final String CONCAT_KEY = createConcatenatedKey();
+	private static GraphDatabaseService graphDB;
+	private static ReadableIndex<Node> autoNodeIndex;
 	
-	public void startGraphDB(){
+	public static void startGraphDB(){
 		log.info("starting graph DB...");
 		graphDB = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder("graph-db")
-				.setConfig(GraphDatabaseSettings.node_keys_indexable, createConcatenatedKey())
+				.setConfig(GraphDatabaseSettings.node_keys_indexable, CONCAT_KEY)
 				.setConfig(GraphDatabaseSettings.node_auto_indexing, "true")
 				.newGraphDatabase();
 		//link Record with graphDB for Record to create Transaction by graphDB
@@ -37,7 +38,7 @@ public class DBHandler {
 		});
 	}
 	
-	public DBRecord getRecordWithKey(String recordKeyValue){
+	public static DBRecord getRecordWithKey(String recordKeyValue){
 		Node node = autoNodeIndex.get(RECORD_KEY, recordKeyValue).getSingle();
 		if(node == null){
 			node = createNodeWithRecordKey(recordKeyValue);
@@ -45,7 +46,7 @@ public class DBHandler {
 		return new DBRecord(node);
 	}
 	
-	public List<DBRecord> getRecords(Key key, Object value){
+	public static List<DBRecord> getRecords(Key key, Object value){
 		IndexHits<Node> hits = autoNodeIndex.get(key.toString(), value);
 		List<DBRecord> list = new ArrayList<DBRecord>();
 		try {
@@ -58,7 +59,7 @@ public class DBHandler {
 		}
 	}
 	
-	private Node createNodeWithRecordKey(String recordKeyValue){
+	private static Node createNodeWithRecordKey(String recordKeyValue){
 		log.debug("creating new Node");
 		Transaction tx = graphDB.beginTx();
 		try {
@@ -71,7 +72,7 @@ public class DBHandler {
 		}
 	}
 	
-	private String createConcatenatedKey(){
+	private static String createConcatenatedKey(){
 		String concatKey = RECORD_KEY;
 		for(Key k: Key.values()){
 			concatKey = concatKey + "," + k;

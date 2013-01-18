@@ -22,6 +22,9 @@ public class Main {
 		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%-5p [%d{MM-dd HH:mm:ss}] %m%n")));
 		Logger.getRootLogger().setLevel(Level.INFO);
 		
+		Controller controller = new Controller();
+		//controller.startGraphDB();
+		
 		try {
 			Options options = new Options();
 			options.addOption("d", false, "download the papers");
@@ -30,12 +33,22 @@ public class Main {
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
 			
-			new Controller().start();
+			if(cmd.hasOption("d")){
+				//controller.downloadRecords();
+			}
+			if(cmd.hasOption("l")){
+				controller.linkRecords();
+			}
+			
 		} catch (ParseException e) {
 			log.fatal("CommandLine parsing error");
+		} catch (FileNotFoundException e) {
+			log.fatal("FileNotFoundException");
+			e.printStackTrace();
+		} catch (XMLStreamException e) {
+			log.fatal("XMLStreamException");
+			e.printStackTrace();
 		}
-		
-		
 		
 	}
 	
