@@ -1,11 +1,9 @@
 package pishen.dblp;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.xml.stream.XMLStreamException;
@@ -37,38 +35,31 @@ public class Controller {
 		}
 	}
 	
-	public void linkRecords() throws XMLStreamException, IOException{
+	public void linkRecords() throws FileNotFoundException, XMLStreamException{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
-		//int paperWithReference = 0;
-		boolean found = false;
+		int paperWithReference = 0;
 		
-		while(xmlParser.hasNextXMLRecord() && !found){
+		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
 			File textRecord = EEHandler.getTextRecord(xmlRecord.getProperty(Key.FILENAME).toString());
-			log.info("parsing name:" + textRecord.getName());
-			if(textRecord.getName().equals("journals-toct-BeameIPS10")){
-				log.info("file found");
+			if(textRecord.exists()){
 				BufferedReader in = new BufferedReader(new FileReader(textRecord));
-				BufferedWriter out = new BufferedWriter(new FileWriter("output"));
 				String line = null;
 				try {
-					log.info("writing");
 					while((line = in.readLine()) != null){
-						out.write(line);
-						out.newLine();
+						if(line.equals("REFERENCES")){
+							paperWithReference++;
+							break;
+						}
 					}
 					in.close();
-					out.close();
-					log.info("done");
 				} catch (IOException e) {
 					log.error("error on reading textrecord:" + xmlRecord.getProperty(Key.FILENAME));
 				}
-			}else{
-				log.error("text record not exist");
 			}
 		}
 		
-		//log.info("paperWithReference=" + paperWithReference);
+		log.info("paperWithReference=" + paperWithReference);
 	}
 	
 	private void tryDownloadRecord(DBRecord dbRecord){

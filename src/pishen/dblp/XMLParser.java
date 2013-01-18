@@ -44,8 +44,8 @@ public class XMLParser {
 		
 		log.info("# " + (++recordCount) + " key=" + recordKey);
 		
-		XMLRecord xmlRecord = new XMLRecord(recordKey);
-		xmlRecord.setProperty(Key.FILENAME, recordKey.replaceAll("/", "-"));
+		currentRecord = new XMLRecord(recordKey);
+		currentRecord.setProperty(Key.FILENAME, recordKey.replaceAll("/", "-"));
 		
 		//grabing information from the xml
 		while(streamReader.hasNext()){
@@ -56,9 +56,9 @@ public class XMLParser {
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
 					if(streamReader.getText().startsWith("db")){
-						xmlRecord.setProperty(Key.EE, "http://www.sigmod.org/dblp/" + streamReader.getText());
+						currentRecord.setProperty(Key.EE, "http://www.sigmod.org/dblp/" + streamReader.getText());
 					}else{
-						xmlRecord.setProperty(Key.EE, streamReader.getText());
+						currentRecord.setProperty(Key.EE, streamReader.getText());
 					}
 				}else{
 					log.error("content of ee is wrong");
@@ -68,7 +68,7 @@ public class XMLParser {
 				//year found
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
-					xmlRecord.setProperty(Key.YEAR, streamReader.getText());
+					currentRecord.setProperty(Key.YEAR, streamReader.getText());
 				}else{
 					log.error("content of year is wrong");
 				}
@@ -77,7 +77,7 @@ public class XMLParser {
 				//title found
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
-					xmlRecord.setProperty(Key.TITLE, streamReader.getText());
+					currentRecord.setProperty(Key.TITLE, streamReader.getText());
 				}else{
 					log.error("content of title is wrong");
 				}
