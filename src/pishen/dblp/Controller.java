@@ -35,9 +35,10 @@ public class Controller {
 		}
 	}
 	
-	public void linkRecords() throws FileNotFoundException, XMLStreamException{
+	public void linkRecords(int limit) throws FileNotFoundException, XMLStreamException{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
 		boolean found = false;
+		int numOfFound = 0;
 		
 		while(xmlParser.hasNextXMLRecord() && !found){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
@@ -55,7 +56,12 @@ public class Controller {
 					}
 					in.close();
 					if(found){
-						log.info("found: " + textRecord.getName());
+						numOfFound++;
+						if(numOfFound < 2){
+							found = false;
+						}else{
+							log.info("found: " + textRecord.getName());
+						}
 					}
 				} catch (IOException e) {
 					log.error("error on reading textrecord:" + xmlRecord.getProperty(Key.FILENAME));
