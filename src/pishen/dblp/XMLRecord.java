@@ -23,7 +23,11 @@ public class XMLRecord {
 	}
 	
 	public boolean isValid(){
-		if(recordMap.get(Key.TITLE) != null && recordMap.get(Key.YEAR) != null){
+		if(recordKey != null && 
+				recordMap.get(Key.TITLE) != null && 
+				recordMap.get(Key.YEAR) != null && 
+				recordMap.get(Key.EE) != null &&
+				EEHandler.containsRuleForEE(recordMap.get(Key.EE))){
 			return true;
 		}else{
 			return false;

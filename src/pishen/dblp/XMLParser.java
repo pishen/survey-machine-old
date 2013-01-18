@@ -14,30 +14,32 @@ public class XMLParser {
 	private XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 	private XMLStreamReader streamReader;
 	private int recordCount = 0;
+	private XMLRecord currentRecord = new XMLRecord("dummy");
 	
-	public void setupReader(String inputFilename) throws FileNotFoundException, XMLStreamException{
+	public XMLParser(String xmlFilename) throws FileNotFoundException, XMLStreamException{
 		log.info("setting up XML reader...");
-		streamReader = inputFactory.createXMLStreamReader(new FileReader(inputFilename));
+		streamReader = inputFactory.createXMLStreamReader(new FileReader(xmlFilename));
 	}
 	
-	/** Find the next record with record type "article" or "inproceedings",
-	 * which also contains an EE url 
-	 * 
-	 * @return true if the next record is found
-	 * @throws XMLStreamException
-	 */
+	public XMLRecord getNextXMLRecord(){
+		return currentRecord;
+	}
+	
 	public boolean hasNextXMLRecord() throws XMLStreamException{
 		while(streamReader.hasNext()){
 			streamReader.next();
 			if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT && 
 					isTargetPaperType(streamReader.getLocalName())){
-				return true;
+				parseXMLRecord();
+				if(currentRecord.isValid()){
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 	
-	public XMLRecord getNextXMLRecord() throws XMLStreamException{
+	private void parseXMLRecord() throws XMLStreamException{
 		String recordKey = streamReader.getAttributeValue(null, "key");
 		
 		log.info("# " + (++recordCount) + " key=" + recordKey);
@@ -85,8 +87,6 @@ public class XMLParser {
 				break;
 			}
 		}
-		
-		return xmlRecord;
 	}
 	
 	private boolean isTargetPaperType(String localName){

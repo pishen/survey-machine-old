@@ -24,6 +24,7 @@ import pishen.exception.ConnectionFailException;
 import pishen.exception.DownloadFailException;
 import pishen.exception.MismatchedRuleException;
 
+//TODO change the usage to static
 public class EEHandler {
 	private static final Logger log = Logger.getLogger(EEHandler.class);
 	private static final String TEXT_RECORD_DIR = "text-records";
@@ -42,7 +43,7 @@ public class EEHandler {
 		}
 	}
 	
-	public boolean containsRuleForEE(String eeStr){
+	public static boolean containsRuleForEE(String eeStr){
 		String domainName = null;
 		
 		try {

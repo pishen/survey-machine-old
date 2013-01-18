@@ -10,28 +10,30 @@ import pishen.exception.DownloadFailException;
 
 public class Controller {
 	private static final Logger log = Logger.getLogger(Controller.class);
-	private XMLParser xmlParser = new XMLParser();
+	private final String XML_FILENAME = "dblp.xml";
 	private EEHandler eeHandler = new EEHandler();
 	private DBHandler dbHandler = new DBHandler();
 	
-	public void start() throws FileNotFoundException, XMLStreamException{
+	public void start(){
 		dbHandler.startGraphDB();
+	}
+	
+	public void createRecords() throws FileNotFoundException, XMLStreamException{
+		XMLParser xmlParser = new XMLParser(XML_FILENAME);
 		
-		xmlParser.setupReader("dblp.xml");
-		
-		log.info("parse through all the records in dblp.xml");
 		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
-			if(xmlRecord.isValid() && eeHandler.containsRuleForEE(xmlRecord.getProperty(Key.EE))){
-				//copy the key-value pairs from XMLRecord to DBRecord
-				DBRecord dbRecord = dbHandler.getRecordWithKey(xmlRecord.getRecordKey());
-				for(Key key: Key.values()){
-					dbRecord.setProperty(key, xmlRecord.getProperty(key));
-				}
-				//try to download EE
-				tryDownloadRecord(dbRecord);
+			//copy the key-value pairs from XMLRecord to DBRecord
+			DBRecord dbRecord = dbHandler.getRecordWithKey(xmlRecord.getRecordKey());
+			for(Key key: Key.values()){
+				dbRecord.setProperty(key, xmlRecord.getProperty(key));
 			}
+			//try to download EE
+			tryDownloadRecord(dbRecord);
 		}
+	}
+	
+	public void linkRecords(){
 		
 	}
 	
