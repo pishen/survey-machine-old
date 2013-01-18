@@ -1,6 +1,7 @@
 package pishen.dblp;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -47,6 +48,9 @@ public class Main {
 			e.printStackTrace();
 		} catch (XMLStreamException e) {
 			log.fatal("XMLStreamException");
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

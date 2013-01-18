@@ -1,9 +1,11 @@
 package pishen.dblp;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.xml.stream.XMLStreamException;
@@ -35,7 +37,7 @@ public class Controller {
 		}
 	}
 	
-	public void linkRecords() throws FileNotFoundException, XMLStreamException{
+	public void linkRecords() throws XMLStreamException, IOException{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
 		//int paperWithReference = 0;
 		boolean found = false;
@@ -43,18 +45,20 @@ public class Controller {
 		while(xmlParser.hasNextXMLRecord() && !found){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
 			File textRecord = EEHandler.getTextRecord(xmlRecord.getProperty(Key.FILENAME).toString());
-			if(textRecord.exists()){
+			if(textRecord.getName().equals("journals-toct-BeameIPS10")){
+				log.info("file found");
 				BufferedReader in = new BufferedReader(new FileReader(textRecord));
+				BufferedWriter out = new BufferedWriter(new FileWriter("output"));
 				String line = null;
 				try {
+					log.info("writing");
 					while((line = in.readLine()) != null){
-						if(line.equals("REFERENCES")){
-							log.info("found");
-							found = true;
-							break;
-						}
+						out.write(line);
+						out.newLine();
 					}
 					in.close();
+					out.close();
+					log.info("done");
 				} catch (IOException e) {
 					log.error("error on reading textrecord:" + xmlRecord.getProperty(Key.FILENAME));
 				}
