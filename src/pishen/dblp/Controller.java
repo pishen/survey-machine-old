@@ -47,7 +47,7 @@ public class Controller {
 				String line = null;
 				try {
 					while((line = in.readLine()) != null){
-						if(line.equals("REFERENCE")){
+						if(line.trim().equals("REFERENCES")){
 							paperWithReference++;
 							break;
 						}
