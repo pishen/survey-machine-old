@@ -37,9 +37,10 @@ public class Controller {
 	
 	public void linkRecords() throws FileNotFoundException, XMLStreamException{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
-		int paperWithReference = 0;
+		//int paperWithReference = 0;
+		boolean found = false;
 		
-		while(xmlParser.hasNextXMLRecord()){
+		while(xmlParser.hasNextXMLRecord() && !found){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
 			File textRecord = EEHandler.getTextRecord(xmlRecord.getProperty(Key.FILENAME).toString());
 			if(textRecord.exists()){
@@ -48,7 +49,8 @@ public class Controller {
 				try {
 					while((line = in.readLine()) != null){
 						if(line.equals("REFERENCES")){
-							paperWithReference++;
+							log.info("found");
+							found = true;
 							break;
 						}
 					}
@@ -61,7 +63,7 @@ public class Controller {
 			}
 		}
 		
-		log.info("paperWithReference=" + paperWithReference);
+		//log.info("paperWithReference=" + paperWithReference);
 	}
 	
 	private void tryDownloadRecord(DBRecord dbRecord){
