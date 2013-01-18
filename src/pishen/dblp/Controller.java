@@ -47,14 +47,17 @@ public class Controller {
 				String line = null;
 				try {
 					while((line = in.readLine()) != null){
-						if(line.trim().equals("REFERENCES")){
+						if(line.equals("REFERENCES")){
 							paperWithReference++;
 							break;
 						}
 					}
+					in.close();
 				} catch (IOException e) {
 					log.error("error on reading textrecord:" + xmlRecord.getProperty(Key.FILENAME));
 				}
+			}else{
+				log.error("text record not exist");
 			}
 		}
 		
