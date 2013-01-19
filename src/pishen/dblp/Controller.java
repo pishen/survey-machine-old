@@ -35,26 +35,29 @@ public class Controller {
 		}
 	}
 	
-	public void linkRecords(int limit) throws FileNotFoundException, XMLStreamException{
+	public void linkRecords() throws FileNotFoundException, XMLStreamException{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
-		boolean found = false;
-		int numOfFound = 0;
+		//boolean found = false;
+		//int numOfFound = 0;
+		int numOfMatch = 0;
 		
-		while(xmlParser.hasNextXMLRecord() && !found){
+		while(xmlParser.hasNextXMLRecord() /*&& !found */){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
 			File textRecord = EEHandler.getTextRecord(xmlRecord.getProperty(Key.FILENAME).toString());
 			if(textRecord.exists()){
 				BufferedReader in = new BufferedReader(new FileReader(textRecord));
 				String line = null;
 				try {
-					found = true;
+					//found = true;
 					while((line = in.readLine()) != null){
 						if(line.equals("REFERENCES") || line.equals("References")){
-							found = false;
+							numOfMatch++;
+							//found = false;
 							break;
 						}
 					}
 					in.close();
+					/*
 					if(found){
 						numOfFound++;
 						if(numOfFound < limit){
@@ -63,11 +66,13 @@ public class Controller {
 							log.info("found: " + textRecord.getName());
 						}
 					}
+					*/
 				} catch (IOException e) {
 					log.error("error on reading textrecord:" + xmlRecord.getProperty(Key.FILENAME));
 				}
 			}
 		}
+		log.info("numOfMatch=" + numOfMatch);
 	}
 	
 	private void tryDownloadRecord(DBRecord dbRecord){
