@@ -49,7 +49,7 @@ public class Controller {
 				try {
 					found = true;
 					while((line = in.readLine()) != null){
-						if(line.equals("REFERENCES")){
+						if(line.equals("REFERENCES") || line.equals("References")){
 							found = false;
 							break;
 						}
