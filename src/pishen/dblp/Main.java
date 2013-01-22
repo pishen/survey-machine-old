@@ -23,7 +23,7 @@ public class Main {
 		Logger.getRootLogger().setLevel(Level.INFO);
 		
 		Controller controller = new Controller();
-		//controller.startGraphDB();
+		controller.startGraphDB();
 		
 		try {
 			Options options = new Options();

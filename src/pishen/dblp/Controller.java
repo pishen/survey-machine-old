@@ -41,7 +41,7 @@ public class Controller {
 		//int numOfFound = 0;
 		int numOfMatch = 0;
 		
-		while(xmlParser.hasNextXMLRecord() && !found){
+		while(xmlParser.hasNextXMLRecord() /*&& !found*/){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
 			File textRecord = EEHandler.getTextRecord(xmlRecord.getProperty(Key.FILENAME).toString());
 			if(textRecord.exists()){
@@ -49,22 +49,25 @@ public class Controller {
 				String line = null;
 				try {
 					//found = true;
-					boolean match = false;
+					//boolean match = false;
 					while((line = in.readLine()) != null){
 						if(line.equals("REFERENCES") || line.equals("References")){
-							numOfMatch++;
+							DBRecord dbRecord = DBHandler.getRecordWithKey(xmlRecord.getRecordKey());
+							if(((String)dbRecord.getProperty(Key.EMB)).equals("yes")){
+								numOfMatch++;
+							}
 							//found = false;
-							match = true;
+							//match = true;
 							break;
 						}
 					}
 					in.close();
-					
+					/*
 					if(match && numOfMatch == limit){
 						found = true;
 						log.info("matched key=" + textRecord.getName());
 					}
-					
+					*/
 					/*
 					if(found){
 						numOfFound++;
@@ -80,7 +83,7 @@ public class Controller {
 				}
 			}
 		}
-		log.info("numOfMatch=" + numOfMatch);
+		log.info("numOfMatchWithEMB=" + numOfMatch);
 	}
 	
 	private void tryDownloadRecord(DBRecord dbRecord){
