@@ -28,7 +28,7 @@ public class Main {
 		try {
 			Options options = new Options();
 			options.addOption("d", false, "download the papers");
-			options.addOption("l", false, "link the citation network");
+			options.addOption("l", true, "link the citation network");
 			
 			CommandLineParser parser = new PosixParser();
 			CommandLine cmd = parser.parse(options, args);
@@ -37,8 +37,8 @@ public class Main {
 				//controller.downloadRecords();
 			}
 			if(cmd.hasOption("l")){
-				//controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
-				controller.linkRecords();
+				controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
+				//controller.linkRecords();
 			}
 			
 		} catch (ParseException e) {
