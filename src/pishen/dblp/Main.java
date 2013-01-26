@@ -19,7 +19,7 @@ public class Main {
 	private static final Logger log = Logger.getLogger(Main.class);
 	
 	public static void main(String[] args){
-		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%-5p [%d{MM-dd HH:mm:ss}] %m%n")));
+		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n")));
 		Logger.getRootLogger().setLevel(Level.INFO);
 		
 		Controller controller = new Controller();

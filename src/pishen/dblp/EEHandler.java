@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import pishen.exception.ConnectionFailException;
 import pishen.exception.DownloadFailException;
 import pishen.exception.MismatchedRuleException;
+import pishen.exception.TextRecordNotFoundException;
 
 public class EEHandler {
 	private static final Logger log = Logger.getLogger(EEHandler.class);
@@ -56,8 +57,8 @@ public class EEHandler {
 	
 	public static void downloadRecord(DBRecord record) throws DownloadFailException, InterruptedException, IOException{		
 		EEHandler.record = record;
-		textRecord = getTextRecord(record.getProperty(Key.FILENAME).toString());
-		pdfRecord = new File(PDF_RECORD_DIR + "/" + record.getProperty(Key.FILENAME) + ".pdf");
+		textRecord = new File(TEXT_RECORD_DIR + "/" + record.getStringProperty(Key.FILENAME));
+		pdfRecord = new File(PDF_RECORD_DIR + "/" + record.getStringProperty(Key.FILENAME) + ".pdf");
 		
 		if(textRecord.exists()){
 			log.info("text record exists");
@@ -110,7 +111,7 @@ public class EEHandler {
 	}
 	
 	private static void downloadPDF() throws ConnectionFailException, MismatchedRuleException, IOException {
-		String eeStr = (String)record.getProperty(Key.EE);
+		String eeStr = record.getStringProperty(Key.EE);
 		URL eeURL = new URL(eeStr);
 		//handle different cases of publishers
 		if(eeURL.getHost().equals("doi.acm.org")){
@@ -231,8 +232,12 @@ public class EEHandler {
 		}
 	}
 	
-	public static File getTextRecord(String filename){
-		return new File(TEXT_RECORD_DIR + "/" + filename);
+	public static File getTextRecordByFilename(String filename) throws TextRecordNotFoundException{
+		File textRecord = new File(TEXT_RECORD_DIR + "/" + filename);
+		if(!textRecord.exists()){
+			throw new TextRecordNotFoundException();
+		}
+		return textRecord;
 	}
 	
 }

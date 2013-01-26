@@ -1,16 +1,13 @@
 package pishen.dblp;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.log4j.Logger;
 
 import pishen.exception.DownloadFailException;
+import pishen.exception.LinkingFailException;
 
 public class Controller {
 	private static final Logger log = Logger.getLogger(Controller.class);
@@ -25,76 +22,38 @@ public class Controller {
 		
 		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
-			//copy the key-value pairs from XMLRecord to DBRecord
+			//copy the key-value pairs from XMLRecord to database
 			DBRecord dbRecord = DBHandler.getRecordWithKey(xmlRecord.getRecordKey());
 			for(Key key: Key.values()){
 				dbRecord.setProperty(key, xmlRecord.getProperty(key));
 			}
 			//try to download EE
-			tryDownloadRecord(dbRecord);
+			try {
+				EEHandler.downloadRecord(dbRecord);
+			} catch (DownloadFailException e) {
+				continue;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			log.info("===SUCCESS===");
 		}
 	}
 	
 	public void linkRecords(int limit) throws FileNotFoundException, XMLStreamException{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
-		boolean found = false;
-		//int numOfFound = 0;
-		int numOfMatch = 0;
 		
-		while(xmlParser.hasNextXMLRecord() /*&& !found*/){
+		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
-			File textRecord = EEHandler.getTextRecord(xmlRecord.getProperty(Key.FILENAME).toString());
-			if(textRecord.exists()){
-				BufferedReader in = new BufferedReader(new FileReader(textRecord));
-				String line = null;
-				try {
-					//found = true;
-					//boolean match = false;
-					while((line = in.readLine()) != null){
-						if(line.equals("REFERENCES") || line.equals("References")){
-							DBRecord dbRecord = DBHandler.getRecordWithKey(xmlRecord.getRecordKey());
-							if(((String)dbRecord.getProperty(Key.EMB)).equals("yes")){
-								numOfMatch++;
-							}
-							//found = false;
-							//match = true;
-							break;
-						}
-					}
-					in.close();
-					/*
-					if(match && numOfMatch == limit){
-						found = true;
-						log.info("matched key=" + textRecord.getName());
-					}
-					*/
-					/*
-					if(found){
-						numOfFound++;
-						if(numOfFound < limit){
-							found = false;
-						}else{
-							log.info("found: " + textRecord.getName());
-						}
-					}
-					*/
-				} catch (IOException e) {
-					log.error("error on reading textrecord:" + xmlRecord.getProperty(Key.FILENAME));
-				}
+			DBRecord dbRecord = DBHandler.getRecordWithKey(xmlRecord.getRecordKey());
+			try {
+				RecordLinker.linkRecord(dbRecord);
+			} catch (LinkingFailException e) {
+				continue;
 			}
 		}
-		log.info("numOfMatchWithEMB=" + numOfMatch);
-	}
-	
-	private void tryDownloadRecord(DBRecord dbRecord){
-		try {
-			EEHandler.downloadRecord(dbRecord);
-			log.info("===SUCCESS===");
-		} catch (DownloadFailException e) {
-			//System.out.println("download fail");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
+		log.info("recordWithRefAndEmb=" + RecordLinker.getRecordWithRefAndEmb());
 	}
 	
 	//TODO feature require: updating property value by XMLParser and delete the record that's not exist anymore 

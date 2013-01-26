@@ -17,7 +17,7 @@ public class DBRecord {
 		this.node = node;
 	}
 	
-	public void setProperty(Key key, Object value){
+	public void setProperty(Key key, String value){
 		if(value != null){
 			Transaction tx = graphDB.beginTx();
 			try {
@@ -29,8 +29,12 @@ public class DBRecord {
 		}
 	}
 	
+	public String getStringProperty(Key key){
+		return (String)getProperty(key);
+	}
+	
 	public Object getProperty(Key key){
-		return node.getProperty(key.toString(), null);
+		return node.getProperty(key.toString());
 	}
 	
 }
