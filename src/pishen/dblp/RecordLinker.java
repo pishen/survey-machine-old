@@ -88,7 +88,14 @@ public class RecordLinker {
 	}
 	
 	private static void checkRefFormat() throws IOException{
-		String firstCharStr = textRecordReader.readLine().substring(0, 1);
+		String line = null;
+		while((line = textRecordReader.readLine()) != null){
+			if((line = line.trim()).length() > 0){
+				break;
+			}
+		}
+		
+		String firstCharStr = line.substring(0, 1);
 		if(!formatStr.contains(firstCharStr)){
 			formatStr = formatStr + firstCharStr;
 			formatWriter.write(firstCharStr + " " + dbRecord.getStringProperty(Key.FILENAME));
