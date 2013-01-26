@@ -95,11 +95,15 @@ public class RecordLinker {
 			}
 		}
 		
-		String firstCharStr = line.substring(0, 1);
-		if(!formatStr.contains(firstCharStr)){
-			formatStr = formatStr + firstCharStr;
-			formatWriter.write(firstCharStr + " " + dbRecord.getStringProperty(Key.FILENAME));
-			formatWriter.newLine();
+		if(line != null){
+			String firstCharStr = line.substring(0, 1);
+			if(!formatStr.contains(firstCharStr)){
+				log.info("new type found");
+				formatStr = formatStr + firstCharStr;
+				formatWriter.write(firstCharStr + " " + dbRecord.getStringProperty(Key.FILENAME));
+				formatWriter.newLine();
+				formatWriter.flush();
+			}
 		}
 	}
 	
