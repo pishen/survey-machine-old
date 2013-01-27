@@ -35,6 +35,12 @@ public class RecordLinker {
 		}
 	}
 	
+	public static void writeTypeCounts(){
+		for(int i = 0; i < typeCounts.length; i++){
+			typeCountWriter.println("type-" + (i + 1) + "=" + typeCounts[i]);
+		}
+	}
+	
 	public static void linkRecord(DBRecord dbRecord) throws LinkingFailException{
 		RecordLinker.dbRecord = dbRecord;
 		try {
@@ -50,7 +56,6 @@ public class RecordLinker {
 			e.printStackTrace();
 			throw new LinkingFailException();
 		}
-		writeTypeCounts();
 	}
 	
 	private static void tryCheckingEMB() throws NotEmbException{
@@ -83,12 +88,6 @@ public class RecordLinker {
 		
 		if(!hasValidCitationMark){
 			checklistWriter.println(dbRecord.getStringProperty(Key.FILENAME));
-		}
-	}
-	
-	private static void writeTypeCounts(){
-		for(int i = 0; i < typeCounts.length; i++){
-			typeCountWriter.println("type-" + (i + 1) + "=" + typeCounts[i]);
 		}
 	}
 	

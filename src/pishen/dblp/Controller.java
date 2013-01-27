@@ -52,7 +52,7 @@ public class Controller {
 				continue;
 			}
 		}
-		
+		RecordLinker.writeTypeCounts();
 	}
 	
 	//TODO feature require: updating property value by XMLParser and delete the record that's not exist anymore 
