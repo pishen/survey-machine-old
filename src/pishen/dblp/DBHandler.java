@@ -33,6 +33,7 @@ public class DBHandler {
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 			public void run(){
+				log.info("shutting down graphDB");
 				graphDB.shutdown();
 			}
 		});

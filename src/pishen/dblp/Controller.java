@@ -40,7 +40,7 @@ public class Controller {
 		}
 	}
 	
-	public void linkRecords(int limit) throws FileNotFoundException, XMLStreamException{
+	public void linkRecords() throws FileNotFoundException, XMLStreamException{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
 		
 		while(xmlParser.hasNextXMLRecord()){
@@ -53,7 +53,6 @@ public class Controller {
 			}
 		}
 		
-		log.info("recordWithRefAndEmb=" + RecordLinker.getRecordWithRefAndEmb());
 	}
 	
 	//TODO feature require: updating property value by XMLParser and delete the record that's not exist anymore 
