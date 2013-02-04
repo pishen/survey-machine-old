@@ -40,7 +40,7 @@ public class Downloader {
 			} catch (WrongContentTypeException e) {
 				//content type is wrong
 				sleep(1000); //sleep 1s for not querying the server too frequently
-				log.warn("undefined rule");
+				log.warn("wrong content type");
 				log.warn("--content type: [" + e.getContentType() + "]");
 				throw new DownloadFailException();
 			} catch (IOException e) {

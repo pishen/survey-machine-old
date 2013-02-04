@@ -17,7 +17,7 @@ import pishen.tool.Executor;
 public class EEHandler {
 	private static final Logger log = Logger.getLogger(EEHandler.class);
 
-	public static void fetchFiles(DBRecord dbRecord){
+	public static void fetchResources(DBRecord dbRecord){
 		if(dbRecord.getTextFile().exists() == false){
 			try {
 				downloadPDF(dbRecord);
@@ -44,7 +44,7 @@ public class EEHandler {
 		}else{
 			log.info("downloading PDF");
 			try {
-				URL targetURL = URLGenerator.generatePDFURL(dbRecord);
+				URL targetURL = RuleHandler.getPDFURL(dbRecord);
 				Downloader.downloadFileWithRetry(targetURL, pdfFile, "application/pdf");
 			} catch (Exception e) {
 				pdfFile.delete();

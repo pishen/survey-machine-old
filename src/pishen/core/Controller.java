@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 import pishen.db.DBHandler;
 import pishen.db.DBRecord;
 import pishen.db.DBRecordIterator;
-import pishen.exception.DownloadFailException;
 import pishen.exception.LinkingFailException;
 import pishen.xml.XMLParser;
 import pishen.xml.XMLRecord;
@@ -35,10 +34,10 @@ public class Controller {
 		}
 	}
 	
-	public void fetchFilesForAllRecords(){
+	public void fetchResourcesForAllRecords(){
 		DBRecordIterator iter = DBHandler.iteratorForRecord();
 		while(iter.hasNext()){
-			EEHandler.fetchFiles(iter.next());
+			EEHandler.fetchResources(iter.next());
 		}
 	}
 	
