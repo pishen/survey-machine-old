@@ -26,20 +26,21 @@ public class Controller {
 	}
 	
 	public void testRef(){
+		log.info("testing");
 		DBRecord dbRecord = DBHandler.getRecordWithKey("journals/tog/LipmanCRL07");
 		try {
 			RuleHandler.getRefGrabber(dbRecord).grabRef();
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
+			log.error("MalformedURLException");
 			e.printStackTrace();
 		} catch (RuleNotFoundException e) {
-			// TODO Auto-generated catch block
+			log.error("RuleNotFoundException");
 			e.printStackTrace();
 		} catch (DownloadFailException e) {
-			// TODO Auto-generated catch block
+			log.error("DownloadFailException");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			log.error("IOException");
 			e.printStackTrace();
 		}
 	}
