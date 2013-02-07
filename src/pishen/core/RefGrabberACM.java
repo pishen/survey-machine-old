@@ -23,6 +23,7 @@ public class RefGrabberACM {
 	}
 	
 	public void grabRef() throws DownloadFailException, IOException{
+		log.info("grabbing");
 		URL refURL = new URL(dbRecord.getStringProperty(Key.EE) + "&preflayout=flat");
 		ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
 		
