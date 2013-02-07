@@ -29,6 +29,7 @@ public class Main {
 		log.info(p.getElementsContainingOwnText("This a test").size());
 		*/
 		
+		log.info("start");
 		Controller controller = new Controller();
 		controller.testRef();
 		
