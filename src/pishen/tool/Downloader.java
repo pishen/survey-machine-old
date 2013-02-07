@@ -55,7 +55,7 @@ public class Downloader {
 		
 		if(urlc.getContentType() == null){
 			throw new ConnectionFailException(urlc);
-		}else if(!urlc.getContentType().equals(expectedContentType)){
+		}else if(!urlc.getContentType().startsWith(expectedContentType)){
 			throw new WrongContentTypeException(urlc.getContentType());
 		}else{
 			downloadFile(urlc, out);
