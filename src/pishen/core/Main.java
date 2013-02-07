@@ -30,7 +30,9 @@ public class Main {
 		*/
 		
 		Controller controller = new Controller();
+		controller.testRef();
 		
+		/*
 		try {
 			Options options = new Options();
 			options.addOption("d", false, "download the papers");
@@ -47,7 +49,7 @@ public class Main {
 				controller.linkRecords();
 			}
 			
-			controller.testRef();
+			
 			
 		} catch (ParseException e) {
 			log.fatal("CommandLine parsing error");
@@ -58,6 +60,6 @@ public class Main {
 			log.fatal("XMLStreamException");
 			e.printStackTrace();
 		}
-		
+		*/
 	}
 }
