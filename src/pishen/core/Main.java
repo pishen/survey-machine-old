@@ -29,7 +29,6 @@ public class Main {
 		log.info(p.getElementsContainingOwnText("This a test").size());
 		*/
 		
-		log.info("start");
 		Controller controller = new Controller();
 		controller.testRef();
 		
@@ -49,8 +48,6 @@ public class Main {
 				//controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
 				controller.linkRecords();
 			}
-			
-			
 			
 		} catch (ParseException e) {
 			log.fatal("CommandLine parsing error");

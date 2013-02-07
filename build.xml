@@ -13,7 +13,7 @@
 		<jar destfile="survey-machine.jar" basedir="bin">
 			<zipgroupfileset dir="lib" includes="*.jar"/>
 			<manifest>
-				<attribute name="Main-Class" value="pishen.dblp.Main"/>
+				<attribute name="Main-Class" value="pishen.core.Main"/>
 			</manifest>
 		</jar>
 	</target>

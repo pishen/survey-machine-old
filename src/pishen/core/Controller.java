@@ -26,7 +26,6 @@ public class Controller {
 	}
 	
 	public void testRef(){
-		log.info("testing");
 		DBRecord dbRecord = DBHandler.getRecordWithKey("journals/tog/LipmanCRL07");
 		try {
 			RuleHandler.getRefGrabber(dbRecord).grabRef();
