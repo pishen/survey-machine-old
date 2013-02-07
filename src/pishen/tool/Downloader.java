@@ -1,7 +1,5 @@
 package pishen.tool;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,11 +16,11 @@ import pishen.exception.WrongContentTypeException;
 public class Downloader {
 	private static final Logger log = Logger.getLogger(Downloader.class);
 	
-	public static void downloadFileWithRetry(URL targetURL, File outputFile, String expectedContentType) throws DownloadFailException{
+	public static void downloadFileWithRetry(URL targetURL, OutputStream out, String expectedContentType) throws DownloadFailException{
 		int retryPeriod = 2000;
 		while(true){
 			try {
-				downloadFile(targetURL, outputFile, expectedContentType);
+				downloadFile(targetURL, out, expectedContentType);
 				sleep(1000); //sleep 1s for not querying the server too frequently
 				break; //finish download if there's no exceptions
 			} catch (ConnectionFailException e) {
@@ -51,7 +49,7 @@ public class Downloader {
 		}
 	}
 	
-	private static void downloadFile(URL targetURL, File outputFile, String expectedContentType) 
+	private static void downloadFile(URL targetURL, OutputStream out, String expectedContentType) 
 			throws IOException, ConnectionFailException, WrongContentTypeException{
 		HttpURLConnection urlc = createURLConnection(targetURL);
 		
@@ -60,7 +58,7 @@ public class Downloader {
 		}else if(!urlc.getContentType().equals(expectedContentType)){
 			throw new WrongContentTypeException(urlc.getContentType());
 		}else{
-			downloadFile(urlc, outputFile);
+			downloadFile(urlc, out);
 		}
 	}
 	
@@ -70,10 +68,9 @@ public class Downloader {
 		return urlc;
 	}
 	
-	private static void downloadFile(URLConnection urlc, File outputFile) throws IOException{
+	private static void downloadFile(URLConnection urlc, OutputStream out) throws IOException{
 		byte[] buffer = new byte[4096];
 		InputStream in = urlc.getInputStream();
-		OutputStream out = new FileOutputStream(outputFile);
 		int n = 0;
 		while((n = in.read(buffer)) > 0){
 			out.write(buffer, 0, n);

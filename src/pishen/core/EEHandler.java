@@ -3,6 +3,7 @@ package pishen.core;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
@@ -45,7 +46,7 @@ public class EEHandler {
 			log.info("downloading PDF");
 			try {
 				URL targetURL = RuleHandler.getPDFURL(dbRecord);
-				Downloader.downloadFileWithRetry(targetURL, pdfFile, "application/pdf");
+				Downloader.downloadFileWithRetry(targetURL, new FileOutputStream(pdfFile), "application/pdf");
 			} catch (Exception e) {
 				pdfFile.delete();
 				throw new DownloadFailException();

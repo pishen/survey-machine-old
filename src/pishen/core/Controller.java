@@ -1,6 +1,8 @@
 package pishen.core;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -9,7 +11,9 @@ import org.apache.log4j.Logger;
 import pishen.db.DBHandler;
 import pishen.db.DBRecord;
 import pishen.db.DBRecordIterator;
+import pishen.exception.DownloadFailException;
 import pishen.exception.LinkingFailException;
+import pishen.exception.RuleNotFoundException;
 import pishen.xml.XMLParser;
 import pishen.xml.XMLRecord;
 
@@ -17,8 +21,27 @@ public class Controller {
 	private static final Logger log = Logger.getLogger(Controller.class);
 	private final String XML_FILENAME = "dblp.xml";
 	
-	public void startGraphDB(){
+	public Controller(){
 		DBHandler.startGraphDB();
+	}
+	
+	public void testRef(){
+		DBRecord dbRecord = DBHandler.getRecordWithKey("journals/tog/LipmanCRL07");
+		try {
+			RuleHandler.getRefGrabber(dbRecord).grabRef();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RuleNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DownloadFailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void copyXMLValuesToDB() throws Exception{

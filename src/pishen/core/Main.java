@@ -21,9 +21,15 @@ public class Main {
 	public static void main(String[] args){
 		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n")));
 		Logger.getRootLogger().setLevel(Level.INFO);
+		/*
+		String html = "<p>This <a>is</a> a test.</p>";
+		Document doc = Jsoup.parse(html);
+		
+		Element p = doc.getElementsByTag("p").first();
+		log.info(p.getElementsContainingOwnText("This a test").size());
+		*/
 		
 		Controller controller = new Controller();
-		controller.startGraphDB();
 		
 		try {
 			Options options = new Options();
@@ -41,6 +47,8 @@ public class Main {
 				controller.linkRecords();
 			}
 			
+			controller.testRef();
+			
 		} catch (ParseException e) {
 			log.fatal("CommandLine parsing error");
 		} catch (FileNotFoundException e) {
@@ -52,5 +60,4 @@ public class Main {
 		}
 		
 	}
-	
 }

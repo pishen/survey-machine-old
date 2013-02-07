@@ -1,6 +1,6 @@
 package pishen.exception;
 
-public class URLNotFoundException extends Exception {
+public class RuleNotFoundException extends Exception {
 
 	/**
 	 * 
