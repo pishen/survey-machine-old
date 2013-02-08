@@ -26,7 +26,7 @@ public class Controller {
 	}
 	
 	public void testRef(){
-		DBRecord dbRecord = DBHandler.getRecordWithKey("journals/tog/LipmanCRL07");
+		DBRecord dbRecord = DBHandler.getRecordWithKey("journals/toct/Fortnow09");
 		try {
 			RuleHandler.getRefGrabber(dbRecord).grabRef();
 		} catch (MalformedURLException e) {
