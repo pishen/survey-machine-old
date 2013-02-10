@@ -10,7 +10,7 @@ import pishen.core.Key;
 
 
 public class DBRecord {
-	public static final String RECORD_KEY = "RECORD_KEY"; 
+	public static final String RECORD_KEY = "RECORD_KEY";
 	
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";

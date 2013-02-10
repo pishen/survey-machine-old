@@ -31,6 +31,7 @@ public class Main {
 		options.addOption("c", false, "fetch paper content");
 		options.addOption("r", false, "fetch paper ref");
 		options.addOption("l", false, "link the citation network");
+		options.addOption("t", false, "testing");
 		
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = null;
@@ -53,6 +54,10 @@ public class Main {
 		if(cmd.hasOption("l")){
 			//controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
 			//controller.linkRecords();
+		}
+		
+		if(cmd.hasOption("t")){
+			controller.checkNodes();
 		}
 	}
 }

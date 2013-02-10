@@ -22,6 +22,14 @@ public class Controller {
 		DBHandler.startGraphDB();
 	}
 	
+	public void checkNodes(){
+		DBRecordIterator iter = DBHandler.iteratorForRecord();
+		while(iter.hasNext()){
+			DBRecord dbRecord = iter.next();
+			log.info("[TEST] has 'FILENAME'=" + dbRecord.hasProperty(Key.FILENAME));
+		}
+	}
+	
 	public void copyXMLValuesToDB() throws Exception{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
 		
