@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -29,6 +30,12 @@ public class DBHandler {
 				.newGraphDatabase();
 		//link Record with graphDB for Record to create Transaction by graphDB
 		DBRecord.setGraphDB(graphDB);
+		
+		try {
+			graphDB.getReferenceNode().delete();
+		} catch(NotFoundException e) {
+			log.info("Reference Node already deleted.");
+		}
 		
 		//auto-indexing all the keys in record except RECORD_KEY
 		autoNodeIndex = graphDB.index().getNodeAutoIndexer().getAutoIndex();
