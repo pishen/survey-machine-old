@@ -31,11 +31,7 @@ public class DBHandler {
 		//link Record with graphDB for Record to create Transaction by graphDB
 		DBRecord.setGraphDB(graphDB);
 		
-		try {
-			graphDB.getReferenceNode().delete();
-		} catch(NotFoundException e) {
-			log.info("Reference Node already deleted.");
-		}
+		deleteReferenceNode();
 		
 		//auto-indexing all the keys in record except RECORD_KEY
 		autoNodeIndex = graphDB.index().getNodeAutoIndexer().getAutoIndex();
@@ -92,6 +88,18 @@ public class DBHandler {
 			concatKey = concatKey + "," + k;
 		}
 		return concatKey;
+	}
+	
+	private static void deleteReferenceNode(){
+		Transaction tx = graphDB.beginTx();
+		try {
+			graphDB.getReferenceNode().delete();
+			tx.success();
+		} catch(NotFoundException e) {
+			log.info("Reference Node already deleted.");
+		} finally {
+			tx.finish();
+		}
 	}
 	
 }
