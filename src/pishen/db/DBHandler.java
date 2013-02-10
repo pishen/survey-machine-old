@@ -17,7 +17,6 @@ import pishen.core.Key;
 
 public class DBHandler {
 	private static final Logger log = Logger.getLogger(DBHandler.class);
-	private static final String RECORD_KEY = "RECORD_KEY";
 	private static final String CONCAT_KEY = createConcatenatedKey();
 	private static GraphDatabaseService graphDB;
 	private static ReadableIndex<Node> autoNodeIndex;
@@ -47,7 +46,7 @@ public class DBHandler {
 	}
 	
 	public static DBRecord getRecordWithKey(String recordKeyValue){
-		Node node = autoNodeIndex.get(RECORD_KEY, recordKeyValue).getSingle();
+		Node node = autoNodeIndex.get(DBRecord.RECORD_KEY, recordKeyValue).getSingle();
 		if(node == null){
 			node = createNodeWithRecordKey(recordKeyValue);
 		}
@@ -72,7 +71,7 @@ public class DBHandler {
 		Transaction tx = graphDB.beginTx();
 		try {
 			Node node = graphDB.createNode();
-			node.setProperty(RECORD_KEY, recordKeyValue);
+			node.setProperty(DBRecord.RECORD_KEY, recordKeyValue);
 			tx.success();
 			return node;
 		} finally {
@@ -81,7 +80,7 @@ public class DBHandler {
 	}
 	
 	private static String createConcatenatedKey(){
-		String concatKey = RECORD_KEY;
+		String concatKey = DBRecord.RECORD_KEY;
 		for(Key k: Key.values()){
 			concatKey = concatKey + "," + k;
 		}

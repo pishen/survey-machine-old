@@ -22,7 +22,7 @@ public class Downloader {
 			try {
 				downloadFile(targetURL, out, expectedContentType);
 				sleep(1000); //sleep 1s for not querying the server too frequently
-				break; //finish download if there's no exceptions
+				return; //finish download if there's no exceptions
 			} catch (ConnectionFailException e) {
 				//sleep and retry, if fail too many times, print fail messages
 				if(retryPeriod <= 32000){
@@ -42,7 +42,7 @@ public class Downloader {
 				log.warn("--content type: [" + e.getContentType() + "]");
 				throw new DownloadFailException();
 			} catch (IOException e) {
-				log.error("IOException when downloading");
+				log.error("IOException when downloading file");
 				e.printStackTrace();
 				throw new DownloadFailException();
 			}
@@ -70,13 +70,16 @@ public class Downloader {
 	
 	private static void downloadFile(URLConnection urlc, OutputStream out) throws IOException{
 		byte[] buffer = new byte[4096];
-		InputStream in = urlc.getInputStream();
-		int n = 0;
-		while((n = in.read(buffer)) > 0){
-			out.write(buffer, 0, n);
+		InputStream in = null;
+		try {
+			in = urlc.getInputStream();
+			int n = 0;
+			while((n = in.read(buffer)) > 0){
+				out.write(buffer, 0, n);
+			}
+		} finally {
+			in.close();
 		}
-		in.close();
-		out.close();
 	}
 	
 	private static void sleep(long millis){

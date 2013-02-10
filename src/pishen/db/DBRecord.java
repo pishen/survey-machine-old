@@ -10,10 +10,11 @@ import pishen.core.Key;
 
 
 public class DBRecord {
-	public static final String TEXT_DIR = "text-records";
-	public static final String PDF_DIR = "pdf-records";
-	public static final String REF_DIR = "refs";
+	public static final String RECORD_KEY = "RECORD_KEY"; 
 	
+	private static final String TEXT_DIR = "text-records";
+	private static final String PDF_DIR = "pdf-records";
+	private static final String REF_DIR = "refs";
 	private static GraphDatabaseService graphDB;
 	private Node node;
 	
@@ -32,6 +33,10 @@ public class DBRecord {
 		this.node = node;
 	}
 	
+	public String getRecordKey(){
+		return (String)node.getProperty(RECORD_KEY);
+	}
+	
 	public void setProperty(Key key, Object value){
 		if(value != null){
 			Transaction tx = graphDB.beginTx();
@@ -44,8 +49,16 @@ public class DBRecord {
 		}
 	}
 	
+	public boolean hasProperty(Key key){
+		return node.hasProperty(key.toString());
+	}
+	
 	public String getStringProperty(Key key){
 		return (String)getProperty(key);
+	}
+	
+	public boolean getBooleanProperty(Key key){
+		return (Boolean)getProperty(key);
 	}
 	
 	public Object getProperty(Key key){

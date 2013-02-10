@@ -1,8 +1,6 @@
 package pishen.core;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -11,7 +9,6 @@ import org.apache.log4j.Logger;
 import pishen.db.DBHandler;
 import pishen.db.DBRecord;
 import pishen.db.DBRecordIterator;
-import pishen.exception.DownloadFailException;
 import pishen.exception.LinkingFailException;
 import pishen.exception.RuleNotFoundException;
 import pishen.xml.XMLParser;
@@ -23,25 +20,6 @@ public class Controller {
 	
 	public Controller(){
 		DBHandler.startGraphDB();
-	}
-	
-	public void testRef(){
-		DBRecord dbRecord = DBHandler.getRecordWithKey("journals/toct/Fortnow09");
-		try {
-			RuleHandler.getRefGrabber(dbRecord).grabRef();
-		} catch (MalformedURLException e) {
-			log.error("MalformedURLException");
-			e.printStackTrace();
-		} catch (RuleNotFoundException e) {
-			log.error("RuleNotFoundException");
-			e.printStackTrace();
-		} catch (DownloadFailException e) {
-			log.error("DownloadFailException");
-			e.printStackTrace();
-		} catch (IOException e) {
-			log.error("IOException");
-			e.printStackTrace();
-		}
 	}
 	
 	public void copyXMLValuesToDB() throws Exception{
@@ -57,10 +35,25 @@ public class Controller {
 		}
 	}
 	
-	public void fetchResourcesForAllRecords(){
+	public void fetchContentsForAllRecords(){
 		DBRecordIterator iter = DBHandler.iteratorForRecord();
 		while(iter.hasNext()){
-			EEHandler.fetchResources(iter.next());
+			DBRecord dbRecord = iter.next();
+			log.info("[FETCH_CONTENT] key=" + dbRecord.getRecordKey());
+			ContentFetcher.fetchContent(iter.next());
+		}
+	}
+	
+	public void fetchRefForAllRecords(){
+		DBRecordIterator iter = DBHandler.iteratorForRecord();
+		while(iter.hasNext()){
+			DBRecord dbRecord = iter.next();
+			log.info("[FETCH_REF] key=" + dbRecord.getRecordKey());
+			try {
+				RuleHandler.getRefFetcher(dbRecord).fetchRef();
+			} catch (RuleNotFoundException e) {
+				log.info("Rule not found");
+			}
 		}
 	}
 	

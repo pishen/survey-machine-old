@@ -1,9 +1,5 @@
 package pishen.core;
 
-import java.io.FileNotFoundException;
-
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
@@ -30,34 +26,33 @@ public class Main {
 		*/
 		
 		Controller controller = new Controller();
-		controller.testRef();
 		
-		/*
+		Options options = new Options();
+		options.addOption("c", false, "fetch paper content");
+		options.addOption("r", false, "fetch paper ref");
+		options.addOption("l", false, "link the citation network");
+		
+		CommandLineParser parser = new PosixParser();
+		CommandLine cmd = null;
 		try {
-			Options options = new Options();
-			options.addOption("d", false, "download the papers");
-			options.addOption("l", false, "link the citation network");
-			
-			CommandLineParser parser = new PosixParser();
-			CommandLine cmd = parser.parse(options, args);
-			
-			if(cmd.hasOption("d")){
-				//controller.downloadRecords();
-			}
-			if(cmd.hasOption("l")){
-				//controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
-				controller.linkRecords();
-			}
-			
+			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
-			log.fatal("CommandLine parsing error");
-		} catch (FileNotFoundException e) {
-			log.fatal("FileNotFoundException");
+			log.error("ParseException");
 			e.printStackTrace();
-		} catch (XMLStreamException e) {
-			log.fatal("XMLStreamException");
-			e.printStackTrace();
+			return;
 		}
-		*/
+		
+		if(cmd.hasOption("c")){
+			//controller.downloadRecords();
+		}
+		
+		if(cmd.hasOption("r")){
+			controller.fetchRefForAllRecords();
+		}
+		
+		if(cmd.hasOption("l")){
+			//controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
+			//controller.linkRecords();
+		}
 	}
 }

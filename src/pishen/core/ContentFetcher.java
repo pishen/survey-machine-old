@@ -15,28 +15,29 @@ import pishen.exception.DownloadFailException;
 import pishen.tool.Downloader;
 import pishen.tool.Executor;
 
-public class EEHandler {
-	private static final Logger log = Logger.getLogger(EEHandler.class);
+public class ContentFetcher {
+	private static final Logger log = Logger.getLogger(ContentFetcher.class);
 
-	public static void fetchResources(DBRecord dbRecord){
+	//TODO add info to Key for file existence checking? content-type checking?
+	public static void fetchContent(DBRecord dbRecord){
 		if(dbRecord.getTextFile().exists() == false){
 			try {
 				downloadPDF(dbRecord);
 				checkEmbeddedFonts(dbRecord);
 				pdfToText(dbRecord);
-				log.info("==files fetching SUCCESS==");
 			} catch (DownloadFailException e) {
 				//throw new Exceptions if necessary
+			} catch (IOException e) {
+				log.error("error on open/close PDF file");
+				e.printStackTrace();
 			} finally {
 				//clean up unnecessary files
 				dbRecord.getPDFFile().delete();
 			}
 		}
-		downloadRef(dbRecord);
-		
 	}
 
-	private static void downloadPDF(DBRecord dbRecord) throws DownloadFailException{		
+	private static void downloadPDF(DBRecord dbRecord) throws DownloadFailException, IOException{		
 		File pdfFile = dbRecord.getPDFFile();
 		
 		if(pdfFile.exists()){
@@ -44,25 +45,15 @@ public class EEHandler {
 			return;
 		}else{
 			log.info("downloading PDF");
+			FileOutputStream out = new FileOutputStream(pdfFile);
 			try {
 				URL targetURL = RuleHandler.getPDFURL(dbRecord);
-				Downloader.downloadFileWithRetry(targetURL, new FileOutputStream(pdfFile), "application/pdf");
+				Downloader.downloadFileWithRetry(targetURL, out, "application/pdf");
 			} catch (Exception e) {
-				pdfFile.delete();
 				throw new DownloadFailException();
+			} finally {
+				out.close();
 			}
-		}
-	}
-	
-	private static void downloadRef(DBRecord dbRecord){
-		File refFile = dbRecord.getRefFile();
-		
-		if(refFile.exists()){
-			log.info("Ref file exists");
-			return;
-		}else{
-			log.info("downloading ref");
-			//TODO
 		}
 	}
 	

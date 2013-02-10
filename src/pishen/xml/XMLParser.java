@@ -15,7 +15,7 @@ public class XMLParser {
 	private static final Logger log = Logger.getLogger(XMLParser.class);
 	private XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 	private XMLStreamReader streamReader;
-	//private int recordCount = 0;
+	private int recordCount = 0;
 	private XMLRecord currentRecord = new XMLRecord("dummy");
 	
 	public XMLParser(String xmlFilename) throws FileNotFoundException, XMLStreamException{
@@ -44,7 +44,7 @@ public class XMLParser {
 	private void parseXMLRecord() throws XMLStreamException{
 		String recordKey = streamReader.getAttributeValue(null, "key");
 		
-		//log.info("# " + (++recordCount) + " key=" + recordKey);
+		log.info("parsing record #" + (++recordCount) + " key=" + recordKey);
 		
 		currentRecord = new XMLRecord(recordKey);
 		currentRecord.setProperty(Key.FILENAME, recordKey.replaceAll("/", "-"));
