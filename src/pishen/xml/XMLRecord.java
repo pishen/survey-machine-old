@@ -4,11 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
-import pishen.core.Key;
+import pishen.core.RecordKey;
 
 public class XMLRecord {
 	private String recordKey;
-	private HashMap<Key,String> recordMap = new HashMap<Key,String>();
+	private HashMap<RecordKey,String> recordMap = new HashMap<RecordKey,String>();
 	
 	public XMLRecord(String recordKey){
 		this.recordKey = recordKey;
@@ -18,19 +18,19 @@ public class XMLRecord {
 		return recordKey;
 	}
 	
-	public void setProperty(Key key, String value){
+	public void setProperty(RecordKey key, String value){
 		recordMap.put(key, value);
 	}
 	
-	public String getProperty(Key key){
+	public String getProperty(RecordKey key){
 		return recordMap.get(key);
 	}
 	
 	public boolean isValid(){
 		if(recordKey != null && 
-				recordMap.get(Key.TITLE) != null && 
-				recordMap.get(Key.YEAR) != null && 
-				recordMap.get(Key.EE) != null &&
+				recordMap.get(RecordKey.TITLE) != null && 
+				recordMap.get(RecordKey.YEAR) != null && 
+				recordMap.get(RecordKey.EE) != null &&
 				isTargetDomain()){
 			return true;
 		}else{
@@ -42,7 +42,7 @@ public class XMLRecord {
 		String domainName = null;
 		
 		try {
-			domainName = new URL(recordMap.get(Key.EE)).getHost();
+			domainName = new URL(recordMap.get(RecordKey.EE)).getHost();
 		} catch (MalformedURLException e) {
 			return false;
 		}

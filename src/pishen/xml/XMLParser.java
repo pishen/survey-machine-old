@@ -9,7 +9,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.log4j.Logger;
 
-import pishen.core.Key;
+import pishen.core.RecordKey;
 
 public class XMLParser {
 	private static final Logger log = Logger.getLogger(XMLParser.class);
@@ -47,7 +47,7 @@ public class XMLParser {
 		log.info("parsing record #" + (++recordCount) + " key=" + recordKey);
 		
 		currentRecord = new XMLRecord(recordKey);
-		currentRecord.setProperty(Key.FILENAME, recordKey.replaceAll("/", "-"));
+		currentRecord.setProperty(RecordKey.FILENAME, recordKey.replaceAll("/", "-"));
 		
 		//grabing information from the xml
 		while(streamReader.hasNext()){
@@ -58,9 +58,9 @@ public class XMLParser {
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
 					if(streamReader.getText().startsWith("db")){
-						currentRecord.setProperty(Key.EE, "http://www.sigmod.org/dblp/" + streamReader.getText());
+						currentRecord.setProperty(RecordKey.EE, "http://www.sigmod.org/dblp/" + streamReader.getText());
 					}else{
-						currentRecord.setProperty(Key.EE, streamReader.getText());
+						currentRecord.setProperty(RecordKey.EE, streamReader.getText());
 					}
 				}else{
 					log.error("content of ee is wrong");
@@ -70,7 +70,7 @@ public class XMLParser {
 				//year found
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
-					currentRecord.setProperty(Key.YEAR, streamReader.getText());
+					currentRecord.setProperty(RecordKey.YEAR, streamReader.getText());
 				}else{
 					log.error("content of year is wrong");
 				}
@@ -79,7 +79,7 @@ public class XMLParser {
 				//title found
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
-					currentRecord.setProperty(Key.TITLE, streamReader.getText());
+					currentRecord.setProperty(RecordKey.TITLE, streamReader.getText());
 				}else{
 					log.error("content of title is wrong");
 				}

@@ -25,8 +25,6 @@ public class Main {
 		log.info(p.getElementsContainingOwnText("This a test").size());
 		*/
 		
-		Controller controller = new Controller();
-		
 		Options options = new Options();
 		options.addOption("c", false, "fetch paper content");
 		options.addOption("r", false, "fetch paper ref");
@@ -43,21 +41,23 @@ public class Main {
 			return;
 		}
 		
+		Controller.startGraphDB();
+		
 		if(cmd.hasOption("c")){
-			//controller.downloadRecords();
+			//Controller.downloadRecords();
 		}
 		
 		if(cmd.hasOption("r")){
-			controller.fetchRefForAllRecords();
+			//Controller.fetchRefForAllRecords();
 		}
 		
 		if(cmd.hasOption("l")){
-			//controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
-			//controller.linkRecords();
+			//Controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
+			//Controller.linkRecords();
 		}
 		
 		if(cmd.hasOption("t")){
-			controller.checkNodes();
+			Controller.test();
 		}
 	}
 }

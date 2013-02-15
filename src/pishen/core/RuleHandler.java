@@ -13,7 +13,7 @@ public class RuleHandler {
 	
 	//TODO catch MalformedURLException inside
 	public static URL getPDFURL(DBRecord dbRecord) throws MalformedURLException, RuleNotFoundException{
-		String eeStr = dbRecord.getStringProperty(Key.EE);
+		String eeStr = dbRecord.getStringProperty(RecordKey.EE);
 		URL eeURL = new URL(eeStr);
 		
 		if(eeURL.getHost().equals("doi.acm.org")){
@@ -25,7 +25,7 @@ public class RuleHandler {
 	}
 	
 	public static RefFetcherACM getRefFetcher(DBRecord dbRecord) throws RuleNotFoundException{
-		String eeStr = dbRecord.getStringProperty(Key.EE);
+		String eeStr = dbRecord.getStringProperty(RecordKey.EE);
 		URL eeURL = null;
 		try {
 			eeURL = new URL(eeStr);

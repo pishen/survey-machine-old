@@ -28,8 +28,9 @@ public class RefFetcherACM {
 	}
 	
 	public void fetchRef(){
-		if(!dbRecord.hasProperty(Key.HAS_REF) || dbRecord.getBooleanProperty(Key.HAS_REF)){
+		if(!dbRecord.hasProperty(RecordKey.HAS_REF) || dbRecord.getBooleanProperty(RecordKey.HAS_REF)){
 			try {
+				//TODO check if ref file exist
 				downloadRefPage();
 				parseRefPage();
 			} catch (DownloadFailException e) {
@@ -47,7 +48,7 @@ public class RefFetcherACM {
 	private void downloadRefPage() throws DownloadFailException{
 		URL refURL = null;
 		try {
-			refURL = new URL(dbRecord.getStringProperty(Key.EE) + "&preflayout=flat");
+			refURL = new URL(dbRecord.getStringProperty(RecordKey.EE) + "&preflayout=flat");
 		} catch (MalformedURLException e) {
 			log.error("MalformedURLException: " + refURL);
 			e.printStackTrace();
@@ -68,19 +69,20 @@ public class RefFetcherACM {
 				.nextElementSibling();
 		Element table = refMarkDiv.getElementsByTag("table").first();
 		if(table == null){
-			dbRecord.setProperty(Key.HAS_REF, false);
+			dbRecord.setProperty(RecordKey.HAS_REF, false);
 			log.info("no reference found");
 		}else{
-			dbRecord.setProperty(Key.HAS_REF, true);
+			dbRecord.setProperty(RecordKey.HAS_REF, true);
+			/*
 			try {
 				parseTable(table);
 			} catch (IOException e) {
 				log.error("IOException on open/close ref output file");
 				e.printStackTrace();
-			}
+			}*/
 		}
 	}
-	
+	/*
 	private void parseTable(Element table) throws IOException{
 		PrintWriter out = new PrintWriter(new FileWriter(dbRecord.getRefFile()));
 		
@@ -89,6 +91,9 @@ public class RefFetcherACM {
 			Elements rows = table.getElementsByTag("tr");
 			for(Element row: rows){
 				Element cellDiv = row.child(2).child(0);
+				//TODO doi checking method is wrong
+				
+				
 				if(cellDiv.ownText().contains("[doi>")){
 					String href = cellDiv.select("a").last().attr("href");
 					String id = href.substring(href.lastIndexOf(".") + 1);
@@ -103,5 +108,5 @@ public class RefFetcherACM {
 			out.close();
 		}
 		
-	}
+	}*/
 }

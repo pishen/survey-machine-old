@@ -16,34 +16,40 @@ import pishen.xml.XMLRecord;
 
 public class Controller {
 	private static final Logger log = Logger.getLogger(Controller.class);
-	private final String XML_FILENAME = "dblp.xml";
+	private static final String XML_FILENAME = "dblp.xml";
 	
-	public Controller(){
+	public static void startGraphDB(){
 		DBHandler.startGraphDB();
 	}
 	
-	public void checkNodes(){
+	//TODO change EMB from String to boolean
+	//TODO add property NAME, TYPE for record, copy FILENAME to NAME, delete RECORD_KEY and FILENAME
+	//TODO remove property RECORD_KEY and FILENAME from auto_index
+	//TODO refactor XMLParser and XMLRecord
+	
+	public static void test(){
 		DBRecordIterator iter = DBHandler.iteratorForRecord();
 		while(iter.hasNext()){
 			DBRecord dbRecord = iter.next();
-			log.info("[TEST] has 'FILENAME'=" + dbRecord.hasProperty(Key.FILENAME));
+			log.info("[TEST] refactoring record: " + dbRecord.getRecordKey());
+			dbRecord.refactor();
 		}
 	}
 	
-	public void copyXMLValuesToDB() throws Exception{
+	public static void copyXMLValuesToDB() throws Exception{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
 		
 		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
 			//copy the key-value pairs from XMLRecord to database
 			DBRecord dbRecord = DBHandler.getRecordWithKey(xmlRecord.getRecordKey());
-			for(Key key: Key.values()){
+			for(RecordKey key: RecordKey.values()){
 				dbRecord.setProperty(key, xmlRecord.getProperty(key));
 			}
 		}
 	}
 	
-	public void fetchContentsForAllRecords(){
+	public static void fetchContentsForAllRecords(){
 		DBRecordIterator iter = DBHandler.iteratorForRecord();
 		while(iter.hasNext()){
 			DBRecord dbRecord = iter.next();
@@ -52,7 +58,7 @@ public class Controller {
 		}
 	}
 	
-	public void fetchRefForAllRecords(){
+	public static void fetchRefForAllRecords(){
 		DBRecordIterator iter = DBHandler.iteratorForRecord();
 		while(iter.hasNext()){
 			DBRecord dbRecord = iter.next();
@@ -65,7 +71,7 @@ public class Controller {
 		}
 	}
 	
-	public void linkRecords() throws FileNotFoundException, XMLStreamException{
+	public static void linkRecords() throws FileNotFoundException, XMLStreamException{
 		//TODO change the way of iterating to DB-based
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
 		

@@ -53,7 +53,7 @@ public class RecordLinker {
 		} catch (TextRecordNotFoundException e) {
 			throw new LinkingFailException();
 		} catch (IOException e) {
-			log.error("IOException when reading record: " + dbRecord.getStringProperty(Key.FILENAME));
+			log.error("IOException when reading record: " + dbRecord.getStringProperty(RecordKey.FILENAME));
 			e.printStackTrace();
 			throw new LinkingFailException();
 		}
@@ -61,7 +61,7 @@ public class RecordLinker {
 	
 	private static void tryCheckingEMB() throws NotEmbException{
 		try {
-			String emb = currentRecord.getStringProperty(Key.EMB);
+			String emb = currentRecord.getStringProperty(RecordKey.EMB);
 			if(!emb.equals("yes")){
 				throw new NotEmbException();
 			}
@@ -93,7 +93,7 @@ public class RecordLinker {
 		}
 		
 		if(!hasValidCitationMark){
-			checklistWriter.println(currentRecord.getStringProperty(Key.FILENAME));
+			checklistWriter.println(currentRecord.getStringProperty(RecordKey.FILENAME));
 		}
 	}
 	

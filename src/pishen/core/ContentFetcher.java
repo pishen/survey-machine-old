@@ -93,9 +93,9 @@ public class ContentFetcher {
 		}
 		
 		if(token.equals("yes")){
-			dbRecord.setProperty(Key.EMB, "yes");
+			dbRecord.setProperty(RecordKey.EMB, "yes");
 		}else if(token.equals("no")){
-			dbRecord.setProperty(Key.EMB, "no");
+			dbRecord.setProperty(RecordKey.EMB, "no");
 		}else{
 			//throw Exception if necessary
 			return;

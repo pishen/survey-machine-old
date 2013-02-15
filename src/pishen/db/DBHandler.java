@@ -14,9 +14,11 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-import pishen.core.Key;
+import pishen.core.RecordKey;
 
 public class DBHandler {
+	public static final String NODE_TYPE = "TYPE"; //TODO clean (private?)
+	
 	private static final Logger log = Logger.getLogger(DBHandler.class);
 	private static final String CONCAT_KEY = createConcatenatedKey();
 	private static GraphDatabaseService graphDB;
@@ -56,7 +58,7 @@ public class DBHandler {
 		return new DBRecord(node);
 	}
 	
-	public static List<DBRecord> getRecords(Key key, Object value){
+	public static List<DBRecord> getRecords(RecordKey key, Object value){
 		IndexHits<Node> hits = autoNodeIndex.get(key.toString(), value);
 		List<DBRecord> list = new ArrayList<DBRecord>();
 		try {
@@ -70,7 +72,6 @@ public class DBHandler {
 	}
 	
 	private static Node createNodeWithRecordKey(String recordKeyValue){
-		log.debug("creating new Node");
 		Transaction tx = graphDB.beginTx();
 		try {
 			Node node = graphDB.createNode();
@@ -82,9 +83,10 @@ public class DBHandler {
 		}
 	}
 	
+	//TODO clean
 	private static String createConcatenatedKey(){
-		String concatKey = DBRecord.RECORD_KEY;
-		for(Key k: Key.values()){
+		String concatKey = DBRecord.RECORD_KEY + "," + NODE_TYPE + "," + DBRecord.NAME;
+		for(RecordKey k: RecordKey.values()){
 			concatKey = concatKey + "," + k;
 		}
 		return concatKey;
