@@ -18,7 +18,7 @@ import pishen.tool.Executor;
 public class ContentFetcher {
 	private static final Logger log = Logger.getLogger(ContentFetcher.class);
 
-	//TODO add info to Key for file existence checking? content-type checking?
+	//TODO add info to DBRecord to avoid fetching paper with wrong content-type
 	public static void fetchContent(DBRecord dbRecord){
 		if(dbRecord.getTextFile().exists() == false){
 			try {
@@ -92,6 +92,7 @@ public class ContentFetcher {
 			}
 		}
 		
+		//TODO change yes/no to true/false
 		if(token.equals("yes")){
 			dbRecord.setProperty(RecordKey.EMB, "yes");
 		}else if(token.equals("no")){

@@ -42,12 +42,11 @@ public class XMLParser {
 	}
 	
 	private void parseXMLRecord() throws XMLStreamException{
-		String recordKey = streamReader.getAttributeValue(null, "key");
+		String recordName = streamReader.getAttributeValue(null, "key").replaceAll("/", "-");
 		
-		log.info("parsing record #" + (++recordCount) + " key=" + recordKey);
+		log.info("parsing record #" + (++recordCount) + " key=" + recordName);
 		
-		currentRecord = new XMLRecord(recordKey);
-		currentRecord.setProperty(RecordKey.FILENAME, recordKey.replaceAll("/", "-"));
+		currentRecord = new XMLRecord(recordName);
 		
 		//grabing information from the xml
 		while(streamReader.hasNext()){

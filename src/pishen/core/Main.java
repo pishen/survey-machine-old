@@ -21,7 +21,8 @@ public class Main {
 		Logger.getRootLogger().setLevel(Level.INFO);
 		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n")));
 		try {
-			Logger.getRootLogger().addAppender(new FileAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n"), "logfile"));
+			Logger.getRootLogger().addAppender(new FileAppender(
+					new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n"), "survey-machine.log"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

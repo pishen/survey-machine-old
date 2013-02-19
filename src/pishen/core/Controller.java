@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 
 import pishen.db.DBHandler;
 import pishen.db.DBRecord;
-import pishen.db.DBRecordIterator;
 import pishen.exception.LinkingFailException;
 import pishen.exception.RuleNotFoundException;
 import pishen.xml.XMLParser;
@@ -23,26 +22,31 @@ public class Controller {
 	}
 	
 	//TODO change EMB from String to boolean
-	//TODO add property NAME, TYPE for record, copy FILENAME to NAME, delete RECORD_KEY and FILENAME
-	//TODO remove property RECORD_KEY and FILENAME from auto_index
-	//TODO refactor XMLParser and XMLRecord
 	
 	public static void test(){
-		DBRecordIterator iter = DBHandler.iteratorForRecord();
-		while(iter.hasNext()){
-			DBRecord dbRecord = iter.next();
-			log.info("[TEST] refactoring record: " + dbRecord.getRecordKey());
-			dbRecord.refactor();
+		int count = 0;
+		for(DBRecord dbRecord: DBHandler.getAllRecords()){
+			log.info("[TEST] #" + (++count) + " name=" + dbRecord.getName());
+			//dbRecord.refactor();
+			if(dbRecord.hasProperty(RecordKey.EMB)){
+				log.info("changing EMB");
+				String emb = dbRecord.getStringProperty(RecordKey.EMB);
+				if(emb.equals("yes")){
+					dbRecord.setProperty(RecordKey.EMB, true);
+				}else{
+					dbRecord.setProperty(RecordKey.EMB, false);
+				}
+			}
 		}
 	}
 	
-	public static void copyXMLValuesToDB() throws Exception{
+	public static void copyDBLPInfo() throws Exception{
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
 		
 		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
 			//copy the key-value pairs from XMLRecord to database
-			DBRecord dbRecord = DBHandler.getRecordWithKey(xmlRecord.getRecordKey());
+			DBRecord dbRecord = DBHandler.getOrCreateRecord(xmlRecord.getRecordName());
 			for(RecordKey key: RecordKey.values()){
 				dbRecord.setProperty(key, xmlRecord.getProperty(key));
 			}
@@ -50,19 +54,17 @@ public class Controller {
 	}
 	
 	public static void fetchContentsForAllRecords(){
-		DBRecordIterator iter = DBHandler.iteratorForRecord();
-		while(iter.hasNext()){
-			DBRecord dbRecord = iter.next();
-			log.info("[FETCH_CONTENT] key=" + dbRecord.getRecordKey());
-			ContentFetcher.fetchContent(iter.next());
+		int count = 0;
+		for(DBRecord dbRecord: DBHandler.getAllRecords()){
+			log.info("[FETCH_CONTENT] #" + (++count) + " name=" + dbRecord.getName());
+			ContentFetcher.fetchContent(dbRecord);
 		}
 	}
 	
 	public static void fetchRefForAllRecords(){
-		DBRecordIterator iter = DBHandler.iteratorForRecord();
-		while(iter.hasNext()){
-			DBRecord dbRecord = iter.next();
-			log.info("[FETCH_REF] key=" + dbRecord.getRecordKey());
+		int count = 0;
+		for(DBRecord dbRecord: DBHandler.getAllRecords()){
+			log.info("[FETCH_REF] #" + (++count) + " name=" + dbRecord.getName());
 			try {
 				RuleHandler.getRefFetcher(dbRecord).fetchRef();
 			} catch (RuleNotFoundException e) {
@@ -77,7 +79,7 @@ public class Controller {
 		
 		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
-			DBRecord dbRecord = DBHandler.getRecordWithKey(xmlRecord.getRecordKey());
+			DBRecord dbRecord = DBHandler.getOrCreateRecord(xmlRecord.getRecordName());
 			try {
 				RecordLinker.linkRecord(dbRecord);
 			} catch (LinkingFailException e) {

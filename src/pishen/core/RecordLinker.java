@@ -53,7 +53,7 @@ public class RecordLinker {
 		} catch (TextRecordNotFoundException e) {
 			throw new LinkingFailException();
 		} catch (IOException e) {
-			log.error("IOException when reading record: " + dbRecord.getStringProperty(RecordKey.FILENAME));
+			log.error("IOException when reading record: " + dbRecord.getName());
 			e.printStackTrace();
 			throw new LinkingFailException();
 		}
@@ -93,7 +93,7 @@ public class RecordLinker {
 		}
 		
 		if(!hasValidCitationMark){
-			checklistWriter.println(currentRecord.getStringProperty(RecordKey.FILENAME));
+			checklistWriter.println(currentRecord.getName());
 		}
 	}
 	

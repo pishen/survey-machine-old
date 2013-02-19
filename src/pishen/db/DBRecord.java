@@ -2,7 +2,6 @@ package pishen.db;
 
 import java.io.File;
 
-import org.apache.log4j.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -11,10 +10,9 @@ import pishen.core.RecordKey;
 
 
 public class DBRecord {
-	public static final String RECORD_KEY = "RECORD_KEY"; //TODO clean
 	public static final String NAME = "NAME";
 	
-	private static final Logger log = Logger.getLogger(DBRecord.class);
+	//private static final Logger log = Logger.getLogger(DBRecord.class);
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";
 	private static GraphDatabaseService graphDB;
@@ -34,19 +32,16 @@ public class DBRecord {
 		this.node = node;
 	}
 	
-	//TODO clean
-	public String getRecordKey(){
-		return (String)node.getProperty(RECORD_KEY);
+	public String getName(){
+		return (String)node.getProperty(NAME);
 	}
 	
 	//TODO clean
 	public void refactor(){
 		Transaction tx = graphDB.beginTx();
 		try {
-			node.removeProperty(RECORD_KEY);
-			node.setProperty(NAME, getStringProperty(RecordKey.FILENAME));
-			node.removeProperty(RecordKey.FILENAME.toString());
-			node.setProperty(DBHandler.NODE_TYPE, NodeType.RECORD.toString());
+			//TODO change EMB from yes/no to true/false
+			
 			tx.success();
 		} finally {
 			tx.finish();
@@ -92,11 +87,11 @@ public class DBRecord {
 	}
 	
 	public File getPDFFile(){
-		return new File(PDF_DIR + "/" + getStringProperty(RecordKey.FILENAME) + ".pdf");
+		return new File(PDF_DIR + "/" + getName() + ".pdf");
 	}
 	
 	public File getTextFile(){
-		return new File(TEXT_DIR + "/" + getStringProperty(RecordKey.FILENAME));
+		return new File(TEXT_DIR + "/" + getName());
 	}
 	
 	private static void createDirIfNotExist(String filename){
