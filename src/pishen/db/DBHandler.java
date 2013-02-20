@@ -9,7 +9,12 @@ import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.ReadableIndex;
 
-import pishen.core.RecordKey;
+import pishen.db.node.NodeType;
+import pishen.db.node.Record;
+import pishen.db.node.RecordHits;
+import pishen.db.node.RecordKey;
+import pishen.db.node.Reference;
+
 
 public class DBHandler {
 	public static final String NODE_TYPE = "TYPE";
@@ -26,7 +31,7 @@ public class DBHandler {
 				.setConfig(GraphDatabaseSettings.node_auto_indexing, "true")
 				.newGraphDatabase();
 		//link Record with graphDB for Record to create Transaction by graphDB
-		DBRecord.setGraphDB(graphDB);
+		Record.setGraphDB(graphDB);
 		
 		autoNodeIndex = graphDB.index().getNodeAutoIndexer().getAutoIndex();
 		
@@ -39,7 +44,7 @@ public class DBHandler {
 	}
 	
 	public static RecordHits getAllRecords(){
-		IndexHits<Node> indexHits = autoNodeIndex.get(NODE_TYPE, NodeType.RECORD);
+		IndexHits<Node> indexHits = autoNodeIndex.get(NODE_TYPE, NodeType.RECORD.toString());
 		return new RecordHits(indexHits);
 	}
 	
@@ -48,23 +53,36 @@ public class DBHandler {
 		return new RecordHits(hits);
 	}
 	
-	public static DBRecord getOrCreateRecord(String recordName){
+	public static Record getOrCreateRecord(String recordName){
 		Transaction tx = graphDB.beginTx();
 		try {
-			Node node = autoNodeIndex.get(DBRecord.NAME, recordName).getSingle();
+			Node node = autoNodeIndex.get(Record.NAME, recordName).getSingle();
 			if(node == null){
 				node = graphDB.createNode();
-				node.setProperty(DBRecord.NAME, recordName);
+				node.setProperty(NODE_TYPE, NodeType.RECORD.toString());
+				node.setProperty(Record.NAME, recordName);
 			}
 			tx.success();
-			return new DBRecord(node);
+			return new Record(node);
+		} finally {
+			tx.finish();
+		}
+	}
+	
+	public static Reference createReference(){
+		Transaction tx = graphDB.beginTx();
+		try {
+			Node node = graphDB.createNode();
+			node.setProperty(NODE_TYPE, NodeType.REFERENCE.toString());
+			tx.success();
+			return new Reference(node);
 		} finally {
 			tx.finish();
 		}
 	}
 	
 	private static String createConcatenatedKey(){
-		String concatKey = NODE_TYPE + "," + DBRecord.NAME;
+		String concatKey = NODE_TYPE + "," + Record.NAME;
 		for(RecordKey k: RecordKey.values()){
 			concatKey = concatKey + "," + k;
 		}

@@ -1,11 +1,12 @@
-package pishen.db;
+package pishen.db.node;
 
 import java.util.Iterator;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 
-public class RecordHits implements Iterator<DBRecord>, Iterable<DBRecord> {
+
+public class RecordHits implements Iterator<Record>, Iterable<Record> {
 	private IndexHits<Node> indexHits;
 
 	public RecordHits(IndexHits<Node> nodeIter){
@@ -13,7 +14,7 @@ public class RecordHits implements Iterator<DBRecord>, Iterable<DBRecord> {
 	}
 	
 	@Override
-	public Iterator<DBRecord> iterator() {
+	public Iterator<Record> iterator() {
 		return this;
 	}
 	
@@ -23,8 +24,8 @@ public class RecordHits implements Iterator<DBRecord>, Iterable<DBRecord> {
 	}
 
 	@Override
-	public DBRecord next() {
-		return new DBRecord(indexHits.next());
+	public Record next() {
+		return new Record(indexHits.next());
 	}
 
 	@Override

@@ -12,7 +12,8 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.neo4j.graphdb.NotFoundException;
 
-import pishen.db.DBRecord;
+import pishen.db.node.Record;
+import pishen.db.node.RecordKey;
 import pishen.exception.LinkingFailException;
 import pishen.exception.NotEmbException;
 import pishen.exception.TextRecordNotFoundException;
@@ -21,7 +22,7 @@ public class RecordLinker {
 	private static final Logger log = Logger.getLogger(RecordLinker.class);
 	
 	private static int[] typeCounts = new int[8];
-	private static DBRecord currentRecord;
+	private static Record currentRecord;
 	private static File textFile;
 	
 	private static PrintWriter checklistWriter;
@@ -42,8 +43,8 @@ public class RecordLinker {
 		}
 	}
 	
-	public static void linkRecord(DBRecord dbRecord) throws LinkingFailException{
-		RecordLinker.currentRecord = dbRecord;
+	public static void linkRecord(Record record) throws LinkingFailException{
+		RecordLinker.currentRecord = record;
 		try {
 			tryCheckingEMB();
 			tryGettingTextRecordFile();
@@ -53,7 +54,7 @@ public class RecordLinker {
 		} catch (TextRecordNotFoundException e) {
 			throw new LinkingFailException();
 		} catch (IOException e) {
-			log.error("IOException when reading record: " + dbRecord.getName());
+			log.error("IOException when reading record: " + record.getName());
 			e.printStackTrace();
 			throw new LinkingFailException();
 		}
@@ -61,8 +62,8 @@ public class RecordLinker {
 	
 	private static void tryCheckingEMB() throws NotEmbException{
 		try {
-			String emb = currentRecord.getStringProperty(RecordKey.EMB);
-			if(!emb.equals("yes")){
+			boolean emb = currentRecord.getBooleanProperty(RecordKey.EMB);
+			if(emb == false){
 				throw new NotEmbException();
 			}
 		} catch (NotFoundException e) {

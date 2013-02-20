@@ -9,7 +9,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.log4j.Logger;
 
-import pishen.core.RecordKey;
+import pishen.db.node.RecordKey;
 
 public class XMLParser {
 	private static final Logger log = Logger.getLogger(XMLParser.class);

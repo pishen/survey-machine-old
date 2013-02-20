@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
-import pishen.core.RecordKey;
+import pishen.db.node.RecordKey;
 
 public class XMLRecord {
 	private static final Logger log = Logger.getLogger(XMLRecord.class);

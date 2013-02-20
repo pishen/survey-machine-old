@@ -5,15 +5,16 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
-import pishen.db.DBRecord;
+import pishen.db.node.Record;
+import pishen.db.node.RecordKey;
 import pishen.exception.RuleNotFoundException;
 
 public class RuleHandler {
 	private static final Logger log = Logger.getLogger(RuleHandler.class);
 	
 	//TODO catch MalformedURLException inside
-	public static URL getPDFURL(DBRecord dbRecord) throws MalformedURLException, RuleNotFoundException{
-		String eeStr = dbRecord.getStringProperty(RecordKey.EE);
+	public static URL getPDFURL(Record record) throws MalformedURLException, RuleNotFoundException{
+		String eeStr = record.getStringProperty(RecordKey.EE);
 		URL eeURL = new URL(eeStr);
 		
 		if(eeURL.getHost().equals("doi.acm.org")){
@@ -24,8 +25,8 @@ public class RuleHandler {
 		}
 	}
 	
-	public static RefFetcherACM getRefFetcher(DBRecord dbRecord) throws RuleNotFoundException{
-		String eeStr = dbRecord.getStringProperty(RecordKey.EE);
+	public static RefFetcherACM getRefFetcher(Record record) throws RuleNotFoundException{
+		String eeStr = record.getStringProperty(RecordKey.EE);
 		URL eeURL = null;
 		try {
 			eeURL = new URL(eeStr);
@@ -36,7 +37,7 @@ public class RuleHandler {
 		}
 		
 		if(eeURL.getHost().equals("doi.acm.org")){
-			return new RefFetcherACM(dbRecord);
+			return new RefFetcherACM(record);
 		}else{
 			throw new RuleNotFoundException();
 		}

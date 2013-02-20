@@ -10,7 +10,8 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
-import pishen.db.DBRecord;
+import pishen.db.node.Record;
+import pishen.db.node.RecordKey;
 import pishen.exception.DownloadFailException;
 import pishen.tool.Downloader;
 import pishen.tool.Executor;
@@ -18,13 +19,13 @@ import pishen.tool.Executor;
 public class ContentFetcher {
 	private static final Logger log = Logger.getLogger(ContentFetcher.class);
 
-	//TODO add info to DBRecord to avoid fetching paper with wrong content-type
-	public static void fetchContent(DBRecord dbRecord){
-		if(dbRecord.getTextFile().exists() == false){
+	//TODO add info to Record to avoid fetching paper with wrong content-type
+	public static void fetchContent(Record record){
+		if(record.getTextFile().exists() == false){
 			try {
-				downloadPDF(dbRecord);
-				checkEmbeddedFonts(dbRecord);
-				pdfToText(dbRecord);
+				downloadPDF(record);
+				checkEmbeddedFonts(record);
+				pdfToText(record);
 			} catch (DownloadFailException e) {
 				//throw new Exceptions if necessary
 			} catch (IOException e) {
@@ -32,13 +33,13 @@ public class ContentFetcher {
 				e.printStackTrace();
 			} finally {
 				//clean up unnecessary files
-				dbRecord.getPDFFile().delete();
+				record.getPDFFile().delete();
 			}
 		}
 	}
 
-	private static void downloadPDF(DBRecord dbRecord) throws DownloadFailException, IOException{		
-		File pdfFile = dbRecord.getPDFFile();
+	private static void downloadPDF(Record record) throws DownloadFailException, IOException{		
+		File pdfFile = record.getPDFFile();
 		
 		if(pdfFile.exists()){
 			log.info("PDF file exists");
@@ -47,7 +48,7 @@ public class ContentFetcher {
 			log.info("downloading PDF");
 			FileOutputStream out = new FileOutputStream(pdfFile);
 			try {
-				URL targetURL = RuleHandler.getPDFURL(dbRecord);
+				URL targetURL = RuleHandler.getPDFURL(record);
 				Downloader.downloadFileWithRetry(targetURL, out, "application/pdf");
 			} catch (Exception e) {
 				throw new DownloadFailException();
@@ -57,8 +58,8 @@ public class ContentFetcher {
 		}
 	}
 	
-	private static void checkEmbeddedFonts(DBRecord dbRecord){
-		String cmdLineStr = "pdffonts " + dbRecord.getPDFFile().getPath();
+	private static void checkEmbeddedFonts(Record record){
+		String cmdLineStr = "pdffonts " + record.getPDFFile().getPath();
 		ByteArrayOutputStream pdffontsOutput = new ByteArrayOutputStream();
 		String line3 = "";
 		
@@ -94,18 +95,18 @@ public class ContentFetcher {
 		
 		//TODO change yes/no to true/false
 		if(token.equals("yes")){
-			dbRecord.setProperty(RecordKey.EMB, "yes");
+			record.setProperty(RecordKey.EMB, true);
 		}else if(token.equals("no")){
-			dbRecord.setProperty(RecordKey.EMB, "no");
+			record.setProperty(RecordKey.EMB, false);
 		}else{
 			//throw Exception if necessary
 			return;
 		}
 	}
 	
-	private static void pdfToText(DBRecord dbRecord){
-		File pdfFile = dbRecord.getPDFFile();
-		File textFile = dbRecord.getTextFile();
+	private static void pdfToText(Record record){
+		File pdfFile = record.getPDFFile();
+		File textFile = record.getTextFile();
 		String cmdLineStr = "pdftotext " + pdfFile.getPath() + " " + textFile.getPath();
 		
 		try {

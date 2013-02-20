@@ -1,4 +1,4 @@
-package pishen.db;
+package pishen.db.node;
 
 import java.io.File;
 
@@ -6,13 +6,13 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
-import pishen.core.RecordKey;
 
 
-public class DBRecord {
+
+public class Record {
 	public static final String NAME = "NAME";
 	
-	//private static final Logger log = Logger.getLogger(DBRecord.class);
+	//private static final Logger log = Logger.getLogger(Record.class);
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";
 	private static GraphDatabaseService graphDB;
@@ -25,10 +25,10 @@ public class DBRecord {
 	}
 	
 	public static void setGraphDB(GraphDatabaseService graphDB){
-		DBRecord.graphDB = graphDB;
+		Record.graphDB = graphDB;
 	}
 	
-	public DBRecord(Node node){
+	public Record(Node node){
 		this.node = node;
 	}
 	

@@ -21,7 +21,7 @@ public class Downloader {
 		while(true){
 			try {
 				downloadFile(targetURL, out, expectedContentType);
-				sleep(1000); //sleep 1s for not querying the server too frequently
+				sleep(500); //sleep 1s for not querying the server too frequently
 				return; //finish download if there's no exceptions
 			} catch (ConnectionFailException e) {
 				//sleep and retry, if fail too many times, print fail messages
@@ -37,7 +37,7 @@ public class Downloader {
 				}
 			} catch (WrongContentTypeException e) {
 				//content type is wrong
-				sleep(1000); //sleep 1s for not querying the server too frequently
+				sleep(500); //sleep 1s for not querying the server too frequently
 				log.warn("wrong content type");
 				log.warn("--content type: [" + e.getContentType() + "]");
 				throw new DownloadFailException();

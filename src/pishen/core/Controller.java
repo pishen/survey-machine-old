@@ -7,7 +7,8 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.log4j.Logger;
 
 import pishen.db.DBHandler;
-import pishen.db.DBRecord;
+import pishen.db.node.Record;
+import pishen.db.node.RecordKey;
 import pishen.exception.LinkingFailException;
 import pishen.exception.RuleNotFoundException;
 import pishen.xml.XMLParser;
@@ -21,20 +22,18 @@ public class Controller {
 		DBHandler.startGraphDB();
 	}
 	
-	//TODO change EMB from String to boolean
-	
 	public static void test(){
 		int count = 0;
-		for(DBRecord dbRecord: DBHandler.getAllRecords()){
-			log.info("[TEST] #" + (++count) + " name=" + dbRecord.getName());
-			//dbRecord.refactor();
-			if(dbRecord.hasProperty(RecordKey.EMB)){
+		for(Record record: DBHandler.getAllRecords()){
+			log.info("[TEST] #" + (++count) + " name=" + record.getName());
+			//record.refactor();
+			if(record.hasProperty(RecordKey.EMB)){
 				log.info("changing EMB");
-				String emb = dbRecord.getStringProperty(RecordKey.EMB);
+				String emb = record.getStringProperty(RecordKey.EMB);
 				if(emb.equals("yes")){
-					dbRecord.setProperty(RecordKey.EMB, true);
+					record.setProperty(RecordKey.EMB, true);
 				}else{
-					dbRecord.setProperty(RecordKey.EMB, false);
+					record.setProperty(RecordKey.EMB, false);
 				}
 			}
 		}
@@ -46,27 +45,27 @@ public class Controller {
 		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
 			//copy the key-value pairs from XMLRecord to database
-			DBRecord dbRecord = DBHandler.getOrCreateRecord(xmlRecord.getRecordName());
+			Record record = DBHandler.getOrCreateRecord(xmlRecord.getRecordName());
 			for(RecordKey key: RecordKey.values()){
-				dbRecord.setProperty(key, xmlRecord.getProperty(key));
+				record.setProperty(key, xmlRecord.getProperty(key));
 			}
 		}
 	}
 	
 	public static void fetchContentsForAllRecords(){
 		int count = 0;
-		for(DBRecord dbRecord: DBHandler.getAllRecords()){
-			log.info("[FETCH_CONTENT] #" + (++count) + " name=" + dbRecord.getName());
-			ContentFetcher.fetchContent(dbRecord);
+		for(Record record: DBHandler.getAllRecords()){
+			log.info("[FETCH_CONTENT] #" + (++count) + " name=" + record.getName());
+			ContentFetcher.fetchContent(record);
 		}
 	}
 	
 	public static void fetchRefForAllRecords(){
 		int count = 0;
-		for(DBRecord dbRecord: DBHandler.getAllRecords()){
-			log.info("[FETCH_REF] #" + (++count) + " name=" + dbRecord.getName());
+		for(Record record: DBHandler.getAllRecords()){
+			log.info("[FETCH_REF] #" + (++count) + " name=" + record.getName());
 			try {
-				RuleHandler.getRefFetcher(dbRecord).fetchRef();
+				RuleHandler.getRefFetcher(record).fetchRef();
 			} catch (RuleNotFoundException e) {
 				log.info("Rule not found");
 			}
@@ -79,9 +78,9 @@ public class Controller {
 		
 		while(xmlParser.hasNextXMLRecord()){
 			XMLRecord xmlRecord = xmlParser.getNextXMLRecord();
-			DBRecord dbRecord = DBHandler.getOrCreateRecord(xmlRecord.getRecordName());
+			Record record = DBHandler.getOrCreateRecord(xmlRecord.getRecordName());
 			try {
-				RecordLinker.linkRecord(dbRecord);
+				RecordLinker.linkRecord(record);
 			} catch (LinkingFailException e) {
 				continue;
 			}
