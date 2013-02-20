@@ -4,15 +4,13 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
-public class Reference {
+import pishen.db.ContainerShell;
+
+public class Reference extends ContainerShell{
 	public static final String CONTENT = "CONTENT";
 	public static final String LINKS = "LINKS";
-	private static GraphDatabaseService graphDB;
-	private Node node;
 	
-	public static void setGraphDB(GraphDatabaseService graphDB){
-		Reference.graphDB = graphDB;
-	}
+	private Node node;
 	
 	public Reference(Node node){
 		this.node = node;
