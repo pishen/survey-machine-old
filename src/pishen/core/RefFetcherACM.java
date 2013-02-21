@@ -9,9 +9,13 @@ import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+import pishen.db.DBHandler;
 import pishen.db.node.Record;
 import pishen.db.node.RecordKey;
+import pishen.db.node.Reference;
+import pishen.db.rel.HasRef;
 import pishen.exception.DownloadFailException;
 import pishen.tool.Downloader;
 
@@ -70,32 +74,32 @@ public class RefFetcherACM {
 			log.info("no reference found");
 		}else{
 			record.setProperty(RecordKey.HAS_REF, true);
-			/*
-			try {
-				parseTable(table);
-			} catch (IOException e) {
-				log.error("IOException on open/close ref output file");
-				e.printStackTrace();
-			}*/
+			parseTable(table);
 		}
 	}
 	
 	private void parseTable(Element table){
 		//may throw NullPointerException, IndexOutOfBoundsException
 		Elements rows = table.getElementsByTag("tr");
+		int count = 0;
 		for(Element row: rows){
+			count++;
 			Element cellDiv = row.child(2).child(0);
-			//TODO doi checking method is wrong
 			
-			if(cellDiv.ownText().contains("[doi>")){
-				String href = cellDiv.select("a").last().attr("href");
-				String id = href.substring(href.lastIndexOf(".") + 1);
-				//log.info("[ID]" + id);
-				out.println("[ID]" + id);
-			}else{
-				//log.info("[REF]" + cellDiv.text());
-				out.println("[REF]" + cellDiv.text());
+			Reference ref = DBHandler.createReference();
+			HasRef hasRef = record.createHasRefTo(ref);
+			
+			hasRef.setProperty(HasRef.CITATION_MARK, count);
+			ref.setProperty(Reference.CONTENT, cellDiv.text());
+			
+			//write the links into Reference as String[]
+			Elements links = cellDiv.select("a");
+			String[] linkStrings = new String[links.size()];
+			for(int i = 0; i < links.size(); i++){
+				linkStrings[i] = links.get(i).attr("href");
 			}
+			ref.setProperty(Reference.LINKS, linkStrings);
+			
 		}
 	}
 }

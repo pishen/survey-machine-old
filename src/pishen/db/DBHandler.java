@@ -17,8 +17,7 @@ import pishen.db.node.Reference;
 
 
 public class DBHandler {
-	public static final String NODE_TYPE = "TYPE";
-	
+	private static final String NODE_TYPE = "TYPE";
 	private static final Logger log = Logger.getLogger(DBHandler.class);
 	private static final String CONCAT_KEY = createConcatenatedKey();
 	private static GraphDatabaseService graphDB;
@@ -30,8 +29,6 @@ public class DBHandler {
 				.setConfig(GraphDatabaseSettings.node_keys_indexable, CONCAT_KEY)
 				.setConfig(GraphDatabaseSettings.node_auto_indexing, "true")
 				.newGraphDatabase();
-		//link Record with graphDB for Record to create Transaction by graphDB
-		Record.setGraphDB(graphDB);
 		
 		autoNodeIndex = graphDB.index().getNodeAutoIndexer().getAutoIndex();
 		
@@ -54,7 +51,7 @@ public class DBHandler {
 	}
 	
 	public static Record getOrCreateRecord(String recordName){
-		Transaction tx = graphDB.beginTx();
+		Transaction tx = getTransaction();
 		try {
 			Node node = autoNodeIndex.get(Record.NAME, recordName).getSingle();
 			if(node == null){
@@ -79,6 +76,10 @@ public class DBHandler {
 		} finally {
 			tx.finish();
 		}
+	}
+	
+	protected static Transaction getTransaction(){
+		return graphDB.beginTx();
 	}
 	
 	private static String createConcatenatedKey(){

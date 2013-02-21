@@ -2,21 +2,19 @@ package pishen.db.node;
 
 import java.io.File;
 
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.Relationship;
 
+import pishen.db.NodeShell;
+import pishen.db.rel.HasRef;
+import pishen.db.rel.RelType;
 
-
-
-public class Record {
+public class Record extends NodeShell {
 	public static final String NAME = "NAME";
 	
 	//private static final Logger log = Logger.getLogger(Record.class);
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";
-	private static GraphDatabaseService graphDB;
-	private Node node;
 	
 	static{
 		//create the dir for text and pdf records
@@ -24,66 +22,37 @@ public class Record {
 		createDirIfNotExist(TEXT_DIR);
 	}
 	
-	public static void setGraphDB(GraphDatabaseService graphDB){
-		Record.graphDB = graphDB;
-	}
-	
 	public Record(Node node){
-		this.node = node;
+		super(node);
 	}
 	
 	public String getName(){
-		return (String)node.getProperty(NAME);
-	}
-	
-	//TODO clean
-	public void refactor(){
-		Transaction tx = graphDB.beginTx();
-		try {
-			//TODO change EMB from yes/no to true/false
-			
-			tx.success();
-		} finally {
-			tx.finish();
-		}
+		return super.getStringProperty(NAME);
 	}
 	
 	public void setProperty(RecordKey key, Object value){
-		if(value != null){
-			Transaction tx = graphDB.beginTx();
-			try {
-				node.setProperty(key.toString(), value);
-				tx.success();
-			} finally {
-				tx.finish();
-			}
-		}
+		super.setProperty(key.toString(), value);
 	}
 	
 	public void removeProperty(RecordKey key){
-		Transaction tx = graphDB.beginTx();
-		try {
-			node.removeProperty(key.toString());
-			tx.success();
-		} finally {
-			tx.finish();
-		}
+		super.removeProperty(key.toString());
 	}
 	
 	public boolean hasProperty(RecordKey key){
-		return node.hasProperty(key.toString());
+		return super.hasProperty(key.toString());
 	}
 	
 	public String getStringProperty(RecordKey key){
-		return (String)getProperty(key);
+		return super.getStringProperty(key.toString());
 	}
 	
 	public boolean getBooleanProperty(RecordKey key){
-		return (Boolean)getProperty(key);
+		return super.getBooleanProperty(key.toString());
 	}
 	
-	public Object getProperty(RecordKey key){
-		return node.getProperty(key.toString());
+	public HasRef createHasRefTo(Reference targetRef){
+		Relationship rel = super.createRelationshipTo(targetRef, RelType.HAS_REF);
+		return new HasRef(rel);
 	}
 	
 	public File getPDFFile(){
