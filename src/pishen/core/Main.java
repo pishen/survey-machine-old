@@ -58,7 +58,7 @@ public class Main {
 		}
 		
 		if(cmd.hasOption("r")){
-			//Controller.fetchRefForAllRecords();
+			Controller.fetchRefForAllRecords();
 		}
 		
 		if(cmd.hasOption("l")){
