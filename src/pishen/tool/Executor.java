@@ -28,9 +28,9 @@ public class Executor {
 			executor.execute(cmdLine);
 		} catch (IOException e) {
 			if(watchdog.killedProcess()){
-				log.error("error: killed by watchdog");
+				log.error("error: killed by watchdog", e);
 			}else{
-				log.error("error: unknown");
+				log.error("error: unknown", e);
 			}
 			throw e;
 		}

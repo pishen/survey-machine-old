@@ -42,8 +42,7 @@ public class Downloader {
 				log.warn("--content type: [" + e.getContentType() + "]");
 				throw new DownloadFailException();
 			} catch (IOException e) {
-				log.error("IOException when downloading file");
-				e.printStackTrace();
+				log.error("IOException when downloading file", e);
 				throw new DownloadFailException();
 			}
 		}
@@ -86,8 +85,7 @@ public class Downloader {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {
-			log.error("exception on sleep");
-			e.printStackTrace();
+			log.error("exception on sleep", e);
 		}
 	}
 }

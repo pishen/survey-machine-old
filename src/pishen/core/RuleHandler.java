@@ -31,8 +31,7 @@ public class RuleHandler {
 		try {
 			eeURL = new URL(eeStr);
 		} catch (MalformedURLException e) {
-			log.error("MalformedURLException: " + eeURL);
-			e.printStackTrace();
+			log.error("MalformedURLException: " + eeURL, e);
 			throw new RuleNotFoundException();
 		}
 		

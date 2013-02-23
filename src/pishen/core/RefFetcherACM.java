@@ -37,11 +37,9 @@ public class RefFetcherACM {
 			} catch (DownloadFailException e) {
 				log.info("Fail downloading ref page");
 			} catch (NullPointerException e) {
-				log.error("NullPointerException on parsing html");
-				e.printStackTrace();
+				log.error("NullPointerException on parsing html", e);
 			} catch (IndexOutOfBoundsException e) {
-				log.error("IndexOutOfBoundsException on parsing html");
-				e.printStackTrace();
+				log.error("IndexOutOfBoundsException on parsing html", e);
 			}
 		}
 	}
@@ -51,8 +49,7 @@ public class RefFetcherACM {
 		try {
 			refURL = new URL(record.getStringProperty(RecordKey.EE) + "&preflayout=flat");
 		} catch (MalformedURLException e) {
-			log.error("MalformedURLException: " + refURL);
-			e.printStackTrace();
+			log.error("MalformedURLException: " + refURL, e);
 			throw new DownloadFailException();
 		}
 		
@@ -64,17 +61,19 @@ public class RefFetcherACM {
 		Document doc = Jsoup.parse(outputBuffer.toString());
 		
 		//may throw NullPointerException, IndexOutOfBoundsException
-		Element refMarkDiv = doc.getElementsByAttributeValue("name", "references")
-				.first()
-				.parent()
-				.nextElementSibling();
-		Element table = refMarkDiv.getElementsByTag("table").first();
-		if(table == null){
+		Element refHeading = doc.getElementsByAttributeValue("name", "references").first();
+		if(refHeading == null){
 			record.setProperty(RecordKey.HAS_REF, false);
 			log.info("no reference found");
 		}else{
-			record.setProperty(RecordKey.HAS_REF, true);
-			parseTable(table);
+			Element table = refHeading.parent().nextElementSibling().getElementsByTag("table").first();
+			if(table == null){
+				record.setProperty(RecordKey.HAS_REF, false);
+				log.info("no reference found");
+			}else{
+				record.setProperty(RecordKey.HAS_REF, true);
+				parseTable(table);
+			}
 		}
 	}
 	

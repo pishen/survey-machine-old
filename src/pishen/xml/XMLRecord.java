@@ -47,8 +47,7 @@ public class XMLRecord {
 		try {
 			domainName = new URL(recordMap.get(RecordKey.EE)).getHost();
 		} catch (MalformedURLException e) {
-			log.error("MalformedURLException on parsing EE");
-			e.printStackTrace();
+			log.error("MalformedURLException on parsing EE", e);
 			return false;
 		}
 		

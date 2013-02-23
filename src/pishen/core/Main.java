@@ -22,7 +22,7 @@ public class Main {
 		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n")));
 		try {
 			Logger.getRootLogger().addAppender(new FileAppender(
-					new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n"), "survey-machine.log"));
+					new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n"), "survey-machine.log", false));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -46,8 +46,7 @@ public class Main {
 		try {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
-			log.error("ParseException");
-			e.printStackTrace();
+			log.error("ParseException", e);
 			return;
 		}
 		

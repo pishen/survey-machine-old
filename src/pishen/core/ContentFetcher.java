@@ -29,8 +29,7 @@ public class ContentFetcher {
 			} catch (DownloadFailException e) {
 				//throw new Exceptions if necessary
 			} catch (IOException e) {
-				log.error("error on open/close PDF file");
-				e.printStackTrace();
+				log.error("error on open/close PDF file", e);
 			} finally {
 				//clean up unnecessary files
 				record.getPDFFile().delete();

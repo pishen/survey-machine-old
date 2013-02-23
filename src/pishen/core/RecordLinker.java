@@ -54,8 +54,7 @@ public class RecordLinker {
 		} catch (TextRecordNotFoundException e) {
 			throw new LinkingFailException();
 		} catch (IOException e) {
-			log.error("IOException when reading record: " + record.getName());
-			e.printStackTrace();
+			log.error("IOException when reading record: " + record.getName(), e);
 			throw new LinkingFailException();
 		}
 	}
