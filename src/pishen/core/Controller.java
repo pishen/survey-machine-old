@@ -23,8 +23,9 @@ public class Controller {
 	}
 	
 	public static void test(){
-		log.info("[TEST] create test node");
-		DBHandler.getOrCreateRecord("test");
+		log.info("[TEST] delete test node");
+		Record record = DBHandler.getOrCreateRecord("test");
+		record.delete();
 	}
 	
 	public static void copyDBLPInfo() throws Exception{

@@ -69,6 +69,10 @@ public class Record extends NodeShell {
 		return super.getIntProperty(HAS_REF_COUNT);
 	}
 	
+	public void delete(){
+		super.delete();
+	}
+	
 	public File getPDFFile(){
 		return new File(PDF_DIR + "/" + getName() + ".pdf");
 	}
