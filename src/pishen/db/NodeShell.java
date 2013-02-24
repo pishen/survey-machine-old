@@ -30,9 +30,15 @@ public class NodeShell extends ContainerShell {
 	}
 	
 	protected void delete(){
-		for(Relationship rel: node.getRelationships()){
-			rel.delete();
+		Transaction tx = DBHandler.getTransaction();
+		try {
+			for(Relationship rel: node.getRelationships()){
+				rel.delete();
+			}
+			node.delete();
+			tx.success();
+		} finally {
+			tx.finish();
 		}
-		node.delete();
 	}
 }
