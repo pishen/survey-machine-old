@@ -97,7 +97,8 @@ public class DBHandler {
 		try {
 			log.info("[TEST] create");
 			Record record = getOrCreateRecord("test");
-			//record.delete();
+			record.delete();
+			/*
 			try {
 				for(int i = 0; i < 20; i++){
 					log.info("[TEST] sleep");
@@ -106,6 +107,7 @@ public class DBHandler {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			*/
 			tx.success();
 		} finally {
 			tx.finish();
