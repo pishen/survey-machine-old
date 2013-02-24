@@ -44,6 +44,10 @@ public class ContainerShell {
 		return (Boolean)getProperty(key);
 	}
 	
+	protected int getIntProperty(String key){
+		return (Integer)getProperty(key);
+	}
+	
 	protected Object getProperty(String key){
 		return container.getProperty(key.toString());
 	}

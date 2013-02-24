@@ -24,4 +24,15 @@ public class NodeShell extends ContainerShell {
 			tx.finish();
 		}
 	}
+	
+	protected Iterable<Relationship> getRelationships(RelType relType){
+		return node.getRelationships(relType);
+	}
+	
+	protected void delete(){
+		for(Relationship rel: node.getRelationships()){
+			rel.delete();
+		}
+		node.delete();
+	}
 }

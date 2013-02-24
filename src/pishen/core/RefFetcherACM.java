@@ -29,9 +29,10 @@ public class RefFetcherACM {
 	}
 	
 	public void fetchRef(){
-		if(!record.hasProperty(RecordKey.HAS_REF) || record.getBooleanProperty(RecordKey.HAS_REF)){
+		//HAS_REF==true: all references are parsed and added
+		//HAS_REF==false: no reference available
+		if(!record.hasProperty(RecordKey.HAS_REF)){
 			try {
-				//TODO check if ref relationship exist
 				downloadRefPage();
 				parseRefPage();
 			} catch (DownloadFailException e) {
@@ -71,34 +72,34 @@ public class RefFetcherACM {
 				record.setProperty(RecordKey.HAS_REF, false);
 				log.info("no reference found");
 			}else{
-				record.setProperty(RecordKey.HAS_REF, true);
 				parseTable(table);
+				record.setProperty(RecordKey.HAS_REF, true);
 			}
 		}
 	}
 	
 	private void parseTable(Element table){
 		//may throw NullPointerException, IndexOutOfBoundsException
+		int currentSize = record.getHasRefCount();
+		
 		Elements rows = table.getElementsByTag("tr");
-		int count = 0;
-		for(Element row: rows){
-			count++;
-			Element cellDiv = row.child(2).child(0);
+		for(int i = currentSize; i < rows.size(); i++){
+			Element cellDiv = rows.get(i).child(2).child(0);
 			
+			//TODO can I lock the whole section here?
 			Reference ref = DBHandler.createReference();
 			HasRef hasRef = record.createHasRefTo(ref);
 			
-			hasRef.setProperty(HasRef.CITATION_MARK, count);
+			hasRef.setProperty(HasRef.CITATION_MARK, i + 1);
 			ref.setProperty(Reference.CONTENT, cellDiv.text());
 			
 			//write the links into Reference as String[]
 			Elements links = cellDiv.select("a");
 			String[] linkStrings = new String[links.size()];
-			for(int i = 0; i < links.size(); i++){
-				linkStrings[i] = links.get(i).attr("href");
+			for(int j = 0; j < links.size(); j++){
+				linkStrings[j] = links.get(j).attr("href");
 			}
 			ref.setProperty(Reference.LINKS, linkStrings);
-			
 		}
 	}
 }

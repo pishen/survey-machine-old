@@ -23,20 +23,8 @@ public class Controller {
 	}
 	
 	public static void test(){
-		int count = 0;
-		for(Record record: DBHandler.getAllRecords()){
-			log.info("[TEST] #" + (++count) + " name=" + record.getName());
-			//record.refactor();
-			if(record.hasProperty(RecordKey.EMB)){
-				log.info("changing EMB");
-				String emb = record.getStringProperty(RecordKey.EMB);
-				if(emb.equals("yes")){
-					record.setProperty(RecordKey.EMB, true);
-				}else{
-					record.setProperty(RecordKey.EMB, false);
-				}
-			}
-		}
+		log.info("[TEST] create test node");
+		DBHandler.getOrCreateRecord("test");
 	}
 	
 	public static void copyDBLPInfo() throws Exception{

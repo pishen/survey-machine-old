@@ -7,12 +7,14 @@ import org.neo4j.graphdb.Relationship;
 
 import pishen.db.NodeShell;
 import pishen.db.rel.HasRef;
+import pishen.db.rel.HasRefHits;
 import pishen.db.rel.RelType;
 
 public class Record extends NodeShell {
 	public static final String NAME = "NAME";
 	
 	//private static final Logger log = Logger.getLogger(Record.class);
+	private static final String HAS_REF_COUNT = "HAS_REF_COUNT";
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";
 	
@@ -24,6 +26,9 @@ public class Record extends NodeShell {
 	
 	public Record(Node node){
 		super(node);
+		if(super.hasProperty(HAS_REF_COUNT) == false){
+			countHasRef();
+		}
 	}
 	
 	public String getName(){
@@ -52,7 +57,16 @@ public class Record extends NodeShell {
 	
 	public HasRef createHasRefTo(Reference targetRef){
 		Relationship rel = super.createRelationshipTo(targetRef, RelType.HAS_REF);
+		super.setProperty(HAS_REF_COUNT, super.getIntProperty(HAS_REF_COUNT) + 1);
 		return new HasRef(rel);
+	}
+	
+	public HasRefHits getHasRefs(){
+		return new HasRefHits(super.getRelationships(RelType.HAS_REF));
+	}
+	
+	public int getHasRefCount(){
+		return super.getIntProperty(HAS_REF_COUNT);
 	}
 	
 	public File getPDFFile(){
@@ -68,6 +82,14 @@ public class Record extends NodeShell {
 		if(!dir.exists()){
 			dir.mkdir();
 		}
+	}
+	
+	private void countHasRef(){
+		int count = 0;
+		for(@SuppressWarnings("unused") HasRef hasRef: getHasRefs()){
+			count++;
+		}
+		super.setProperty(HAS_REF_COUNT, count);
 	}
 	
 }

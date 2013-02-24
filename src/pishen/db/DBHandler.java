@@ -22,6 +22,7 @@ public class DBHandler {
 	private static final String CONCAT_KEY = createConcatenatedKey();
 	private static GraphDatabaseService graphDB;
 	private static ReadableIndex<Node> autoNodeIndex;
+	private static Reference currentRef;
 	
 	public static void startGraphDB(){
 		log.info("starting graph DB");
@@ -34,6 +35,7 @@ public class DBHandler {
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 			public void run(){
+				//TODO clean the not-completed Reference
 				log.info("shutting down graphDB");
 				graphDB.shutdown();
 			}
