@@ -92,4 +92,24 @@ public class DBHandler {
 		return concatKey;
 	}
 	
+	public static void test(){
+		Transaction tx = getTransaction();
+		try {
+			log.info("[TEST] create");
+			Record record = getOrCreateRecord("test");
+			//record.delete();
+			try {
+				for(int i = 0; i < 20; i++){
+					log.info("[TEST] sleep");
+					Thread.sleep(1000);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			tx.success();
+		} finally {
+			tx.finish();
+		}
+	}
+	
 }

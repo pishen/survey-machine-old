@@ -27,4 +27,7 @@ public class Reference extends NodeShell{
 		super.setProperty(key, value);
 	}
 	
+	public void delete(){
+		super.delete();
+	}
 }
