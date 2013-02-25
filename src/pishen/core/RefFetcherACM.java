@@ -10,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.neo4j.graphdb.Transaction;
 
 import pishen.db.DBHandler;
 import pishen.db.node.Record;
@@ -64,33 +65,40 @@ public class RefFetcherACM {
 		//may throw NullPointerException, IndexOutOfBoundsException
 		Element refHeading = doc.getElementsByAttributeValue("name", "references").first();
 		if(refHeading == null){
+			log.info("unknown item");
 			record.setProperty(RecordKey.HAS_REF, false);
-			log.info("no reference found");
 		}else{
 			Element table = refHeading.parent().nextElementSibling().getElementsByTag("table").first();
 			if(table == null){
+				log.info("no reference available");
 				record.setProperty(RecordKey.HAS_REF, false);
-				log.info("no reference found");
 			}else{
-				parseTable(table);
-				record.setProperty(RecordKey.HAS_REF, true);
+				//make the whole section atomic
+				Transaction tx = DBHandler.getTransaction();
+				try {
+					parseTable(table);
+					record.setProperty(RecordKey.HAS_REF, true);
+					log.info("finish adding references");
+					tx.success();
+				} finally {
+					tx.finish();
+				}
 			}
 		}
 	}
 	
 	private void parseTable(Element table){
 		//may throw NullPointerException, IndexOutOfBoundsException
-		int currentSize = record.getHasRefCount();
-		
 		Elements rows = table.getElementsByTag("tr");
-		for(int i = currentSize; i < rows.size(); i++){
-			Element cellDiv = rows.get(i).child(2).child(0);
+		int count = 0;
+		for(Element row: rows){
+			count++;
+			Element cellDiv = row.child(2).child(0);
 			
-			//TODO can I lock the whole section here?
 			Reference ref = DBHandler.createReference();
 			HasRef hasRef = record.createHasRefTo(ref);
 			
-			hasRef.setProperty(HasRef.CITATION_MARK, i + 1);
+			hasRef.setProperty(HasRef.CITATION_MARK, count);
 			ref.setProperty(Reference.CONTENT, cellDiv.text());
 			
 			//write the links into Reference as String[]

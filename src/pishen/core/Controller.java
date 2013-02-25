@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.log4j.Logger;
-import org.neo4j.graphdb.Transaction;
 
 import pishen.db.DBHandler;
 import pishen.db.node.Record;
@@ -25,15 +24,6 @@ public class Controller {
 	
 	public static void test(){
 		log.info("[TEST]");
-		Transaction tx = DBHandler.getTransaction();
-		try {
-			Record record = DBHandler.getOrCreateRecord("test");
-			record.delete();
-			tx.success();
-		} finally {
-			tx.finish();
-		}
-		
 	}
 	
 	public static void copyDBLPInfo() throws Exception{

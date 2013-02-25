@@ -34,7 +34,6 @@ public class DBHandler {
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 			public void run(){
-				//TODO clean the not-completed Reference
 				log.info("shutting down graphDB");
 				graphDB.shutdown();
 			}

@@ -92,7 +92,6 @@ public class ContentFetcher {
 			}
 		}
 		
-		//TODO change yes/no to true/false
 		if(token.equals("yes")){
 			record.setProperty(RecordKey.EMB, true);
 		}else if(token.equals("no")){
