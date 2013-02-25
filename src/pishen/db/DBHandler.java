@@ -22,7 +22,6 @@ public class DBHandler {
 	private static final String CONCAT_KEY = createConcatenatedKey();
 	private static GraphDatabaseService graphDB;
 	private static ReadableIndex<Node> autoNodeIndex;
-	private static Reference currentRef;
 	
 	public static void startGraphDB(){
 		log.info("starting graph DB");
@@ -80,7 +79,7 @@ public class DBHandler {
 		}
 	}
 	
-	protected static Transaction getTransaction(){
+	public static Transaction getTransaction(){
 		return graphDB.beginTx();
 	}
 	
@@ -90,28 +89,6 @@ public class DBHandler {
 			concatKey = concatKey + "," + k;
 		}
 		return concatKey;
-	}
-	
-	public static void test(){
-		Transaction tx = getTransaction();
-		try {
-			log.info("[TEST] create");
-			Record record = getOrCreateRecord("test");
-			record.delete();
-			/*
-			try {
-				for(int i = 0; i < 20; i++){
-					log.info("[TEST] sleep");
-					Thread.sleep(1000);
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			*/
-			tx.success();
-		} finally {
-			tx.finish();
-		}
 	}
 	
 }
