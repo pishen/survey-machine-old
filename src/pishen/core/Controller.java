@@ -28,11 +28,7 @@ public class Controller {
 		Transaction tx = DBHandler.getTransaction();
 		try {
 			Record record = DBHandler.getOrCreateRecord("test");
-			record.setProperty(RecordKey.TITLE, "test");
-			record.setProperty(RecordKey.TITLE, record.getStringProperty(RecordKey.TITLE) + " test");
-			for(int i = 0; i < 20000; i++){
-				log.info("running: " + i);
-			}
+			record.delete();
 			tx.success();
 		} finally {
 			tx.finish();
