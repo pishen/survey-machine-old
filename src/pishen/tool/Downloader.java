@@ -76,21 +76,20 @@ public class Downloader {
 	}
 	
 	private static HttpURLConnection createURLConnection(URL url) throws IOException{
-		//randomly choose a proxy
 		HttpURLConnection urlc = null;
+		
+		//randomly choose a proxy
 		if(proxyList.isEmpty()){
 			urlc = (HttpURLConnection)url.openConnection();
 		}else{
 			Proxy randomProxy = proxyList.get((int)(proxyList.size() * Math.random()));
 			log.info("connect through proxy " + randomProxy.address());
 			urlc = (HttpURLConnection)url.openConnection(randomProxy);
-			if(urlc.getContentType() == null){
-				log.warn("null content-type on proxy " + randomProxy.address());
-			}
 		}
 		
 		//randomly choose an user-agent
 		urlc.setRequestProperty("User-Agent", userAgentStrs[(int)(userAgentStrs.length * Math.random())]);
+
 		return urlc;
 	}
 	
