@@ -83,7 +83,7 @@ public class Downloader {
 			urlc = (HttpURLConnection)url.openConnection();
 		}else{
 			Proxy randomProxy = proxyList.get((int)(proxyList.size() * Math.random()));
-			log.info("connect through proxy " + randomProxy.address());
+			log.info("proxy=" + randomProxy.address());
 			urlc = (HttpURLConnection)url.openConnection(randomProxy);
 		}
 		

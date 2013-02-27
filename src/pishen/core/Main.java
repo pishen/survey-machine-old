@@ -19,10 +19,10 @@ public class Main {
 	
 	public static void main(String[] args){
 		Logger.getRootLogger().setLevel(Level.INFO);
-		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n")));
+		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] [%t] %m%n")));
 		try {
 			Logger.getRootLogger().addAppender(new FileAppender(
-					new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n"), "survey-machine.log"));
+					new PatternLayout("%d{MM-dd HH:mm:ss} [%p] [%t] %m%n"), "survey-machine.log"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

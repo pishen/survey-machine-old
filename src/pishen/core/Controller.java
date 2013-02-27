@@ -69,14 +69,22 @@ public class Controller {
 	}
 	
 	public static void fetchRefForAllRecords(){
-		int count = 0;
-		for(Record record: DBHandler.getAllRecords()){
-			log.info("[FETCH_REF] #" + (++count) + " name=" + record.getName());
-			try {
-				RuleHandler.getRefFetcher(record).fetchRef();
-			} catch (RuleNotFoundException e) {
-				log.info("Rule not found");
-			}
+		DBHandler.initRecordIterator();
+		for(int i = 1; i <=4; i++){
+			new Thread("t" + i){
+				@Override
+				public void run() {
+					Record record = null;
+					while((record = DBHandler.getNextRecord()) != null){
+						log.info("[FETCH_REF] #" + DBHandler.count() + " name=" + record.getName());
+						try {
+							RuleHandler.getRefFetcher(record).fetchRef();
+						} catch (RuleNotFoundException e) {
+							log.info("Rule not found");
+						}
+					}
+				}
+			}.start();
 		}
 	}
 	

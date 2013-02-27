@@ -110,4 +110,5 @@ public class RefFetcherACM {
 			ref.setProperty(Reference.LINKS, linkStrings);
 		}
 	}
+
 }

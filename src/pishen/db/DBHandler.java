@@ -22,6 +22,8 @@ public class DBHandler {
 	private static final String CONCAT_KEY = createConcatenatedKey();
 	private static GraphDatabaseService graphDB;
 	private static ReadableIndex<Node> autoNodeIndex;
+	private static RecordHits allRecordHits;
+	private static int count;
 	
 	public static void startGraphDB(){
 		log.info("starting graph DB");
@@ -38,6 +40,23 @@ public class DBHandler {
 				graphDB.shutdown();
 			}
 		});
+	}
+	
+	public static void initRecordIterator(){
+		allRecordHits = getAllRecords();
+		count = 0;
+	}
+	
+	public static synchronized int count(){
+		return ++count;
+	}
+	
+	public static synchronized Record getNextRecord(){
+		if(allRecordHits.hasNext()){
+			return allRecordHits.next();
+		}else{
+			return null;
+		}
 	}
 	
 	public static RecordHits getAllRecords(){
