@@ -55,9 +55,9 @@ public class Controller {
 		}
 	}
 	
-	public static void fetchRefForAllRecords(){
+	public static void fetchRefForAllRecords(int numOfThreads){
 		DBHandler.initRecordIterator();
-		for(int i = 1; i <=6; i++){
+		for(int i = 1; i <=numOfThreads; i++){
 			new Thread("t" + i){
 				@Override
 				public void run() {

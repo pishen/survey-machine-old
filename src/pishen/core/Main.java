@@ -37,7 +37,7 @@ public class Main {
 		
 		Options options = new Options();
 		options.addOption("c", false, "fetch paper content");
-		options.addOption("r", false, "fetch paper ref");
+		options.addOption("r", true, "fetch paper ref");
 		options.addOption("l", false, "link the citation network");
 		options.addOption("t", false, "testing");
 		
@@ -57,7 +57,7 @@ public class Main {
 		}
 		
 		if(cmd.hasOption("r")){
-			Controller.fetchRefForAllRecords();
+			Controller.fetchRefForAllRecords(Integer.parseInt(cmd.getOptionValue("r")));
 		}
 		
 		if(cmd.hasOption("l")){
