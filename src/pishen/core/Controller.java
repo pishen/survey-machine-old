@@ -1,10 +1,6 @@
 package pishen.core;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -13,10 +9,8 @@ import org.apache.log4j.Logger;
 import pishen.db.DBHandler;
 import pishen.db.node.Record;
 import pishen.db.node.RecordKey;
-import pishen.exception.DownloadFailException;
 import pishen.exception.LinkingFailException;
 import pishen.exception.RuleNotFoundException;
-import pishen.tool.Downloader;
 import pishen.xml.XMLParser;
 import pishen.xml.XMLRecord;
 
@@ -29,22 +23,15 @@ public class Controller {
 	}
 	
 	public static void test(){
-		log.info("[TEST]");
-		try {
-			URL ip = new URL("http://www.ip-adress.com");
-			FileOutputStream out = new FileOutputStream("ip.html");
-			Downloader.downloadFileWithRetry(ip, out, "text/html");
-			out.close();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (DownloadFailException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		int count = 0;
+		for(Record record: DBHandler.getAllRecords()){
+			log.info("[TEST_REF_FIX] #" + (++count) + " name=" + record.getName());
+			try {
+				RuleHandler.getRefFetcher(record).fetchRef();
+			} catch (RuleNotFoundException e) {
+				log.info("Rule not found");
+			}
 		}
-		
 	}
 	
 	public static void copyDBLPInfo() throws Exception{

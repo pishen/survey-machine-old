@@ -32,7 +32,10 @@ public class RefFetcherACM {
 	public void fetchRef(){
 		//HAS_REF==true: all references are parsed and added
 		//HAS_REF==false: no reference available
-		if(!record.hasProperty(RecordKey.HAS_REF)){
+		//TODO clean
+		if(record.hasProperty(RecordKey.HAS_REF) 
+				&& record.getBooleanProperty(RecordKey.HAS_REF) == true
+				&& record.getHasRefCount() == 0){
 			try {
 				downloadRefPage();
 				parseRefPage();
