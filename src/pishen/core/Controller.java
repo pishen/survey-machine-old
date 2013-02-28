@@ -70,7 +70,7 @@ public class Controller {
 	
 	public static void fetchRefForAllRecords(){
 		DBHandler.initRecordIterator();
-		for(int i = 1; i <=4; i++){
+		for(int i = 1; i <=6; i++){
 			new Thread("t" + i){
 				@Override
 				public void run() {

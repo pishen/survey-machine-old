@@ -24,7 +24,8 @@ public class Downloader {
 	private static final List<Proxy> proxyList = new ArrayList<Proxy>();
 	private static final String[] userAgentStrs = {"Mozilla/5.0 Gecko/20100101 Firefox/17.0", 
 		"Mozilla/5.0 AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.97 Safari/537.22",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/534.57.7 (KHTML, like Gecko)"};
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/534.57.7 (KHTML, like Gecko)",
+		"Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:19.0) Gecko/20100101 Firefox/19.0"};
 	
 	static {
 		initProxyList();
