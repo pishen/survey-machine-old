@@ -24,14 +24,23 @@ public class Controller {
 	
 	public static void test(){
 		int count = 0;
+		int noPropertyCount = 0;
+		int needFixCount = 0;
 		for(Record record: DBHandler.getAllRecords()){
-			log.info("[TEST_REF_FIX] #" + (++count) + " name=" + record.getName());
+			log.info("[FETCH_REF_TEST] #" + (++count) + " name=" + record.getName());
 			try {
 				RuleHandler.getRefFetcher(record).fetchRef();
 			} catch (RuleNotFoundException e) {
 				log.info("Rule not found");
 			}
+			if(!record.hasProperty(RecordKey.HAS_REF)){
+				noPropertyCount++;
+			}else if(record.getBooleanProperty(RecordKey.HAS_REF) == true && record.getHasRefCount() == 0){
+				needFixCount++;
+			}
 		}
+		log.info("[FETCH_REF_TEST] # has no HAS_REF: " + noPropertyCount);
+		log.info("[FETCH_REF_TEST] # need to be fix: " + needFixCount);
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
