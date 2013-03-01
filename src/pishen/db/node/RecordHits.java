@@ -25,7 +25,13 @@ public class RecordHits implements Iterator<Record>, Iterable<Record> {
 
 	@Override
 	public Record next() {
-		return new Record(indexHits.next());
+		//TODO clean
+		Node node = indexHits.next();
+		if(node.getProperty("TYPE").equals("RECORD")){
+			return new Record(node);
+		}else{
+			return null;
+		}
 	}
 
 	@Override

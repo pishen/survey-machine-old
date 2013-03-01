@@ -7,6 +7,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.log4j.Logger;
 
 import pishen.db.DBHandler;
+import pishen.db.NodeShell;
 import pishen.db.node.Record;
 import pishen.db.node.RecordKey;
 import pishen.exception.LinkingFailException;
@@ -27,6 +28,10 @@ public class Controller {
 		int noPropertyCount = 0;
 		int needFixCount = 0;
 		for(Record record: DBHandler.getAllRecords()){
+			if(record == null){
+				log.info("[FETCH_REF_TEST] #" + (++count) + " wrong");
+				continue;
+			}
 			log.info("[FETCH_REF_TEST] #" + (++count) + " name=" + record.getName());
 			try {
 				RuleHandler.getRefFetcher(record).fetchRef();
