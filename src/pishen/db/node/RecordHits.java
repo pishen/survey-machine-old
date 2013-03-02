@@ -5,6 +5,8 @@ import java.util.Iterator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 
+import pishen.db.DBHandler;
+
 
 public class RecordHits implements Iterator<Record>, Iterable<Record> {
 	private IndexHits<Node> indexHits;
@@ -30,6 +32,7 @@ public class RecordHits implements Iterator<Record>, Iterable<Record> {
 		if(node.getProperty("TYPE").equals("RECORD")){
 			return new Record(node);
 		}else{
+			DBHandler.fixNode(node);
 			return null;
 		}
 	}

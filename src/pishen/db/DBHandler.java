@@ -59,6 +59,19 @@ public class DBHandler {
 		}
 	}
 	
+	//TODO clean
+	public static void fixNode(Node node){
+		log.info("fixing");
+		Transaction tx = getTransaction();
+		try {
+			node.setProperty(NODE_TYPE, node.getProperty(NODE_TYPE));
+			node.removeProperty("HAS_REF_COUNT");
+			tx.success();
+		} finally {
+			tx.finish();
+		}
+	}
+	
 	public static RecordHits getAllRecords(){
 		IndexHits<Node> indexHits = autoNodeIndex.get(NODE_TYPE, NodeType.RECORD.toString());
 		return new RecordHits(indexHits);
