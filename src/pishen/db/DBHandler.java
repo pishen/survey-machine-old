@@ -8,6 +8,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.ReadableIndex;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 import pishen.db.node.NodeType;
 import pishen.db.node.Record;
@@ -60,17 +61,22 @@ public class DBHandler {
 	}
 	
 	//TODO clean
-	public static void fixNode(Node node){
-		log.info("fixing");
-		Transaction tx = getTransaction();
-		try {
-			node.removeProperty(NODE_TYPE);
-			node.setProperty(NODE_TYPE, "REFERENCE");
-			node.removeProperty("HAS_REF_COUNT");
-			tx.success();
-		} finally {
-			tx.finish();
+	public static void checkAll(){
+		int recordCount = 0;
+		int refCount = 0;
+		int wrongCount = 0;
+		int count = 0;
+		for(Node node: GlobalGraphOperations.at(graphDB).getAllNodes()){
+			log.info("[CHECK] #" + (++count));
+			if(node.getProperty(NODE_TYPE).equals("RECORD")){
+				recordCount++;
+			}else if(node.getProperty(NODE_TYPE).equals("REFERENCE")){
+				refCount++;
+			}else{
+				wrongCount++;
+			}
 		}
+		log.info("record=" + recordCount + " ref=" + refCount + " wrong=" + wrongCount);
 	}
 	
 	public static RecordHits getAllRecords(){
