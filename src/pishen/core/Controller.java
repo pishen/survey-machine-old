@@ -24,7 +24,8 @@ public class Controller {
 	}
 	
 	public static void test(){
-		Record.reCreateNodeIndex();
+		Record test = Record.getOrCreateRecord("test");
+		test.delete();
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
