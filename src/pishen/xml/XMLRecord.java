@@ -2,39 +2,55 @@ package pishen.xml;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
-import pishen.db.node.RecordKey;
+import pishen.db.Record;
 
 public class XMLRecord {
 	private static final Logger log = Logger.getLogger(XMLRecord.class);
-	private String recordName;
-	private HashMap<RecordKey,String> recordMap = new HashMap<RecordKey,String>();
+	private String name, title, year;
+	private URL eeURL;
 	
-	public XMLRecord(String recordName){
-		this.recordName = recordName;
+	protected XMLRecord(String name){
+		this.name = name;
 	}
 	
-	public String getRecordName(){
-		return recordName;
+	public void dumpTo(Record record){
+		record.setTitle(title);
+		record.setEE(eeURL);
+		record.setYear(year);
 	}
 	
-	public void setProperty(RecordKey key, String value){
-		recordMap.put(key, value);
+	public String getName(){
+		return name;
 	}
 	
-	public String getProperty(RecordKey key){
-		return recordMap.get(key);
+	protected void setEE(String ee){
+		try {
+			eeURL = new URL(ee);
+		} catch (MalformedURLException e) {
+			log.error("EE is not valid");
+		}
 	}
 	
-	public boolean isValid(){
-		if(recordName != null && 
-				recordMap.get(RecordKey.TITLE) != null && 
-				recordMap.get(RecordKey.YEAR) != null && 
-				recordMap.get(RecordKey.EE) != null &&
-				isTargetDomain()){
+	protected void setTitle(String title){
+		if((this.title = title) == null){
+			log.error("title can't be null");
+		}
+	}
+	
+	protected void setYear(String year){
+		try{
+			Integer.parseInt(year);
+		}catch(NumberFormatException e){
+			log.error("year is not valid");
+		}
+		this.year = year;
+	}
+	
+	protected boolean isValid(){
+		if(title != null && year != null && eeURL != null && isTargetDomain()){
 			return true;
 		}else{
 			return false;
@@ -42,14 +58,7 @@ public class XMLRecord {
 	}
 	
 	private boolean isTargetDomain(){
-		String domainName = null;
-		
-		try {
-			domainName = new URL(recordMap.get(RecordKey.EE)).getHost();
-		} catch (MalformedURLException e) {
-			log.error("MalformedURLException on parsing EE", e);
-			return false;
-		}
+		String domainName = eeURL.getHost();
 		
 		//TODO add more domains
 		if(domainName.equals("doi.acm.org")){

@@ -52,21 +52,26 @@ public class Main {
 		
 		Controller.startGraphDB();
 		
-		if(cmd.hasOption("c")){
-			//Controller.downloadRecords();
-		}
-		
-		if(cmd.hasOption("r")){
-			Controller.fetchRefForAllRecords(Integer.parseInt(cmd.getOptionValue("r")));
-		}
-		
-		if(cmd.hasOption("l")){
-			//Controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
-			//Controller.linkRecords();
-		}
-		
-		if(cmd.hasOption("t")){
-			Controller.test();
+		try {
+			if(cmd.hasOption("c")){
+				//Controller.downloadRecords();
+			}
+			if(cmd.hasOption("r")){
+				Controller.fetchRefForAllRecords(Integer.parseInt(cmd.getOptionValue("r")));
+			}
+			if(cmd.hasOption("l")){
+				//Controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
+				//Controller.linkRecords();
+			}
+			if(cmd.hasOption("t")){
+				Controller.test();
+			}
+		} catch(RuntimeException e) {
+			log.error("Runtime error", e);
+			System.exit(0);
+		} catch(Exception e) {
+			log.error("Exception:", e);
+			System.exit(0);
 		}
 	}
 }

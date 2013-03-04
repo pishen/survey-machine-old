@@ -5,35 +5,30 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
-import pishen.db.node.Record;
-import pishen.db.node.RecordKey;
+import pishen.db.Record;
 import pishen.exception.RuleNotFoundException;
 
 public class RuleHandler {
 	private static final Logger log = Logger.getLogger(RuleHandler.class);
 	
-	//TODO catch MalformedURLException inside
-	public static URL getPDFURL(Record record) throws MalformedURLException, RuleNotFoundException{
-		String eeStr = record.getStringProperty(RecordKey.EE);
-		URL eeURL = new URL(eeStr);
+	public static URL getPDFURL(Record record) throws RuleNotFoundException{
+		URL eeURL = record.getEE();
 		
 		if(eeURL.getHost().equals("doi.acm.org")){
-			String documentID = eeStr.substring(eeStr.lastIndexOf(".") + 1);
-			return new URL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID);
+			String documentID = eeURL.toString().substring(eeURL.toString().lastIndexOf(".") + 1);
+			try {
+				return new URL("http://dl.acm.org/ft_gateway.cfm?id=" + documentID);
+			} catch (MalformedURLException e) {
+				log.error("PDF URL error", e);
+				throw new RuleNotFoundException();
+			}
 		}else{
 			throw new RuleNotFoundException();
 		}
 	}
 	
 	public static RefFetcherACM getRefFetcher(Record record) throws RuleNotFoundException{
-		String eeStr = record.getStringProperty(RecordKey.EE);
-		URL eeURL = null;
-		try {
-			eeURL = new URL(eeStr);
-		} catch (MalformedURLException e) {
-			log.error("MalformedURLException: " + eeURL, e);
-			throw new RuleNotFoundException();
-		}
+		URL eeURL = record.getEE();
 		
 		if(eeURL.getHost().equals("doi.acm.org")){
 			return new RefFetcherACM(record);

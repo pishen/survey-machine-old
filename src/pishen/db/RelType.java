@@ -1,4 +1,4 @@
-package pishen.db.rel;
+package pishen.db;
 
 import org.neo4j.graphdb.RelationshipType;
 

@@ -1,4 +1,4 @@
-package pishen.db.rel;
+package pishen.db;
 
 import java.util.Iterator;
 

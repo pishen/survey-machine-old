@@ -3,11 +3,15 @@ package pishen.db;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
 
-public class ContainerShell {
+public abstract class ContainerShell {
 	private PropertyContainer container;
 	
 	protected ContainerShell(PropertyContainer container){
 		this.container = container;
+	}
+	
+	protected boolean isEmpty(){
+		return !container.getPropertyKeys().iterator().hasNext();
 	}
 	
 	protected void setProperty(String key, Object value){
@@ -21,7 +25,8 @@ public class ContainerShell {
 			}
 		}
 	}
-	
+	//Not used for now
+	/*
 	protected void removeProperty(String key){
 		Transaction tx = DBHandler.getTransaction();
 		try {
@@ -31,13 +36,17 @@ public class ContainerShell {
 			tx.finish();
 		}
 	}
-	
+	*/
 	protected boolean hasProperty(String key){
-		return container.hasProperty(key.toString());
+		return container.hasProperty(key);
 	}
 	
 	protected String getStringProperty(String key){
 		return (String)getProperty(key);
+	}
+	
+	protected String[] getStringArrayProperty(String key){
+		return (String[])getProperty(key);
 	}
 	
 	protected boolean getBooleanProperty(String key){
@@ -49,6 +58,6 @@ public class ContainerShell {
 	}
 	
 	protected Object getProperty(String key){
-		return container.getProperty(key.toString());
+		return container.getProperty(key, null); //return null if property not exist
 	}
 }

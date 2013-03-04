@@ -12,8 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.neo4j.graphdb.NotFoundException;
 
-import pishen.db.node.Record;
-import pishen.db.node.RecordKey;
+import pishen.db.Record;
 import pishen.exception.LinkingFailException;
 import pishen.exception.NotEmbException;
 import pishen.exception.TextRecordNotFoundException;
@@ -61,7 +60,7 @@ public class RecordLinker {
 	
 	private static void tryCheckingEMB() throws NotEmbException{
 		try {
-			boolean emb = currentRecord.getBooleanProperty(RecordKey.EMB);
+			boolean emb = currentRecord.getEmb();
 			if(emb == false){
 				throw new NotEmbException();
 			}

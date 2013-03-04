@@ -9,8 +9,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.log4j.Logger;
 
-import pishen.db.node.RecordKey;
-
 public class XMLParser {
 	private static final Logger log = Logger.getLogger(XMLParser.class);
 	private XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -23,7 +21,7 @@ public class XMLParser {
 		streamReader = inputFactory.createXMLStreamReader(new FileReader(xmlFilename));
 	}
 	
-	public XMLRecord getNextXMLRecord(){
+	public XMLRecord getNextValidXMLRecord(){
 		return currentRecord;
 	}
 	
@@ -57,30 +55,30 @@ public class XMLParser {
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
 					if(streamReader.getText().startsWith("db")){
-						currentRecord.setProperty(RecordKey.EE, "http://www.sigmod.org/dblp/" + streamReader.getText());
+						currentRecord.setEE("http://www.sigmod.org/dblp/" + streamReader.getText());
 					}else{
-						currentRecord.setProperty(RecordKey.EE, streamReader.getText());
+						currentRecord.setEE(streamReader.getText());
 					}
 				}else{
-					log.error("content of ee is wrong");
+					log.error("XML content of ee is wrong");
 				}
 			}else if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT &&
 					streamReader.getLocalName().equals("year")){
 				//year found
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
-					currentRecord.setProperty(RecordKey.YEAR, streamReader.getText());
+					currentRecord.setYear(streamReader.getText());
 				}else{
-					log.error("content of year is wrong");
+					log.error("XML content of year is wrong");
 				}
 			}else if(streamReader.getEventType() == XMLStreamReader.START_ELEMENT &&
 					streamReader.getLocalName().equals("title")){
 				//title found
 				streamReader.next();
 				if(streamReader.getEventType() == XMLStreamReader.CHARACTERS && streamReader.getText() != null){
-					currentRecord.setProperty(RecordKey.TITLE, streamReader.getText());
+					currentRecord.setTitle(streamReader.getText());
 				}else{
-					log.error("content of title is wrong");
+					log.error("XML content of title is wrong");
 				}
 			}else if(streamReader.getEventType() == XMLStreamReader.END_ELEMENT &&
 					isTargetPaperType(streamReader.getLocalName())){

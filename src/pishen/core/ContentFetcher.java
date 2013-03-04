@@ -10,9 +10,9 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
-import pishen.db.node.Record;
-import pishen.db.node.RecordKey;
+import pishen.db.Record;
 import pishen.exception.DownloadFailException;
+import pishen.exception.RuleNotFoundException;
 import pishen.tool.Downloader;
 import pishen.tool.Executor;
 
@@ -27,7 +27,7 @@ public class ContentFetcher {
 				checkEmbeddedFonts(record);
 				pdfToText(record);
 			} catch (DownloadFailException e) {
-				//throw new Exceptions if necessary
+				log.info("cannot download PDF");
 			} catch (IOException e) {
 				log.error("error on open/close PDF file", e);
 			} finally {
@@ -49,7 +49,7 @@ public class ContentFetcher {
 			try {
 				URL targetURL = RuleHandler.getPDFURL(record);
 				Downloader.downloadFileWithRetry(targetURL, out, "application/pdf");
-			} catch (Exception e) {
+			} catch (RuleNotFoundException e) {
 				throw new DownloadFailException();
 			} finally {
 				out.close();
@@ -65,17 +65,22 @@ public class ContentFetcher {
 		try {
 			//get output of pdffonts
 			Executor.execWithTimeout(cmdLineStr, pdffontsOutput);
-			
+		} catch (IOException e) {
+			log.error("error when executing pdffonts");
+			return;
+		}
+		
+		try {
 			//read the 3rd line of output of pdffonts into line3
 			BufferedReader resultReader = new BufferedReader(new StringReader(pdffontsOutput.toString()));
 			for(int i = 0; i < 3; i++){
 				if((line3 = resultReader.readLine()) == null){
-					//throw Exception if necessary
+					log.error("line 3 doesn't exist at result of pdffonts");
 					return;
 				}
 			}
 		} catch (IOException e) {
-			//throw Exception if necessary
+			log.error("error when reading result of pdffonts");
 			return;
 		}
 		
@@ -93,11 +98,11 @@ public class ContentFetcher {
 		}
 		
 		if(token.equals("yes")){
-			record.setProperty(RecordKey.EMB, true);
+			record.setEmb(true);
 		}else if(token.equals("no")){
-			record.setProperty(RecordKey.EMB, false);
+			record.setEmb(false);
 		}else{
-			//throw Exception if necessary
+			log.error("token is not 'yes' or 'no'");
 			return;
 		}
 	}
@@ -111,7 +116,7 @@ public class ContentFetcher {
 			Executor.execWithTimeout(cmdLineStr, System.out);
 		} catch (IOException e) {
 			textFile.delete();
-			//throw Exception if necessary
+			log.error("error when executing pdftotext");
 			return;
 		}
 	}

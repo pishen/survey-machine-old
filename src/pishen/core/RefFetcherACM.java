@@ -13,10 +13,9 @@ import org.jsoup.select.Elements;
 import org.neo4j.graphdb.Transaction;
 
 import pishen.db.DBHandler;
-import pishen.db.node.Record;
-import pishen.db.node.RecordKey;
-import pishen.db.node.Reference;
-import pishen.db.rel.HasRef;
+import pishen.db.HasRef;
+import pishen.db.Record;
+import pishen.db.Reference;
 import pishen.exception.DownloadFailException;
 import pishen.tool.Downloader;
 
@@ -32,8 +31,7 @@ public class RefFetcherACM {
 	public void fetchRef(){
 		//HAS_REF==true: all references are parsed and added
 		//HAS_REF==false: no reference available
-		//TODO fixing has_ref=true && has_ref_count=0 records
-		if(!record.hasProperty(RecordKey.HAS_REF)){
+		if(record.getHasRef() == null){
 			try {
 				downloadRefPage();
 				parseRefPage();
@@ -50,7 +48,7 @@ public class RefFetcherACM {
 	private void downloadRefPage() throws DownloadFailException{
 		URL refURL = null;
 		try {
-			refURL = new URL(record.getStringProperty(RecordKey.EE) + "&preflayout=flat");
+			refURL = new URL(record.getEE().toString() + "&preflayout=flat");
 		} catch (MalformedURLException e) {
 			log.error("MalformedURLException: " + refURL, e);
 			throw new DownloadFailException();
@@ -67,18 +65,18 @@ public class RefFetcherACM {
 		Element refHeading = doc.getElementsByAttributeValue("name", "references").first();
 		if(refHeading == null){
 			log.info("unknown item");
-			record.setProperty(RecordKey.HAS_REF, false);
+			record.setHasRef(false);
 		}else{
 			Element table = refHeading.parent().nextElementSibling().getElementsByTag("table").first();
 			if(table == null){
 				log.info("no reference available");
-				record.setProperty(RecordKey.HAS_REF, false);
+				record.setHasRef(false);
 			}else{
 				//make the whole section atomic
 				Transaction tx = DBHandler.getTransaction();
 				try {
 					parseTable(table);
-					record.setProperty(RecordKey.HAS_REF, true);
+					record.setHasRef(true);
 					log.info("finish adding references");
 					tx.success();
 				} finally {
@@ -96,11 +94,11 @@ public class RefFetcherACM {
 			count++;
 			Element cellDiv = row.child(2).child(0);
 			
-			Reference ref = DBHandler.createReference();
+			Reference ref = Reference.createReference();
 			HasRef hasRef = record.createHasRefTo(ref);
 			
-			hasRef.setProperty(HasRef.CITATION_MARK, count);
-			ref.setProperty(Reference.CONTENT, cellDiv.text());
+			hasRef.setCitationMark(count);
+			ref.setContent(cellDiv.text());
 			
 			//write the links into Reference as String[]
 			Elements links = cellDiv.select("a");
@@ -108,7 +106,7 @@ public class RefFetcherACM {
 			for(int j = 0; j < links.size(); j++){
 				linkStrings[j] = links.get(j).attr("href");
 			}
-			ref.setProperty(Reference.LINKS, linkStrings);
+			ref.setLinks(linkStrings);
 		}
 	}
 

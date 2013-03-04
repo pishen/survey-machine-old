@@ -1,4 +1,4 @@
-package pishen.db.node;
+package pishen.db;
 
 import java.util.Iterator;
 
@@ -6,8 +6,10 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 
 
+
 public class RecordHits implements Iterator<Record>, Iterable<Record> {
 	private IndexHits<Node> indexHits;
+	private int count;
 
 	public RecordHits(IndexHits<Node> nodeIter){
 		this.indexHits = nodeIter;
@@ -35,6 +37,18 @@ public class RecordHits implements Iterator<Record>, Iterable<Record> {
 	
 	public void close(){
 		indexHits.close();
+	}
+	
+	public synchronized int count(){
+		return ++count;
+	}
+	
+	public synchronized Record getNextRecord(){
+		if(hasNext()){
+			return next(); 
+		}else{
+			return null;
+		}
 	}
 
 }

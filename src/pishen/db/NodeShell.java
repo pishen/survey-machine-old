@@ -4,14 +4,33 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 
-import pishen.db.rel.RelType;
+import pishen.exception.IllegalOperationException;
 
-public class NodeShell extends ContainerShell {
+public abstract class NodeShell extends ContainerShell {
+	//Key
+	private static final String TYPE = "TYPE";
+	
 	private Node node;
 	
 	protected NodeShell(Node node){
 		super(node);
 		this.node = node;
+	}
+	
+	protected void setType(String type){
+		if(hasType()){
+			throw new IllegalOperationException("Cannot change a set type");
+		}else{
+			super.setProperty(TYPE, type);
+		}
+	}
+	
+	protected boolean hasType(){
+		return super.hasProperty(TYPE);
+	}
+	
+	protected String getType(){
+		return super.getStringProperty(TYPE);
 	}
 	
 	protected Relationship createRelationshipTo(NodeShell targetNodeShell, RelType relType){
