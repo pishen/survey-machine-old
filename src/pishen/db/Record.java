@@ -191,6 +191,7 @@ public class Record extends NodeShell {
 	}
 	
 	public void delete(){
+		recordIndex.remove(node);
 		super.delete();
 	}
 	
