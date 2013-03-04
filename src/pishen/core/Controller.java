@@ -24,7 +24,7 @@ public class Controller {
 	}
 	
 	public static void test(){
-		
+		Record.reCreateNodeIndex();
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
