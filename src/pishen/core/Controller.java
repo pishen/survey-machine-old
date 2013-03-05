@@ -21,33 +21,49 @@ public class Controller {
 	public static void test(){
 		log.info("[TEST]");
 		int count = 0;
-		int noReferenceCount = 0, nullCount = 0, numberCount = 0, textCount = 0, unknownCount = 0, noTextFileCount = 0;
 		for(Record record: Record.getAllRecords()){
 			log.info("[CHECK] #" + (++count) + " NAME=" + record.getName());
-			if(record.getTextFile().exists()){
-				if(record.getHasRefCount() == 0){
-					noReferenceCount++;
-				}
-				Record.CitationType citationType = record.getCitationType();
-				if(citationType == null){
-					nullCount++;
-				}else if(citationType == Record.CitationType.NUMBER){
-					numberCount++;
-				}else if(citationType == Record.CitationType.TEXT){
-					textCount++;
-				}else{
-					unknownCount++;
-				}
+			if(!record.getTextFile().exists()){
+				log.info("NO-TEXT");
 			}else{
-				noTextFileCount++;
+				if(record.getHasRefCount() == 0){
+					log.info("HAS-TEXT NO-REF");
+				}else{
+					boolean emb;
+					if(record.isEmb() == null || record.isEmb() == false){
+						emb = false;
+					}else{
+						emb = true;
+					}
+					Record.CitationType citationType = record.getCitationType();
+					if(citationType == null){
+						if(emb){
+							log.info("HAS-TEXT HAS-REF HAS-EMB NULL");
+						}else{
+							log.info("HAS-TEXT HAS-REF NO-EMB NULL");
+						}
+					}else if(citationType == Record.CitationType.NUMBER){
+						if(emb){
+							log.info("HAS-TEXT HAS-REF HAS-EMB NUMBER");
+						}else{
+							log.info("HAS-TEXT HAS-REF NO-EMB NUMBER");
+						}
+					}else if(citationType == Record.CitationType.TEXT){
+						if(emb){
+							log.info("HAS-TEXT HAS-REF HAS-EMB TEXT");
+						}else{
+							log.info("HAS-TEXT HAS-REF NO-EMB TEXT");
+						}
+					}else{
+						if(emb){
+							log.info("HAS-TEXT HAS-REF HAS-EMB UNKNOWN");
+						}else{
+							log.info("HAS-TEXT HAS-REF NO-EMB UNKNOWN");
+						}
+					}
+				}
 			}
 		}
-		log.info("noReferenceCount=" + noReferenceCount);
-		log.info("nullCount=" + nullCount);
-		log.info("numberCount=" + numberCount);
-		log.info("textCount=" + textCount);
-		log.info("unknownCount=" + unknownCount);
-		log.info("noTextFileCount=" + noTextFileCount);
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
