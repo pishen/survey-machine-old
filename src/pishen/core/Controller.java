@@ -1,15 +1,10 @@
 package pishen.core;
 
-import java.io.FileNotFoundException;
-
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.log4j.Logger;
 
 import pishen.db.DBHandler;
 import pishen.db.Record;
 import pishen.db.RecordHits;
-import pishen.exception.LinkingFailException;
 import pishen.exception.RuleNotFoundException;
 import pishen.xml.XMLParser;
 import pishen.xml.XMLRecord;
@@ -24,8 +19,35 @@ public class Controller {
 	}
 	
 	public static void test(){
-		Record test = Record.getOrCreateRecord("test");
-		test.delete();
+		log.info("[TEST]");
+		int count = 0;
+		int noReferenceCount = 0, nullCount = 0, numberCount = 0, textCount = 0, unknownCount = 0, noTextFileCount = 0;
+		for(Record record: Record.getAllRecords()){
+			log.info("[CHECK] #" + (++count) + " NAME=" + record.getName());
+			if(record.getTextFile().exists()){
+				if(record.getHasRefCount() == 0){
+					noReferenceCount++;
+				}
+				Record.CitationType citationType = record.getCitationType();
+				if(citationType == null){
+					nullCount++;
+				}else if(citationType == Record.CitationType.NUMBER){
+					numberCount++;
+				}else if(citationType == Record.CitationType.TEXT){
+					textCount++;
+				}else{
+					unknownCount++;
+				}
+			}else{
+				noTextFileCount++;
+			}
+		}
+		log.info("noReferenceCount=" + noReferenceCount);
+		log.info("nullCount=" + nullCount);
+		log.info("numberCount=" + numberCount);
+		log.info("textCount=" + textCount);
+		log.info("unknownCount=" + unknownCount);
+		log.info("noTextFileCount=" + noTextFileCount);
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
@@ -72,7 +94,7 @@ public class Controller {
 		}
 	}
 	
-	public static void linkRecords() throws FileNotFoundException, XMLStreamException{
+	/*public static void linkRecords() throws FileNotFoundException, XMLStreamException{
 		//TODO change the way of iterating to DB-based
 		XMLParser xmlParser = new XMLParser(XML_FILENAME);
 		
@@ -80,13 +102,13 @@ public class Controller {
 			XMLRecord xmlRecord = xmlParser.getNextValidXMLRecord();
 			Record record = Record.getOrCreateRecord(xmlRecord.getName());
 			try {
-				RecordLinker.linkRecord(record);
+				CitationMark.linkRecord(record);
 			} catch (LinkingFailException e) {
 				continue;
 			}
 		}
-		RecordLinker.writeTypeCounts();
-	}
+		CitationMark.writeTypeCounts();
+	}*/
 	
 	//TODO feature require: updating property value by XMLParser and delete the record that's not exist anymore 
 	

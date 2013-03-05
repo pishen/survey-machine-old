@@ -1,17 +1,28 @@
 package pishen.db;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.IndexHits;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+
+import pishen.core.CitationMark;
 import pishen.exception.IllegalOperationException;
 
 public class Record extends NodeShell {
+	public static enum CitationType{
+		NUMBER, TEXT, UNKNOWN
+	}
+	
 	private static final Logger log = Logger.getLogger(Record.class);
 	//node type
 	private static final String TYPE = "RECORD";
@@ -117,6 +128,37 @@ public class Record extends NodeShell {
 		recordIndex.add(node, NAME, name);
 	}
 	
+	public CitationType getCitationType(){
+		File textFile = getTextFile();
+		if(textFile.exists() == false){
+			throw new IllegalOperationException("check existence of textfile before calling");
+		}
+		
+		String recordContent;
+		try {
+			recordContent = Files.toString(textFile, Charsets.UTF_8);
+		} catch (IOException e) {
+			log.error("error when reading textfile", e);
+			return null;
+		}
+		Pattern pattern = Pattern.compile("\\[([^\\[\\]]*)\\]");
+		Matcher matcher = pattern.matcher(recordContent);
+		
+		CitationType citationType = null;
+		
+		while(matcher.find()){
+			String stringInBrackets = matcher.group(1);
+			if(citationType == null){
+				citationType = CitationMark.typeOf(stringInBrackets);
+			}else if(citationType != CitationMark.typeOf(stringInBrackets)){
+				citationType = CitationType.UNKNOWN;
+				break;
+			}
+		}
+		
+		return citationType;
+	}
+	
 	public String getName(){
 		return super.getStringProperty(NAME);
 	}
@@ -156,11 +198,11 @@ public class Record extends NodeShell {
 		super.setProperty(EMB, emb);
 	}
 	
-	public boolean getEmb(){
+	public Boolean isEmb(){
 		if(super.hasProperty(EMB)){
 			return super.getBooleanProperty(EMB);
 		}else{
-			return false;
+			return null;
 		}
 	}
 	
