@@ -37,22 +37,24 @@ public class Controller {
 					}
 					Record.CitationType citationType = record.getCitationType();
 					if(citationType == null){
-						if(emb){
-							log.info("HAS-TEXT HAS-REF HAS-EMB NULL");
-						}else{
-							log.info("HAS-TEXT HAS-REF NO-EMB NULL");
-						}
+						continue;
 					}else if(citationType == Record.CitationType.NUMBER){
 						if(emb){
 							log.info("HAS-TEXT HAS-REF HAS-EMB NUMBER");
 						}else{
 							log.info("HAS-TEXT HAS-REF NO-EMB NUMBER");
 						}
-					}else if(citationType == Record.CitationType.TEXT){
+					}else if(citationType == Record.CitationType.OVERFLOW){
 						if(emb){
-							log.info("HAS-TEXT HAS-REF HAS-EMB TEXT");
+							log.info("HAS-TEXT HAS-REF HAS-EMB OVERFLOW");
 						}else{
-							log.info("HAS-TEXT HAS-REF NO-EMB TEXT");
+							log.info("HAS-TEXT HAS-REF NO-EMB OVERFLOW");
+						}
+					}else if(citationType == Record.CitationType.NO_MARK){
+						if(emb){
+							log.info("HAS-TEXT HAS-REF HAS-EMB NO_MARK");
+						}else{
+							log.info("HAS-TEXT HAS-REF NO-EMB NO_MARK");
 						}
 					}else{
 						if(emb){

@@ -12,15 +12,15 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.IndexHits;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
 import pishen.core.CitationMark;
 import pishen.exception.IllegalOperationException;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+
 public class Record extends NodeShell {
 	public static enum CitationType{
-		NUMBER, TEXT, UNKNOWN
+		NO_MARK, NUMBER, OVERFLOW, UNKNOWN
 	}
 	
 	private static final Logger log = Logger.getLogger(Record.class);
@@ -144,19 +144,39 @@ public class Record extends NodeShell {
 		Pattern pattern = Pattern.compile("\\[([^\\[\\]]*)\\]");
 		Matcher matcher = pattern.matcher(recordContent);
 		
-		CitationType citationType = null;
+		boolean[] citationCheck = new boolean[getHasRefCount()];
+		if(citationCheck[0] == true){
+			throw new IllegalOperationException("should initialize boolean array");
+		}
+		
+		boolean hasMark = false;
 		
 		while(matcher.find()){
+			hasMark = true;
 			String stringInBrackets = matcher.group(1);
-			if(citationType == null){
-				citationType = CitationMark.typeOf(stringInBrackets);
-			}else if(citationType != CitationMark.typeOf(stringInBrackets)){
-				citationType = CitationType.UNKNOWN;
-				break;
+			CitationMark mark = new CitationMark(stringInBrackets);
+			if(mark.getType() == CitationMark.Type.NUMBER){
+				for(int citation: mark.getIntCitations()){
+					if(citation > citationCheck.length){
+						return CitationType.OVERFLOW;
+					}else{
+						citationCheck[citation - 1] = true;
+					}
+				}
 			}
 		}
 		
-		return citationType;
+		if(hasMark == false){
+			return CitationType.NO_MARK;
+		}
+		
+		for(boolean check: citationCheck){
+			if(check == false){
+				return CitationType.UNKNOWN;
+			}
+		}
+		
+		return CitationType.NUMBER;
 	}
 	
 	public String getName(){

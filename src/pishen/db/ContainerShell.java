@@ -3,7 +3,7 @@ package pishen.db;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
 
-public abstract class ContainerShell {
+abstract class ContainerShell {
 	private PropertyContainer container;
 	
 	protected ContainerShell(PropertyContainer container){
