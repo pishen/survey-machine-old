@@ -16,7 +16,7 @@ public class CitationMark {
 	private ArrayList<String> citations = new ArrayList<String>();
 	
 	public CitationMark(String content){
-		this.content = content;
+		this.content = content.replaceAll("\\s", "");
 		detectType();
 		splitContent();
 	}
@@ -56,29 +56,28 @@ public class CitationMark {
 	}
 	
 	private void detectType(){
-		String noSpaceContent = content.replaceAll(" ", "");
-		if(noSpaceContent.matches("[1-9]\\d{0,2}")){
+		if(content.matches("[1-9]\\d{0,2}")){
 			//[1] - [999]
 			type = Type.NUMBER;
-		}else if(noSpaceContent.matches("[1-9]\\d{0,2}(,[1-9]\\d{0,2})+")){
+		}else if(content.matches("[1-9]\\d{0,2}(,[1-9]\\d{0,2})+")){
 			//[1,2,3]
 			type = Type.NUMBER;
-		}else if(noSpaceContent.matches("[1-9]\\d{0,2}-[1-9]\\d{0,2}")){
+		}else if(content.matches("[1-9]\\d{0,2}-[1-9]\\d{0,2}")){
 			//[1-10]
 			type = Type.NUMBER;
-		}else if(noSpaceContent.matches("[1-9]\\d{0,2}(-[1-9]\\d{0,2})?(,[1-9]\\d{0,2}(-[1-9]\\d{0,2})?)+")){
+		}else if(content.matches("[1-9]\\d{0,2}(-[1-9]\\d{0,2})?(,[1-9]\\d{0,2}(-[1-9]\\d{0,2})?)+")){
 			//[1,2-10,11,13]
 			type = Type.NUMBER;
-		}else if(noSpaceContent.matches("[12]\\d\\d\\d")){
+		}else if(content.matches("[12]\\d\\d\\d")){
 			//[1000] - [2999]
 			type = Type.UNKNOWN;
-		}else if(noSpaceContent.matches("[12]\\d\\d\\d(;[12]\\d\\d\\d)+")){
+		}else if(content.matches("[12]\\d\\d\\d(;[12]\\d\\d\\d)+")){
 			//[1988;2005;2013]
 			type = Type.UNKNOWN;
-		}else if(noSpaceContent.matches("\\D+[12]\\d\\d\\d")){
+		}else if(content.matches("\\D+[12]\\d\\d\\d")){
 			//[pishen tsai et al. 2013]
 			type = Type.UNKNOWN;
-		}else if(noSpaceContent.matches("\\D+[12]\\d\\d\\d(;\\D+[12]\\d\\d\\d)+")){
+		}else if(content.matches("\\D+[12]\\d\\d\\d(;\\D+[12]\\d\\d\\d)+")){
 			//[pishen tsai et al. 2013; pj cheng 2007]
 			type = Type.UNKNOWN;
 		}else{
