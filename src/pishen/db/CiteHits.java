@@ -6,15 +6,15 @@ import org.neo4j.graphdb.Relationship;
 
 import pishen.exception.IllegalOperationException;
 
-public class HasRefHits implements Iterator<HasRef>, Iterable<HasRef> {
+public class CiteHits implements Iterator<Cite>, Iterable<Cite> {
 	private Iterator<Relationship> iterator;
 	
-	public HasRefHits(Iterable<Relationship> iterable){
+	public CiteHits(Iterable<Relationship> iterable){
 		this.iterator = iterable.iterator();
 	}
-
+	
 	@Override
-	public Iterator<HasRef> iterator() {
+	public Iterator<Cite> iterator() {
 		return this;
 	}
 
@@ -24,8 +24,8 @@ public class HasRefHits implements Iterator<HasRef>, Iterable<HasRef> {
 	}
 
 	@Override
-	public HasRef next() {
-		return new HasRef(iterator.next());
+	public Cite next(){
+		return new Cite(iterator.next());
 	}
 
 	@Override

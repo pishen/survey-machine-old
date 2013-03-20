@@ -25,8 +25,7 @@ abstract class ContainerShell {
 			}
 		}
 	}
-	//Not used for now
-	/*
+	
 	protected void removeProperty(String key){
 		Transaction tx = DBHandler.getTransaction();
 		try {
@@ -36,7 +35,7 @@ abstract class ContainerShell {
 			tx.finish();
 		}
 	}
-	*/
+	
 	protected boolean hasProperty(String key){
 		return container.hasProperty(key);
 	}

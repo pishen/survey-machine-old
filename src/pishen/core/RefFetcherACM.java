@@ -31,7 +31,7 @@ public class RefFetcherACM {
 	public void fetchRef(){
 		//HAS_REF==true: all references are parsed and added
 		//HAS_REF==false: no reference available
-		if(record.getHasRef() == null){
+		if(record.isRefFetched() == false){
 			try {
 				downloadRefPage();
 				parseRefPage();
@@ -65,18 +65,18 @@ public class RefFetcherACM {
 		Element refHeading = doc.getElementsByAttributeValue("name", "references").first();
 		if(refHeading == null){
 			log.info("unknown item");
-			record.setHasRef(false);
+			record.setRefFetched(true);
 		}else{
 			Element table = refHeading.parent().nextElementSibling().getElementsByTag("table").first();
 			if(table == null){
 				log.info("no reference available");
-				record.setHasRef(false);
+				record.setRefFetched(true);
 			}else{
 				//make the whole section atomic
 				Transaction tx = DBHandler.getTransaction();
 				try {
 					parseTable(table);
-					record.setHasRef(true);
+					record.setRefFetched(true);
 					log.info("finish adding references");
 					tx.success();
 				} finally {
@@ -97,7 +97,7 @@ public class RefFetcherACM {
 			Reference ref = Reference.createReference();
 			HasRef hasRef = record.createHasRefTo(ref);
 			
-			hasRef.setCitationMark(count);
+			hasRef.setCitation(count);
 			ref.setContent(cellDiv.text());
 			
 			//write the links into Reference as String[]

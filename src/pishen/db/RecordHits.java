@@ -5,6 +5,8 @@ import java.util.Iterator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 
+import pishen.exception.IllegalOperationException;
+
 
 
 public class RecordHits implements Iterator<Record>, Iterable<Record> {
@@ -32,7 +34,11 @@ public class RecordHits implements Iterator<Record>, Iterable<Record> {
 
 	@Override
 	public void remove() {
-		//TODO remove all edges of the node and delete it
+		throw new IllegalOperationException("remove not implemented yet");
+	}
+	
+	public int size(){
+		return indexHits.size();
 	}
 	
 	public void close(){

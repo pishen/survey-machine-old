@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.IndexHits;
 
 import pishen.core.CitationMark;
@@ -32,8 +33,9 @@ public class Record extends NodeShell {
 	private static final String TITLE = "TITLE"; //indexed, required
 	private static final String YEAR = "YEAR"; //required
 	private static final String EMB = "EMB";
-	private static final String HAS_REF = "HAS_REF";
-	private static final String HAS_REF_COUNT = "HAS_REF_COUNT"; //required
+	private static final String REF_FETCHED = "REF_FETCHED"; //default is no
+	private static final String HAS_REF = "HAS_REF"; //TODO remove
+	private static final String HAS_REF_COUNT = "HAS_REF_COUNT"; //TODO remove
 	//directory names
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";
@@ -52,6 +54,7 @@ public class Record extends NodeShell {
 		createDirIfNotExist(TEXT_DIR);
 	}
 	
+	//called by DBHandler when the database is ready
 	public static void connectNodeIndex(){
 		recordIndex = new NodeIndexShell(DBHandler.getOrCreateIndexForNodes(Record.INDEX_NAME));
 	}
@@ -78,8 +81,16 @@ public class Record extends NodeShell {
 	public static Record getOrCreateRecord(String recordName){
 		Node node = recordIndex.get(NAME, recordName).getSingle();
 		if(node == null){
-			node = DBHandler.createNode();
-			return new Record(node, recordName);
+			Transaction tx = DBHandler.getTransaction();
+			try{
+				//atomic: create the node and initialize it
+				node = DBHandler.createNode();
+				Record newRecord = new Record(node, recordName);
+				tx.success();
+				return newRecord;
+			}finally{
+				tx.finish();
+			}
 		}else{
 			return new Record(node);
 		}
@@ -122,16 +133,34 @@ public class Record extends NodeShell {
 		}
 		super.setType(TYPE);
 		super.setProperty(NAME, name);
-		super.setProperty(HAS_REF_COUNT, 0);
+		super.setProperty(REF_FETCHED, false);
 		
 		recordIndex.add(node, IS_RECORD, true); //default key-value pair for all Records
 		recordIndex.add(node, NAME, name);
+	}
+	
+	//TODO clean
+	public void refactor(){
+		super.removeProperty(HAS_REF_COUNT);
+		if(super.hasProperty(HAS_REF)){
+			super.setProperty(REF_FETCHED, true);
+			super.removeProperty(HAS_REF);
+		}else{
+			super.setProperty(REF_FETCHED, false);
+		}
+		for(HasRef hasRef: getHasRefs()){
+			hasRef.refactor();
+		}
 	}
 	
 	public CitationType getCitationType(){
 		File textFile = getTextFile();
 		if(textFile.exists() == false){
 			throw new IllegalOperationException("check existence of textfile before calling");
+		}
+		
+		if(this.getRefCount() == 0){
+			throw new IllegalOperationException("check num of reference > 0 before calling");
 		}
 		
 		String recordContent;
@@ -144,11 +173,7 @@ public class Record extends NodeShell {
 		Pattern pattern = Pattern.compile("\\[([^\\[\\]]*)\\]");
 		Matcher matcher = pattern.matcher(recordContent);
 		
-		boolean[] citationCheck = new boolean[getHasRefCount()];
-		if(citationCheck[0] == true){
-			throw new IllegalOperationException("should initialize boolean array");
-		}
-		
+		boolean[] citationCheck = new boolean[getRefCount()];
 		boolean hasMark = false;
 		
 		while(matcher.find()){
@@ -226,32 +251,48 @@ public class Record extends NodeShell {
 		}
 	}
 	
-	public void setHasRef(boolean hasRef){
-		super.setProperty(HAS_REF, hasRef);
+	public void setRefFetched(boolean refFetched){
+		super.setProperty(REF_FETCHED, refFetched);
 	}
 	
-	public Boolean getHasRef(){
-		if(super.hasProperty(HAS_REF)){
-			return super.getBooleanProperty(HAS_REF);
-		}else{
-			return null;
-		}
+	public Boolean isRefFetched(){
+		return super.getBooleanProperty(REF_FETCHED);
 	}
 	
-	public int getHasRefCount(){
-		return super.getIntProperty(HAS_REF_COUNT);
-	}
-	
+	//TODO add "citationMark" as an argument
 	public HasRef createHasRefTo(Reference targetRef){
 		Relationship rel = super.createRelationshipTo(targetRef, RelType.HAS_REF);
-		super.setProperty(HAS_REF_COUNT, super.getIntProperty(HAS_REF_COUNT) + 1);
 		return new HasRef(rel);
 	}
 	
+	public int getRefCount(){
+		int count = 0;
+		for(@SuppressWarnings("unused") HasRef hasRef: getHasRefs()){
+			count++;
+		}
+		return count;
+	}
+
 	public HasRefHits getHasRefs(){
 		return new HasRefHits(super.getRelationships(RelType.HAS_REF));
 	}
 	
+	public Cite createCiteTo(Record targetRecord, String citation){
+		Transaction tx = DBHandler.getTransaction();
+		try{
+			Relationship rel = super.createRelationshipTo(targetRecord, RelType.CITE);
+			Cite newCite = new Cite(rel, citation); 
+			tx.success();
+			return newCite;
+		}finally{
+			tx.finish();
+		}
+	}
+	
+	public CiteHits getCites(){
+		return new CiteHits(super.getRelationships(RelType.CITE));
+	}
+
 	public void delete(){
 		recordIndex.remove(node);
 		super.delete();
@@ -271,14 +312,5 @@ public class Record extends NodeShell {
 			dir.mkdir();
 		}
 	}
-	//deprecated
-	/*
-	private void countHasRef(){
-		int count = 0;
-		for(@SuppressWarnings("unused") HasRef hasRef: getHasRefs()){
-			count++;
-		}
-		super.setProperty(HAS_REF_COUNT, count);
-	}
-	*/
+	
 }

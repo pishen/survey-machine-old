@@ -19,52 +19,8 @@ public class Controller {
 	}
 	
 	public static void test(){
-		log.info("[TEST]");
-		int count = 0;
 		for(Record record: Record.getAllRecords()){
-			log.info("[CHECK] #" + (++count) + " NAME=" + record.getName());
-			if(!record.getTextFile().exists()){
-				log.info("NO-TEXT");
-			}else{
-				if(record.getHasRefCount() == 0){
-					log.info("HAS-TEXT NO-REF");
-				}else{
-					boolean emb;
-					if(record.isEmb() == null || record.isEmb() == false){
-						emb = false;
-					}else{
-						emb = true;
-					}
-					Record.CitationType citationType = record.getCitationType();
-					if(citationType == null){
-						continue;
-					}else if(citationType == Record.CitationType.NUMBER){
-						if(emb){
-							log.info("HAS-TEXT HAS-REF HAS-EMB NUMBER");
-						}else{
-							log.info("HAS-TEXT HAS-REF NO-EMB NUMBER");
-						}
-					}else if(citationType == Record.CitationType.OVERFLOW){
-						if(emb){
-							log.info("HAS-TEXT HAS-REF HAS-EMB OVERFLOW");
-						}else{
-							log.info("HAS-TEXT HAS-REF NO-EMB OVERFLOW");
-						}
-					}else if(citationType == Record.CitationType.NO_MARK){
-						if(emb){
-							log.info("HAS-TEXT HAS-REF HAS-EMB NO_MARK");
-						}else{
-							log.info("HAS-TEXT HAS-REF NO-EMB NO_MARK");
-						}
-					}else{
-						if(emb){
-							log.info("HAS-TEXT HAS-REF HAS-EMB UNKNOWN");
-						}else{
-							log.info("HAS-TEXT HAS-REF NO-EMB UNKNOWN");
-						}
-					}
-				}
-			}
+			record.refactor();
 		}
 	}
 	
