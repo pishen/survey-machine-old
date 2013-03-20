@@ -19,11 +19,8 @@ public class Controller {
 	}
 	
 	public static void test(){
-		int count = 0;
-		for(Record record: Record.getAllRecords()){
-			log.info("[REFACTOR] #" + (++count) + " name=" + record.getName());
-			record.refactor();
-		}
+		
+		
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
@@ -67,6 +64,18 @@ public class Controller {
 					}
 				}
 			}.start();
+		}
+	}
+	
+	public static void connectRecords(){
+		int count = 0;
+		for(Record record: Record.getAllRecords()){
+			log.info("[CONNECT] #" + (++count) + " name=" + record.getName());
+			try {
+				RuleHandler.getRecordConnector(record).connect();
+			} catch (RuleNotFoundException e) {
+				log.info("rule not found");
+			}
 		}
 	}
 	

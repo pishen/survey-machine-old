@@ -10,6 +10,10 @@ public class RelationshipShell extends ContainerShell {
 		super(rel);
 		this.rel = rel;
 	}
+	
+	protected Node getStartNode(){
+		return rel.getStartNode();
+	}
 
 	protected Node getEndNode(){
 		return rel.getEndNode();

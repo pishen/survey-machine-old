@@ -27,14 +27,6 @@ public class Main {
 			e.printStackTrace();
 		}
 		
-		/*
-		String html = "<p>This <a>is</a> a test.</p>";
-		Document doc = Jsoup.parse(html);
-		
-		Element p = doc.getElementsByTag("p").first();
-		log.info(p.getElementsContainingOwnText("This a test").size());
-		*/
-		
 		Options options = new Options();
 		options.addOption("c", false, "fetch paper content");
 		options.addOption("r", true, "fetch paper ref");
@@ -60,8 +52,7 @@ public class Main {
 				Controller.fetchRefForAllRecords(Integer.parseInt(cmd.getOptionValue("r")));
 			}
 			if(cmd.hasOption("l")){
-				//Controller.linkRecords(Integer.parseInt(cmd.getOptionValue("l")));
-				//Controller.linkRecords();
+				Controller.connectRecords();
 			}
 			if(cmd.hasOption("t")){
 				Controller.test();

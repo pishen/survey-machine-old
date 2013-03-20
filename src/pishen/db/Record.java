@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
@@ -33,9 +34,7 @@ public class Record extends NodeShell {
 	private static final String TITLE = "TITLE"; //indexed, required
 	private static final String YEAR = "YEAR"; //required
 	private static final String EMB = "EMB";
-	private static final String REF_FETCHED = "REF_FETCHED"; //default is no
-	private static final String HAS_REF = "HAS_REF"; //TODO remove
-	private static final String HAS_REF_COUNT = "HAS_REF_COUNT"; //TODO remove
+	private static final String REF_FETCHED = "REF_FETCHED"; //default is false
 	//directory names
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";
@@ -137,20 +136,6 @@ public class Record extends NodeShell {
 		
 		recordIndex.add(node, IS_RECORD, true); //default key-value pair for all Records
 		recordIndex.add(node, NAME, name);
-	}
-	
-	//TODO clean
-	public void refactor(){
-		super.removeProperty(HAS_REF_COUNT);
-		if(super.hasProperty(HAS_REF)){
-			super.setProperty(REF_FETCHED, true);
-			super.removeProperty(HAS_REF);
-		}else{
-			super.setProperty(REF_FETCHED, false);
-		}
-		for(HasRef hasRef: getHasRefs()){
-			hasRef.refactor();
-		}
 	}
 	
 	public CitationType getCitationType(){
@@ -259,7 +244,7 @@ public class Record extends NodeShell {
 		return super.getBooleanProperty(REF_FETCHED);
 	}
 	
-	//TODO add "citationMark" as an argument
+	//TODO add "citationMark" as an argument, change it to atomic
 	public HasRef createHasRefTo(Reference targetRef){
 		Relationship rel = super.createRelationshipTo(targetRef, RelType.HAS_REF);
 		return new HasRef(rel);
@@ -290,7 +275,11 @@ public class Record extends NodeShell {
 	}
 	
 	public CiteHits getCites(){
-		return new CiteHits(super.getRelationships(RelType.CITE));
+		return new CiteHits(super.getRelationships(RelType.CITE, Direction.OUTGOING));
+	}
+	
+	public CiteHits getIncomingCites(){
+		return new CiteHits(super.getRelationships(RelType.CITE, Direction.INCOMING));
 	}
 
 	public void delete(){

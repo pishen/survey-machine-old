@@ -97,7 +97,7 @@ public class RefFetcherACM {
 			Reference ref = Reference.createReference();
 			HasRef hasRef = record.createHasRefTo(ref);
 			
-			hasRef.setCitation(count);
+			hasRef.setCitation(Integer.toString(count));
 			ref.setContent(cellDiv.text());
 			
 			//write the links into Reference as String[]

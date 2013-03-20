@@ -28,4 +28,12 @@ public class Cite extends RelationshipShell {
 	public String getStringCitation(){
 		return super.getStringProperty(CITATION);
 	}
+	
+	public Record getStartRecord(){
+		return new Record(super.getStartNode());
+	}
+	
+	public Record getEndRecord(){
+		return new Record(super.getEndNode());
+	}
 }

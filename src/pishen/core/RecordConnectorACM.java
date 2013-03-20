@@ -15,54 +15,64 @@ public class RecordConnectorACM {
 	private static final Logger log = Logger.getLogger(RefFetcherACM.class);
 	private Record record;
 	private ArrayList<Cite> citeList = new ArrayList<Cite>();
+	private ArrayList<String> incomingRecordNameList = new ArrayList<String>(); //names of Records that cite this record 
 	
 	public RecordConnectorACM(Record record){
 		this.record = record;
 	}
 	
 	public void connect(){
-		if(isValidRecord() == false){return;}
+		try {
+			validateRecord();
+		} catch (Exception e) {
+			return;
+		}
 
 		for(Cite cite: record.getCites()){
 			citeList.add(cite);
 		}
+		for(Cite incomingCite: record.getIncomingCites()){
+			incomingRecordNameList.add(incomingCite.getStartRecord().getName());
+		}
 		
 		for(HasRef hasRef: record.getHasRefs()){
-			URL acmURL = getAcmUrlFromReference(hasRef);
-			if(acmURL == null){
+			try {
+				checkCiteExistence(hasRef);
+				URL acmURL = getAcmUrlFromReference(hasRef);
+				Record targetRecord = findTargetRecord(acmURL);
+				detectLoop(targetRecord);
+				Cite cite = record.createCiteTo(targetRecord, hasRef.getCitation());
+				citeList.add(cite);
+			} catch (Exception e) {
 				continue;
 			}
-			if(isCiteExist(hasRef)){
-				continue;
-			}
-			
-			Record targetRecord = findTargetRecord(acmURL);
-			if(targetRecord == null){
-				continue;
-			}
-			
-			//TODO create Relationship CITE
-			
 		}
 	}
 	
-	private boolean isValidRecord(){
+	private void validateRecord() throws Exception{
 		if(record.getTextFile().exists() == false){
-			log.info("[CONNECT] textfile not exist");
-			return false;
+			log.info("textfile not exist");
+			throw new Exception("textfile not exist");
 		}
 		if(record.getRefCount() == 0){
-			log.info("[CONNECT] no reference");
-			return false;
+			log.info("no reference");
+			throw new Exception("no reference");
 		}
 		if(record.getCitationType() != Record.CitationType.NUMBER){
-			log.info("[CONNECT] not supported citation type");
-			return false;
+			log.info("not supported citation type");
+			throw new Exception("not supported citation type");
 		}
-		return true;
 	}
 	
-	private URL getAcmUrlFromReference(HasRef hasRef){
+	private void checkCiteExistence(HasRef hasRef) throws Exception{
+		for(Cite cite: citeList){
+			if(hasRef.getCitation().equals(cite.getStringCitation())){
+				throw new Exception("Cite already exists");
+			}
+		}
+	}
+
+	private URL getAcmUrlFromReference(HasRef hasRef) throws Exception{
 		URL acmURL = null;
 		
 		int acmCount = 0;
@@ -79,34 +89,31 @@ public class RecordConnectorACM {
 		}
 		
 		if(acmCount == 0){
-			return null;
+			throw new Exception("no ACM URL found in HasRef");
 		}else if(acmCount > 1){
-			log.error("[CONNECT] more than one matched URLs for ref with citation: " + hasRef.getIntCitation());
-			return null;
+			log.error("more than one matched URLs for ref with citation: " + hasRef.getCitation());
+			throw new Exception("more than one ACM URL found in HasRef");
 		}
 		
 		return acmURL;
 	}
 	
-	private boolean isCiteExist(HasRef hasRef){
-		for(Cite cite: citeList){
-			if(Integer.toString(hasRef.getIntCitation()).equals(cite.getStringCitation())){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private Record findTargetRecord(URL acmURL){
+	private Record findTargetRecord(URL acmURL) throws Exception{
 		RecordHits recordHits = Record.getRecordsWithEE(acmURL.toString());
 		if(recordHits.size() == 0){
-			return null;
+			throw new Exception("target Record not found");
 		}else if(recordHits.size() > 1){
-			log.error("[CONENCT] more than one record with EE: " + acmURL.toString());
+			log.error("more than one target Record with EE: " + acmURL.toString());
 			recordHits.close();
-			return null;
+			throw new Exception("more than one target Record found");
 		}else{
 			return recordHits.next();
+		}
+	}
+	
+	private void detectLoop(Record targetRecord) throws Exception{
+		if(incomingRecordNameList.contains(targetRecord.getName())){
+			throw new Exception("targetRecord already cite this record");
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package pishen.db;
 
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
@@ -46,6 +47,10 @@ public abstract class NodeShell extends ContainerShell {
 	
 	protected Iterable<Relationship> getRelationships(RelType relType){
 		return node.getRelationships(relType);
+	}
+	
+	protected Iterable<Relationship> getRelationships(RelType relType, Direction direction){
+		return node.getRelationships(relType, direction);
 	}
 	
 	protected void delete(){
