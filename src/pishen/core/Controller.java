@@ -19,7 +19,9 @@ public class Controller {
 	}
 	
 	public static void test(){
+		int count = 0;
 		for(Record record: Record.getAllRecords()){
+			log.info("[REFACTOR] #" + (++count) + " name=" + record.getName());
 			record.refactor();
 		}
 	}
