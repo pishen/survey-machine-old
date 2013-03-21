@@ -22,13 +22,19 @@ public class Controller {
 	public static void test(){
 		int count = 0;
 		int citeCount = 0;
+		int maxDegree = 0;
 		for(Record record: Record.getAllRecords()){
 			log.info("[TEST] #" + (++count) + " name=" + record.getName());
+			int degree = 0;
 			for(Cite cite: record.getCites()){
 				citeCount++;
+				degree++;
+			}
+			if(degree > maxDegree){
+				maxDegree = degree;
 			}
 		}
-		log.info("[TEST] citeCount=" + citeCount);
+		log.info("[TEST] citeCount=" + citeCount + " maxDegree=" + maxDegree);
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
