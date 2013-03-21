@@ -2,6 +2,7 @@ package pishen.core;
 
 import org.apache.log4j.Logger;
 
+import pishen.db.Cite;
 import pishen.db.DBHandler;
 import pishen.db.Record;
 import pishen.db.RecordHits;
@@ -19,8 +20,15 @@ public class Controller {
 	}
 	
 	public static void test(){
-		
-		
+		int count = 0;
+		int citeCount = 0;
+		for(Record record: Record.getAllRecords()){
+			log.info("[TEST] #" + (++count) + " name=" + record.getName());
+			for(Cite cite: record.getCites()){
+				citeCount++;
+			}
+		}
+		log.info("[TEST] citeCount=" + citeCount);
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
