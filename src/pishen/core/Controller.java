@@ -26,28 +26,32 @@ public class Controller {
 	public static void test(){
 		int count = 0;
 		int citeCount = 0;
-		int maxDegree = 0;
-		int[] degreeCounts = new int[430];
+		int[] inDegreeCounts = new int[430];
+		int[] outDegreeCounts = new int[430];
 		for(Record record: Record.getAllRecords()){
 			log.info("[TEST] #" + (++count) + " name=" + record.getName());
-			int degree = 0;
+			int inDegree = 0;
+			int outDegree = 0;
 			for(Cite cite: record.getOutgoingCites()){
 				citeCount++;
-				degree++;
+				outDegree++;
 			}
 			for(Cite cite: record.getIncomingCites()){
-				degree++;
+				inDegree++;
 			}
-			if(degree > maxDegree){
-				maxDegree = degree;
-			}
-			degreeCounts[degree]++;
+			
+			inDegreeCounts[inDegree]++;
+			outDegreeCounts[outDegree]++;
 		}
-		log.info("[TEST] citeCount=" + citeCount + " maxDegree=" + maxDegree);
 		try {
-			PrintWriter out = new PrintWriter(new File("degree-counts"));
+			PrintWriter out = new PrintWriter(new File("in-degree-counts"));
 			for(int i = 1; i <= 429; i++){
-				out.println(degreeCounts[i]);
+				out.println(inDegreeCounts[i]);
+			}
+			out.close();
+			out = new PrintWriter(new File("out-degree-counts"));
+			for(int i = 1; i <= 429; i++){
+				out.println(outDegreeCounts[i]);
 			}
 			out.close();
 		} catch (FileNotFoundException e) {
