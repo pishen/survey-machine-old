@@ -1,5 +1,9 @@
 package pishen.core;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 import org.apache.log4j.Logger;
 
 import pishen.db.Cite;
@@ -23,6 +27,7 @@ public class Controller {
 		int count = 0;
 		int citeCount = 0;
 		int maxDegree = 0;
+		int[] degreeCounts = new int[430];
 		for(Record record: Record.getAllRecords()){
 			log.info("[TEST] #" + (++count) + " name=" + record.getName());
 			int degree = 0;
@@ -36,8 +41,18 @@ public class Controller {
 			if(degree > maxDegree){
 				maxDegree = degree;
 			}
+			degreeCounts[degree]++;
 		}
 		log.info("[TEST] citeCount=" + citeCount + " maxDegree=" + maxDegree);
+		try {
+			PrintWriter out = new PrintWriter(new File("degree-counts"));
+			for(int i = 1; i <= 429; i++){
+				out.println(degreeCounts[i]);
+			}
+			out.close();
+		} catch (FileNotFoundException e) {
+			log.error("degree-counts output error", e);
+		}
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
