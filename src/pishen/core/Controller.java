@@ -26,8 +26,11 @@ public class Controller {
 		for(Record record: Record.getAllRecords()){
 			log.info("[TEST] #" + (++count) + " name=" + record.getName());
 			int degree = 0;
-			for(Cite cite: record.getCites()){
+			for(Cite cite: record.getOutgoingCites()){
 				citeCount++;
+				degree++;
+			}
+			for(Cite cite: record.getIncomingCites()){
 				degree++;
 			}
 			if(degree > maxDegree){

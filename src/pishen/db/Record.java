@@ -274,7 +274,7 @@ public class Record extends NodeShell {
 		}
 	}
 	
-	public CiteHits getCites(){
+	public CiteHits getOutgoingCites(){
 		return new CiteHits(super.getRelationships(RelType.CITE, Direction.OUTGOING));
 	}
 	

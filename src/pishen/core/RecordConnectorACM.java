@@ -28,7 +28,7 @@ public class RecordConnectorACM {
 			return;
 		}
 
-		for(Cite cite: record.getCites()){
+		for(Cite cite: record.getOutgoingCites()){
 			citeList.add(cite);
 		}
 		for(Cite incomingCite: record.getIncomingCites()){
