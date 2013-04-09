@@ -36,4 +36,10 @@ public class Cite extends RelationshipShell {
 	public Record getEndRecord(){
 		return new Record(super.getEndNode());
 	}
+
+	@Override
+	public void delete() {
+		super.delete();
+	}
+	
 }

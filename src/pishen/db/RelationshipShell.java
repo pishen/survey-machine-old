@@ -18,4 +18,8 @@ public class RelationshipShell extends ContainerShell {
 	protected Node getEndNode(){
 		return rel.getEndNode();
 	}
+	
+	protected void delete(){
+		rel.delete();
+	}
 }

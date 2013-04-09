@@ -138,6 +138,8 @@ public class Record extends NodeShell {
 		recordIndex.add(node, NAME, name);
 	}
 	
+	//TODO write CitationType to DB, update it (for UNKNOWN) if the rule change
+	//TODO remove the textfile and refcount checking requirement, use another CitationType instead
 	public CitationType getCitationType(){
 		File textFile = getTextFile();
 		if(textFile.exists() == false){
@@ -283,10 +285,25 @@ public class Record extends NodeShell {
 	}
 
 	public void delete(){
-		recordIndex.remove(node);
-		super.delete();
+		Transaction tx = DBHandler.getTransaction();
+		try{
+			recordIndex.remove(node);
+			super.delete();
+			tx.success();
+		}finally{
+			tx.finish();
+		}
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null || !(obj instanceof Record)){
+			return false;
+		}
+		Record targetRecord = (Record)obj;
+		return this.getName().equals(targetRecord.getName());
+	}
+
 	public File getPDFFile(){
 		return new File(PDF_DIR + "/" + getName() + ".pdf");
 	}
