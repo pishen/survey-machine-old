@@ -2,6 +2,7 @@ package pishen.db;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
 
 public class RelationshipShell extends ContainerShell {
 	private Relationship rel;
@@ -20,6 +21,12 @@ public class RelationshipShell extends ContainerShell {
 	}
 	
 	protected void delete(){
-		rel.delete();
+		Transaction tx = DBHandler.getTransaction();
+		try{
+			rel.delete();
+			tx.success();
+		}finally{
+			tx.finish();
+		}
 	}
 }
