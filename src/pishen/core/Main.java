@@ -32,6 +32,7 @@ public class Main {
 		options.addOption("r", true, "fetch paper ref");
 		options.addOption("l", false, "link the citation network");
 		options.addOption("t", false, "testing");
+		options.addOption("e", true, "evaluation");
 		
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = null;
@@ -56,6 +57,9 @@ public class Main {
 			}
 			if(cmd.hasOption("t")){
 				Controller.test();
+			}
+			if(cmd.hasOption("e")){
+				Controller.eval(Integer.parseInt(cmd.getOptionValue("e")));
 			}
 		} catch(RuntimeException e) {
 			log.error("Runtime error", e);
