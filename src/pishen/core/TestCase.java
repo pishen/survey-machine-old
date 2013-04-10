@@ -31,7 +31,9 @@ public class TestCase {
 	public static TestCase getSingleTestCase(){
 		TestCase testCase = null;
 		RecordHits allRecords = Record.getAllRecords();
+		int count = 0;
 		for(Record record: allRecords){
+			log.info("finding TestCase #" + (++count));
 			int citeCount = 0;
 			for(@SuppressWarnings("unused") Cite cite: record.getOutgoingCites()){
 				citeCount++;
@@ -50,7 +52,7 @@ public class TestCase {
 						}
 					}
 					//citedRecord may not be NUMBER if outCount == 0
-					if(outCount >= 3 && inCount >= 3){
+					if(outCount >= 3 && inCount >= 5){
 						log.info("found a TestCase");
 						testCase = new TestCase(record, citedRecord);
 						allRecords.close();

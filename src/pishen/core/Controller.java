@@ -1,5 +1,7 @@
 package pishen.core;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.Logger;
 
 import pishen.db.Cite;
@@ -89,6 +91,24 @@ public class Controller {
 		}
 	}
 	
-	 
+	public static void eval(int maxReturn){
+		TestCase testCase = TestCase.getSingleTestCase();
+		if(testCase == null){
+			log.info("[EVAL] TestCase not found.");
+			return;
+		}
+		
+		log.info("[EVAL] survey record: " + testCase.getSurveyRecord().getName());
+		log.info("[EVAL] test record: " + testCase.getTestRecord().getName());
+		
+		Cocitation cocitation = new Cocitation();
+		log.info("[EVAL] computing cocitation");
+		ArrayList<Record> rankList = cocitation.rank(testCase, maxReturn);
+		
+		Evaluator evaluator = new Evaluator(testCase);
+		log.info("[EVAL] computing F1");
+		double f1 = evaluator.computeF1(rankList);
+		log.info("[EVAL] F1=" + f1);
+	}
 	
 }

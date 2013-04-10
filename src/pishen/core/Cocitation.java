@@ -3,19 +3,18 @@ package pishen.core;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.apache.log4j.Logger;
-
 import pishen.db.Cite;
 import pishen.db.Record;
 
 public class Cocitation {
-	private static final Logger log = Logger.getLogger(Cocitation.class);
+	//private static final Logger log = Logger.getLogger(Cocitation.class);
 	
 	public ArrayList<Record> rank(TestCase testCase, int maxReturnSize){
 		Record testRecord = testCase.getTestRecord();
 		Record surveyRecord = testCase.getSurveyRecord();
 		int thresholdYear = testCase.getThresholdYear();
 		
+		//get records citing test record
 		ArrayList<Record> citingRecords = new ArrayList<Record>();
 		for(Cite cite: testRecord.getIncomingCites()){
 			Record citingRecord = cite.getStartRecord();
@@ -24,6 +23,7 @@ public class Cocitation {
 			}
 		}
 		
+		//get all candidate records for ranking
 		ArrayList<RecordShell> candidateList = new ArrayList<RecordShell>();
 		for(Record citingRecord: citingRecords){
 			for(Cite cite: citingRecord.getOutgoingCites()){
@@ -41,6 +41,7 @@ public class Cocitation {
 			}
 		}
 		
+		//make the ranklist
 		Collections.sort(candidateList);
 		ArrayList<Record> rankList = new ArrayList<Record>();
 		for(int i = 0; i < maxReturnSize; i++){

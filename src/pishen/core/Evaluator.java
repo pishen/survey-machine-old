@@ -8,13 +8,11 @@ import pishen.db.Record;
 
 public class Evaluator {
 	private Record surveyRecord;
-	private int thresholdYear;
 	private Record testRecord;
 	private ArrayList<Record> ansRecords = new ArrayList<Record>();
 	
 	public Evaluator(TestCase testCase){
 		this.surveyRecord = testCase.getSurveyRecord();
-		this.thresholdYear = testCase.getThresholdYear();
 		this.testRecord = testCase.getTestRecord();
 		
 		for(Cite cite: surveyRecord.getOutgoingCites()){
