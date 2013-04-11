@@ -100,10 +100,11 @@ public class Controller {
 		
 		log.info("[EVAL] survey record: " + testCase.getSurveyRecord().getName());
 		log.info("[EVAL] test record: " + testCase.getTestRecord().getName());
+		log.info("[EVAL] ans size=" + testCase.getAnsSize());
 		
 		Cocitation cocitation = new Cocitation();
 		log.info("[EVAL] computing cocitation");
-		ArrayList<Record> rankList = cocitation.rank(testCase, maxReturn);
+		ArrayList<Record> rankList = cocitation.rank(testCase, testCase.getAnsSize());
 		
 		Evaluator evaluator = new Evaluator(testCase);
 		log.info("[EVAL] computing F1");

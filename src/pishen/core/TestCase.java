@@ -20,6 +20,14 @@ public class TestCase {
 		return surveyRecord;
 	}
 	
+	public int getAnsSize(){
+		int count = 0;
+		for(@SuppressWarnings("unused") Cite cite: surveyRecord.getOutgoingCites()){
+			count++;
+		}
+		return count - 1;
+	}
+	
 	public Record getTestRecord(){
 		return testRecord;
 	}
