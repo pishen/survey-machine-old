@@ -107,6 +107,8 @@ public class Controller {
 		
 		Evaluator evaluator = new Evaluator(testCase);
 		log.info("[EVAL] computing F1");
+		log.info("[EVAL] precision=" + evaluator.computePrecision(rankList));
+		log.info("[EVAL] recall=" + evaluator.computeRecall(rankList));
 		double f1 = evaluator.computeF1(rankList);
 		log.info("[EVAL] F1=" + f1);
 	}

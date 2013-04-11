@@ -22,6 +22,26 @@ public class Evaluator {
 		}
 	}
 	
+	public double computePrecision(List<Record> rankList){
+		int hit = 0;
+		for(Record guess: rankList){
+			if(ansRecords.contains(guess)){
+				hit++;
+			}
+		}
+		return hit / (double)rankList.size();
+	}
+	
+	public double computeRecall(List<Record> rankList){
+		int hit = 0;
+		for(Record guess: rankList){
+			if(ansRecords.contains(guess)){
+				hit++;
+			}
+		}
+		return hit / (double)ansRecords.size();
+	}
+	
 	public double computeF1(List<Record> rankList){
 		int hit = 0;
 		for(Record guess: rankList){
