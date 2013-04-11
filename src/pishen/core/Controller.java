@@ -104,7 +104,7 @@ public class Controller {
 		
 		Cocitation cocitation = new Cocitation();
 		log.info("[EVAL] computing cocitation");
-		ArrayList<Record> rankList = cocitation.rank(testCase, testCase.getAnsSize());
+		ArrayList<Record> rankList = cocitation.rank(testCase, maxReturn);
 		
 		Evaluator evaluator = new Evaluator(testCase);
 		log.info("[EVAL] computing F1");
@@ -112,6 +112,11 @@ public class Controller {
 		log.info("[EVAL] recall=" + evaluator.computeRecall(rankList));
 		double f1 = evaluator.computeF1(rankList);
 		log.info("[EVAL] F1=" + f1);
+		
+		int count = 0;
+		for(Record record: rankList){
+			log.info("[EVAL] rank #" + (++count) + " " + record.getTitle());
+		}
 	}
 	
 }
