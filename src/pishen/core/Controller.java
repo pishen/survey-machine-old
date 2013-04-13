@@ -24,14 +24,20 @@ public class Controller {
 		DBHandler.startGraphDB();
 	}
 	
-	public static void test(){
+	public static void test(int threshold){
 		try {
 			PrintWriter out = new PrintWriter(new FileWriter("graph-file"));
 			
 			for(Record record: Record.getAllRecords()){
+				if(record.getId() > threshold){
+					continue;
+				}
 				out.print(record.getId());
 				boolean empty = true;
 				for(Cite cite: record.getOutgoingCites()){
+					if(cite.getEndRecord().getId() > threshold){
+						continue;
+					}
 					if(empty){
 						empty = false;
 						out.print("->" + cite.getEndRecord().getId());
