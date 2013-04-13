@@ -283,6 +283,10 @@ public class Record extends NodeShell {
 	public CiteHits getIncomingCites(){
 		return new CiteHits(super.getRelationships(RelType.CITE, Direction.INCOMING));
 	}
+	
+	public long getId(){
+		return node.getId();
+	}
 
 	public void delete(){
 		Transaction tx = DBHandler.getTransaction();

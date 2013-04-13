@@ -1,5 +1,8 @@
 package pishen.core;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -22,16 +25,26 @@ public class Controller {
 	}
 	
 	public static void test(){
-		//refactor, remove Cite that pointing to future
-		int count = 0;
-		for(Record record: Record.getAllRecords()){
-			log.info("[TEST] #" + (++count) + " find illegal cite");
-			for(Cite cite: record.getOutgoingCites()){
-				if(cite.getEndRecord().getYear() > record.getYear()){
-					log.info("DELETE");
-					cite.delete();
+		try {
+			PrintWriter out = new PrintWriter(new FileWriter("graph-file"));
+			
+			for(Record record: Record.getAllRecords()){
+				out.print(record.getId());
+				boolean empty = true;
+				for(Cite cite: record.getOutgoingCites()){
+					if(empty){
+						empty = false;
+						out.print("->" + cite.getEndRecord().getId());
+					}else{
+						out.print("," + cite.getEndRecord().getId());
+					}
 				}
+				out.println();
 			}
+			
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
