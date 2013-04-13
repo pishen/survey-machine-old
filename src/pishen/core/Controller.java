@@ -29,6 +29,7 @@ public class Controller {
 			PrintWriter out = new PrintWriter(new FileWriter("graph-file"));
 			
 			for(Record record: Record.getAllRecords()){
+				log.info("parsing node #" + record.getId());
 				if(record.getId() > threshold){
 					continue;
 				}
