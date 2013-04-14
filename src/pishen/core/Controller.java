@@ -46,6 +46,17 @@ public class Controller {
 						out.print("," + cite.getEndRecord().getId());
 					}
 				}
+				for(Cite cite: record.getIncomingCites()){
+					if(cite.getEndRecord().getId() > threshold){
+						continue;
+					}
+					if(empty){
+						empty = false;
+						out.print("->" + cite.getEndRecord().getId());
+					}else{
+						out.print("," + cite.getEndRecord().getId());
+					}
+				}
 				out.println();
 			}
 			
