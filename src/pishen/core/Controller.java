@@ -47,14 +47,14 @@ public class Controller {
 					}
 				}
 				for(Cite cite: record.getIncomingCites()){
-					if(cite.getEndRecord().getId() > threshold){
+					if(cite.getStartRecord().getId() > threshold){
 						continue;
 					}
 					if(empty){
 						empty = false;
-						out.print("->" + cite.getEndRecord().getId());
+						out.print("->" + cite.getStartRecord().getId());
 					}else{
-						out.print("," + cite.getEndRecord().getId());
+						out.print("," + cite.getStartRecord().getId());
 					}
 				}
 				out.println();
