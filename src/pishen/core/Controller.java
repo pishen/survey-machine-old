@@ -87,12 +87,13 @@ public class Controller {
 		
 		log.info("[EVAL] survey record: " + testCase.getSurveyRecord().getName());
 		log.info("[EVAL] test record: " + testCase.getTestRecord().getName());
-		log.info("[EVAL] ans size=" + testCase.getAnsSize());
+		log.info("[EVAL] testcase ans size=" + testCase.getAnsSize());
 		
 		Cocitation cocitation = new Cocitation(testCase);
 		log.info("[EVAL] computing cocitation");
 		
 		Evaluator evaluator = new Evaluator(testCase, cocitation.getCandidateList(), cocitation.rank(maxReturn));
+		log.info("[EVAL] evaluator ans size=" + evaluator.getAnsSize());
 		log.info("[EVAL] accuracy=" + evaluator.getAccuracy());
 		log.info("[EVAL] precision=" + evaluator.getPrecision());
 		log.info("[EVAL] recall=" + evaluator.getRecall());

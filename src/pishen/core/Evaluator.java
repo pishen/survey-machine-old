@@ -41,6 +41,10 @@ public class Evaluator {
 		f1 = 2 * (precision * recall / (precision + recall));
 	}
 	
+	public int getAnsSize(){
+		return ansRecords.size();
+	}
+	
 	public double getAccuracy(){
 		return accuracy;
 	}
