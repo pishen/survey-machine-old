@@ -10,47 +10,50 @@ public class Evaluator {
 	private Record surveyRecord;
 	private Record testRecord;
 	private ArrayList<Record> ansRecords = new ArrayList<Record>();
+	private int tp, tn, fp, fn;
+	private double accuracy, recall, precision, f1;
 	
-	public Evaluator(TestCase testCase){
+	public Evaluator(TestCase testCase, List<Record> candidateList, List<Record> rankList){
 		this.surveyRecord = testCase.getSurveyRecord();
 		this.testRecord = testCase.getTestRecord();
 		
 		for(Cite cite: surveyRecord.getOutgoingCites()){
-			if(!cite.getEndRecord().equals(testRecord)){
-				ansRecords.add(cite.getEndRecord());
+			Record candidateAns = cite.getEndRecord();
+			if(!candidateAns.equals(testRecord) && candidateList.contains(candidateAns)){
+				ansRecords.add(candidateAns);
 			}
 		}
-	}
-	
-	public double computePrecision(List<Record> rankList){
-		int hit = 0;
+		
 		for(Record guess: rankList){
 			if(ansRecords.contains(guess)){
-				hit++;
+				tp++;
+			}else{
+				fp++;
 			}
 		}
-		return hit / (double)rankList.size();
+		
+		fn = ansRecords.size() - tp;
+		tn = candidateList.size() - ansRecords.size() - fp;
+		
+		accuracy = (tp + tn) / (double)(tp + fp + fn + tn);
+		precision = tp / (double)(tp + fp);
+		recall = tp / (double)(tp + fn);
+		f1 = 2 * (precision * recall / (precision + recall));
 	}
 	
-	public double computeRecall(List<Record> rankList){
-		int hit = 0;
-		for(Record guess: rankList){
-			if(ansRecords.contains(guess)){
-				hit++;
-			}
-		}
-		return hit / (double)ansRecords.size();
+	public double getAccuracy(){
+		return accuracy;
 	}
 	
-	public double computeF1(List<Record> rankList){
-		int hit = 0;
-		for(Record guess: rankList){
-			if(ansRecords.contains(guess)){
-				hit++;
-			}
-		}
-		double precision = hit / (double)rankList.size();
-		double recall = hit / (double)ansRecords.size();
-		return 2 * (precision * recall / (precision + recall));
+	public double getPrecision(){
+		return precision;
+	}
+	
+	public double getRecall(){
+		return recall;
+	}
+	
+	public double getF1(){
+		return f1;
 	}
 }

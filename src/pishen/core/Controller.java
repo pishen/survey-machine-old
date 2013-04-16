@@ -1,13 +1,7 @@
 package pishen.core;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-
 import org.apache.log4j.Logger;
 
-import pishen.db.Cite;
 import pishen.db.DBHandler;
 import pishen.db.Record;
 import pishen.db.RecordHits;
@@ -24,46 +18,8 @@ public class Controller {
 		DBHandler.startGraphDB();
 	}
 	
-	public static void test(int threshold){
-		try {
-			PrintWriter out = new PrintWriter(new FileWriter("graph-file"));
-			
-			for(Record record: Record.getAllRecords()){
-				log.info("parsing node #" + record.getId());
-				if(record.getId() > threshold){
-					continue;
-				}
-				out.print(record.getId());
-				boolean empty = true;
-				for(Cite cite: record.getOutgoingCites()){
-					if(cite.getEndRecord().getId() > threshold){
-						continue;
-					}
-					if(empty){
-						empty = false;
-						out.print("->" + cite.getEndRecord().getId());
-					}else{
-						out.print("," + cite.getEndRecord().getId());
-					}
-				}
-				for(Cite cite: record.getIncomingCites()){
-					if(cite.getStartRecord().getId() > threshold){
-						continue;
-					}
-					if(empty){
-						empty = false;
-						out.print("->" + cite.getStartRecord().getId());
-					}else{
-						out.print("," + cite.getStartRecord().getId());
-					}
-				}
-				out.println();
-			}
-			
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public static void test(){
+		
 	}
 	
 	public static void copyDBLPInfo() throws Exception{
@@ -133,21 +89,14 @@ public class Controller {
 		log.info("[EVAL] test record: " + testCase.getTestRecord().getName());
 		log.info("[EVAL] ans size=" + testCase.getAnsSize());
 		
-		Cocitation cocitation = new Cocitation();
+		Cocitation cocitation = new Cocitation(testCase);
 		log.info("[EVAL] computing cocitation");
-		ArrayList<Record> rankList = cocitation.rank(testCase, maxReturn);
 		
-		Evaluator evaluator = new Evaluator(testCase);
-		log.info("[EVAL] computing F1");
-		log.info("[EVAL] precision=" + evaluator.computePrecision(rankList));
-		log.info("[EVAL] recall=" + evaluator.computeRecall(rankList));
-		double f1 = evaluator.computeF1(rankList);
-		log.info("[EVAL] F1=" + f1);
-		
-		int count = 0;
-		for(Record record: rankList){
-			log.info("[EVAL] rank #" + (++count) + " " + record.getTitle());
-		}
+		Evaluator evaluator = new Evaluator(testCase, cocitation.getCandidateList(), cocitation.rank(maxReturn));
+		log.info("[EVAL] accuracy=" + evaluator.getAccuracy());
+		log.info("[EVAL] precision=" + evaluator.getPrecision());
+		log.info("[EVAL] recall=" + evaluator.getRecall());
+		log.info("[EVAL] F1=" + evaluator.getF1());
 	}
 	
 }

@@ -2,14 +2,16 @@ package pishen.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import pishen.db.Cite;
 import pishen.db.Record;
 
 public class Cocitation {
 	//private static final Logger log = Logger.getLogger(Cocitation.class);
+	private ArrayList<RecordShell> candidateList = new ArrayList<RecordShell>();
 	
-	public ArrayList<Record> rank(TestCase testCase, int maxReturnSize){
+	public Cocitation(TestCase testCase){
 		Record testRecord = testCase.getTestRecord();
 		Record surveyRecord = testCase.getSurveyRecord();
 		int thresholdYear = testCase.getThresholdYear();
@@ -24,7 +26,6 @@ public class Cocitation {
 		}
 		
 		//get all candidate records for ranking
-		ArrayList<RecordShell> candidateList = new ArrayList<RecordShell>();
 		for(Record citingRecord: citingRecords){
 			for(Cite cite: citingRecord.getOutgoingCites()){
 				Record citedRecord = cite.getEndRecord();
@@ -40,15 +41,26 @@ public class Cocitation {
 				}
 			}
 		}
-		
-		//make the ranklist
+		//sort it
 		Collections.sort(candidateList);
+	}
+	
+	public ArrayList<Record> rank(int maxReturnSize){
+		//make the ranklist
 		ArrayList<Record> rankList = new ArrayList<Record>();
 		for(int i = 0; i < maxReturnSize; i++){
 			rankList.add(candidateList.get(i).getRecord());
 		}
 		
 		return rankList;
+	}
+	
+	public List<Record> getCandidateList(){
+		List<Record> candidateRecordList = new ArrayList<Record>();
+		for(RecordShell shell: candidateList){
+			candidateRecordList.add(shell.getRecord());
+		}
+		return candidateRecordList;
 	}
 	
 	private class RecordShell implements Comparable<RecordShell> {
