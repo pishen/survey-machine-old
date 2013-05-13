@@ -78,26 +78,9 @@ public class Controller {
 		}
 	}
 	
-	public static void eval(int maxReturn){
-		TestCase testCase = TestCase.getSingleTestCase();
-		if(testCase == null){
-			log.info("[EVAL] TestCase not found.");
-			return;
-		}
+	public static void eval(){
+		TestCase.findTestCases(10);
 		
-		log.info("[EVAL] survey record: " + testCase.getSurveyRecord().getName());
-		log.info("[EVAL] test record: " + testCase.getTestRecord().getName());
-		log.info("[EVAL] testcase ans size=" + testCase.getAnsSize());
-		
-		Cocitation cocitation = new Cocitation(testCase);
-		log.info("[EVAL] computing cocitation");
-		
-		Evaluator evaluator = new Evaluator(testCase, cocitation.getCandidateList(), cocitation.rank(maxReturn));
-		log.info("[EVAL] evaluator ans size=" + evaluator.getAnsSize());
-		log.info("[EVAL] accuracy=" + evaluator.getAccuracy());
-		log.info("[EVAL] precision=" + evaluator.getPrecision());
-		log.info("[EVAL] recall=" + evaluator.getRecall());
-		log.info("[EVAL] F1=" + evaluator.getF1());
 	}
 	
 }

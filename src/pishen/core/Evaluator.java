@@ -1,63 +1,64 @@
 package pishen.core;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import pishen.db.Cite;
 import pishen.db.Record;
 
 public class Evaluator {
-	private Record surveyRecord;
-	private Record testRecord;
-	private ArrayList<Record> ansRecords = new ArrayList<Record>();
-	private int tp, tn, fp, fn;
-	private double accuracy, recall, precision, f1;
 	
-	public Evaluator(TestCase testCase, List<Record> candidateList, List<Record> rankList){
-		this.surveyRecord = testCase.getSurveyRecord();
-		this.testRecord = testCase.getTestRecord();
+	public double getMAP(List<ListBundle> bundleList){
+		double sumAvgPrecision = 0.0;
+		for(ListBundle bundle: bundleList){
+			sumAvgPrecision += getAvgPrecision(bundle.ansList, bundle.rankList);
+		}
+		return sumAvgPrecision / (double)bundleList.size();
+	}
+	
+	public class ListBundle{
+		private List<Record> ansList;
+		private List<Record> rankList;
 		
-		for(Cite cite: surveyRecord.getOutgoingCites()){
-			Record candidateAns = cite.getEndRecord();
-			if(!candidateAns.equals(testRecord) && candidateList.contains(candidateAns)){
-				ansRecords.add(candidateAns);
+		public ListBundle(List<Record> ansList, List<Record> rankList){
+			this.ansList = ansList;
+			this.rankList = rankList;
+		}
+	}
+	
+	public double getAvgPrecision(List<Record> ansList, List<Record> rankList){
+		int hit = 0;
+		double sumPrecision = 0.0;
+		for(int i = 0; i < rankList.size(); i++){
+			if(ansList.contains(rankList.get(i))){
+				hit++;
+				sumPrecision += hit / (double)(i + 1);
 			}
 		}
-		
-		for(Record guess: rankList){
-			if(ansRecords.contains(guess)){
-				tp++;
-			}else{
-				fp++;
+		return sumPrecision / (double)ansList.size();
+	}
+	
+	public double getPrecision(List<Record> ansList, List<Record> rankList){
+		return countHit(ansList, rankList) / (double)rankList.size();
+	}
+	
+	public double getRecall(List<Record> ansList, List<Record> rankList){
+		return countHit(ansList, rankList) / (double)ansList.size();
+	}
+	
+	public double getF1(List<Record> ansList, List<Record> rankList){
+		int hit = countHit(ansList, rankList);
+		double precision = hit / (double)rankList.size();
+		double recall = hit / (double)ansList.size();
+		return (2 * precision * recall) / (precision + recall);
+	}
+	
+	private int countHit(List<Record> ansList, List<Record> rankList){
+		int hit = 0;
+		for(int i = 0; i < rankList.size(); i++){
+			if(ansList.contains(rankList.get(i))){
+				hit++;
 			}
 		}
-		
-		fn = ansRecords.size() - tp;
-		tn = candidateList.size() - ansRecords.size() - fp;
-		
-		accuracy = (tp + tn) / (double)(tp + fp + fn + tn);
-		precision = tp / (double)(tp + fp);
-		recall = tp / (double)(tp + fn);
-		f1 = 2 * (precision * recall / (precision + recall));
+		return hit;
 	}
 	
-	public int getAnsSize(){
-		return ansRecords.size();
-	}
-	
-	public double getAccuracy(){
-		return accuracy;
-	}
-	
-	public double getPrecision(){
-		return precision;
-	}
-	
-	public double getRecall(){
-		return recall;
-	}
-	
-	public double getF1(){
-		return f1;
-	}
 }

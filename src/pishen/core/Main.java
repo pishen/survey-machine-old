@@ -59,7 +59,7 @@ public class Main {
 				Controller.test();
 			}
 			if(cmd.hasOption("e")){
-				Controller.eval(Integer.parseInt(cmd.getOptionValue("e")));
+				Controller.eval();
 			}
 		} catch(RuntimeException e) {
 			log.error("Runtime error", e);

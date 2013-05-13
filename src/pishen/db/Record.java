@@ -138,59 +138,6 @@ public class Record extends NodeShell {
 		recordIndex.add(node, NAME, name);
 	}
 	
-	//TODO write CitationType to DB, update it (for UNKNOWN) if the rule change
-	//TODO remove the textfile and refcount checking requirement, use another CitationType instead
-	public CitationType getCitationType(){
-		File textFile = getTextFile();
-		if(textFile.exists() == false){
-			throw new IllegalOperationException("check existence of textfile before calling");
-		}
-		
-		if(this.getRefCount() == 0){
-			throw new IllegalOperationException("check num of reference > 0 before calling");
-		}
-		
-		String recordContent;
-		try {
-			recordContent = Files.toString(textFile, Charsets.UTF_8);
-		} catch (IOException e) {
-			log.error("error when reading textfile", e);
-			return null;
-		}
-		Pattern pattern = Pattern.compile("\\[([^\\[\\]]*)\\]");
-		Matcher matcher = pattern.matcher(recordContent);
-		
-		boolean[] citationCheck = new boolean[getRefCount()];
-		boolean hasMark = false;
-		
-		while(matcher.find()){
-			hasMark = true;
-			String stringInBrackets = matcher.group(1);
-			CitationMark mark = new CitationMark(stringInBrackets);
-			if(mark.getType() == CitationMark.Type.NUMBER){
-				for(int citation: mark.getIntCitations()){
-					if(citation > citationCheck.length){
-						return CitationType.OVERFLOW;
-					}else{
-						citationCheck[citation - 1] = true;
-					}
-				}
-			}
-		}
-		
-		if(hasMark == false){
-			return CitationType.NO_MARK;
-		}
-		
-		for(boolean check: citationCheck){
-			if(check == false){
-				return CitationType.UNKNOWN;
-			}
-		}
-		
-		return CitationType.NUMBER;
-	}
-	
 	public String getName(){
 		return super.getStringProperty(NAME);
 	}
@@ -252,9 +199,10 @@ public class Record extends NodeShell {
 		return new HasRef(rel);
 	}
 	
+	@SuppressWarnings("unused")
 	public int getRefCount(){
 		int count = 0;
-		for(@SuppressWarnings("unused") HasRef hasRef: getHasRefs()){
+		for(HasRef hasRef: getHasRefs()){
 			count++;
 		}
 		return count;
@@ -276,6 +224,58 @@ public class Record extends NodeShell {
 		}
 	}
 	
+	//TODO write CitationType to DB, update it (for UNKNOWN) if the rule change?
+	public CitationType getCitationType(){
+		File textFile = getTextFile();
+		if(textFile.exists() == false){
+			return CitationType.UNKNOWN;
+		}
+		
+		if(this.getRefCount() == 0){
+			return CitationType.NO_MARK;
+		}
+		
+		String recordContent;
+		try {
+			recordContent = Files.toString(textFile, Charsets.UTF_8);
+		} catch (IOException e) {
+			log.error("error when reading textfile", e);
+			return null;
+		}
+		Pattern pattern = Pattern.compile("\\[([^\\[\\]]*)\\]");
+		Matcher matcher = pattern.matcher(recordContent);
+		
+		boolean[] citationCheck = new boolean[getRefCount()];
+		boolean hasMark = false;
+		
+		while(matcher.find()){
+			hasMark = true;
+			String stringInBrackets = matcher.group(1);
+			CitationMark mark = new CitationMark(stringInBrackets);
+			if(mark.getType() == CitationMark.Type.NUMBER){
+				for(int citation: mark.getIntCitations()){
+					if(citation > citationCheck.length){
+						return CitationType.OVERFLOW;
+					}else{
+						citationCheck[citation - 1] = true;
+					}
+				}
+			}
+		}
+		
+		if(hasMark == false){
+			return CitationType.NO_MARK;
+		}
+		
+		for(boolean check: citationCheck){
+			if(check == false){
+				return CitationType.UNKNOWN;
+			}
+		}
+		
+		return CitationType.NUMBER;
+	}
+
 	public CiteHits getOutgoingCites(){
 		return new CiteHits(super.getRelationships(RelType.CITE, Direction.OUTGOING));
 	}

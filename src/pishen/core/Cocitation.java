@@ -2,6 +2,8 @@ package pishen.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import pishen.db.Cite;
@@ -9,94 +11,51 @@ import pishen.db.Record;
 
 public class Cocitation {
 	//private static final Logger log = Logger.getLogger(Cocitation.class);
-	private ArrayList<RecordShell> candidateList = new ArrayList<RecordShell>();
+	private ArrayList<Record> rankList = new ArrayList<Record>();
+	private HashMap<Record, Integer> countMap = new HashMap<Record, Integer>();
 	
-	public Cocitation(TestCase testCase){
-		Record testRecord = testCase.getTestRecord();
-		Record surveyRecord = testCase.getSurveyRecord();
-		int thresholdYear = testCase.getThresholdYear();
-		
-		//get records citing test record
-		ArrayList<Record> citingRecords = new ArrayList<Record>();
-		for(Cite cite: testRecord.getIncomingCites()){
-			Record citingRecord = cite.getStartRecord();
-			if(!citingRecord.equals(surveyRecord) && citingRecord.getYear() <= thresholdYear){
-				citingRecords.add(citingRecord);
-			}
-		}
-		
-		//get all candidate records for ranking
-		for(Record citingRecord: citingRecords){
-			for(Cite cite: citingRecord.getOutgoingCites()){
-				Record citedRecord = cite.getEndRecord();
-				if(!citedRecord.equals(testRecord) && !citedRecord.equals(surveyRecord)){
-					RecordShell recordShell = new RecordShell(citedRecord);
-					int index = 0;
-					if((index = candidateList.indexOf(recordShell)) >= 0){
-						recordShell = candidateList.get(index);
-					}else{
-						candidateList.add(recordShell);
+	public Cocitation(List<Record> seedRecords, Record hidedRecord){
+		for(Record seed: seedRecords){
+			for(Cite stepOneCite: seed.getIncomingCites()){
+				Record citingRecord = stepOneCite.getStartRecord();
+				if(citingRecord.getCitationType() != Record.CitationType.NUMBER
+						|| citingRecord.equals(hidedRecord)
+						|| citingRecord.getYear() > hidedRecord.getYear()){
+					continue;
+				}
+				for(Cite stepTwoCite: citingRecord.getOutgoingCites()){
+					Record targetRecord = stepTwoCite.getEndRecord();
+					if(targetRecord.getCitationType() != Record.CitationType.NUMBER
+							|| seedRecords.contains(targetRecord)
+							|| targetRecord.equals(hidedRecord)){
+						continue;
 					}
-					recordShell.addTimes();
+					if(countMap.containsKey(targetRecord)){
+						countMap.put(targetRecord, countMap.get(targetRecord) + 1);
+					}else{
+						countMap.put(targetRecord, 1);
+						rankList.add(targetRecord);
+					}
 				}
 			}
 		}
-		//sort it
-		Collections.sort(candidateList);
+		Collections.sort(rankList, new rankRecordComparator());
 	}
 	
-	public ArrayList<Record> rank(int maxReturnSize){
-		//make the ranklist
-		ArrayList<Record> rankList = new ArrayList<Record>();
-		for(int i = 0; i < maxReturnSize; i++){
-			rankList.add(candidateList.get(i).getRecord());
-		}
-		
-		return rankList;
-	}
-	
-	public List<Record> getCandidateList(){
-		List<Record> candidateRecordList = new ArrayList<Record>();
-		for(RecordShell shell: candidateList){
-			candidateRecordList.add(shell.getRecord());
-		}
-		return candidateRecordList;
-	}
-	
-	private class RecordShell implements Comparable<RecordShell> {
-		private int times;
-		private Record record;
-		
-		public RecordShell(Record record){
-			this.record = record;
-		}
-		
-		public void addTimes(){
-			times++;
-		}
-		
-		public int getTimes(){
-			return times;
-		}
-		
-		public Record getRecord(){
-			return record;
-		}
-
+	private class rankRecordComparator implements Comparator<Record>{
 		@Override
-		public boolean equals(Object obj) {
-			if(obj == null || !(obj instanceof RecordShell)){
-				return false;
-			}
-			RecordShell targetRecordShell = (RecordShell)obj;
-			return this.record.equals(targetRecordShell.getRecord());
+		public int compare(Record record0, Record record1) {
+			//descending
+			return countMap.get(record1) - countMap.get(record0);
 		}
-
-		@Override
-		public int compareTo(RecordShell targetRecordShell) {
-			//descending order
-			return targetRecordShell.getTimes() - this.times;
-		}
-		
 	}
+	
+	public List<Record> getRankList(int topK){
+		List<Record> subRankList = new ArrayList<Record>();
+		for(int i = 0; i < topK; i++){
+			subRankList.add(rankList.get(i));
+		}
+		return subRankList;
+	}
+	
 }
