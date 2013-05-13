@@ -32,7 +32,7 @@ public class Main {
 		options.addOption("r", true, "fetch paper ref");
 		options.addOption("l", false, "link the citation network");
 		options.addOption("t", false, "testing");
-		options.addOption("e", true, "evaluation");
+		options.addOption("e", false, "evaluation");
 		
 		CommandLineParser parser = new PosixParser();
 		CommandLine cmd = null;
