@@ -7,8 +7,8 @@ import org.neo4j.graphdb.Transaction;
 public class RelationshipShell extends ContainerShell {
 	private Relationship rel;
 
-	protected RelationshipShell(Relationship rel) {
-		super(rel);
+	protected RelationshipShell(Relationship rel, DBHandler dbHandler) {
+		super(rel, dbHandler);
 		this.rel = rel;
 	}
 	
@@ -21,7 +21,7 @@ public class RelationshipShell extends ContainerShell {
 	}
 	
 	protected void delete(){
-		Transaction tx = DBHandler.getTransaction();
+		Transaction tx = dbHandler.getTransaction();
 		try{
 			rel.delete();
 			tx.success();

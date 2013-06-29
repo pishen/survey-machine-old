@@ -11,119 +11,74 @@ import org.neo4j.tooling.GlobalGraphOperations;
 
 public class DBHandler {
 	private static final Logger log = Logger.getLogger(DBHandler.class);
-	//private static final String CONCAT_KEY = createConcatenatedKey();
-	private static GraphDatabaseService graphDB;
-	//private static ReadableIndex<Node> autoNodeIndex;
-	//private static RecordHits allRecordHits;
-	//private static int count;
 	
-	public static void startGraphDB(){
-		log.info("starting graph DB");
-		graphDB = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder("graph-db").newGraphDatabase();
+	private static final String TYPE_INDEX = "TYPE_INDEX";
+	private static final String TYPE = "TYPE";
+	private static final String RECORD = "RECORD";
+	
+	private GraphDatabaseService graphDB;
+
+	private NodeIndexShell typeIndex;
+	
+	public DBHandler(final String dbName){
+		log.info("starting DB: " + dbName);
+		graphDB = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbName).newGraphDatabase();
 		
-		//autoNodeIndex = graphDB.index().getNodeAutoIndexer().getAutoIndex();
-		Record.connectNodeIndex();
+		//Record.connectNodeIndex(this);
+		typeIndex = getIndexForNodes(TYPE_INDEX);
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 			public void run(){
-				log.info("shutting down graphDB");
+				log.info("shutting down DB: " + dbName);
 				graphDB.shutdown();
 			}
 		});
 	}
 	
-	/*public static void initRecordIterator(){
-		allRecordHits = getAllRecords();
-		count = 0;
-	}
-	
-	public static synchronized int count(){
-		return ++count;
-	}
-	
-	public static synchronized Record getNextRecord(){
-		if(allRecordHits.hasNext()){
-			return allRecordHits.next();
-		}else{
-			return null;
-		}
-	}*/
-	/*
-	public static RecordHits getAllRecords(){
-		IndexHits<Node> indexHits = autoNodeIndex.get(NODE_TYPE, NodeType.RECORD.toString());
-		return new RecordHits(indexHits);
-	}
-	
-	public static RecordHits getRecords(RecordKey key, Object value){
-		IndexHits<Node> hits = autoNodeIndex.get(key.toString(), value);
-		return new RecordHits(hits);
-	}*/
-	/*
-	public static Record getOrCreateRecord(String recordName){
-		Transaction tx = graphDB.beginTx();;
-		try {
-			Node node = autoNodeIndex.get(Record.NAME, recordName).getSingle();
-			if(node == null){
-				node = graphDB.createNode();
-				node.setProperty(NODE_TYPE, NodeType.RECORD.toString());
-				node.setProperty(Record.NAME, recordName);
-			}
-			tx.success();
-			return new Record(node);
-		} finally {
-			tx.finish();
-		}
-	}
-	*/
-	/*public static Reference createReference(){
-		Transaction tx = graphDB.beginTx();
-		try {
-			Node node = graphDB.createNode();
-			node.setProperty(NODE_TYPE, NodeType.REFERENCE.toString());
-			tx.success();
-			return new Reference(node);
-		} finally {
-			tx.finish();
-		}
-	}*/
-	
-	public static Transaction getTransaction(){
+	public Transaction getTransaction(){
 		return graphDB.beginTx();
 	}
 	
-	protected static Iterable<Node> getAllNodes(){
-		return GlobalGraphOperations.at(graphDB).getAllNodes();
-	}
-	
-	protected static Node createNode(){
-		Transaction tx = graphDB.beginTx();
-		try{
-			Node newNode = graphDB.createNode(); 
-			tx.success();
-			return newNode;
-		}finally{
-			tx.finish();
+	//node handling
+	public Record getOrCreateRecord(String recordName){
+		Node node = getIndexForNodes(Record.RECORD_INDEX).get(Record.NAME, recordName).getSingle();
+		if(node == null){
+			Transaction tx = graphDB.beginTx();
+			try{
+				//atomic: create the node and initialize it with TYPE and NAME
+				log.info("create new Record with name: " + recordName);
+				
+				node = graphDB.createNode();
+				
+				node.setProperty(TYPE, RECORD);
+				typeIndex.add(node, TYPE, RECORD);
+				
+				Record newRecord = new Record(node, this, recordName);
+				
+				tx.success();
+				return newRecord;
+			}finally{
+				tx.finish();
+			}
+		}else{
+			return new Record(node, this);
 		}
 	}
 	
-	protected static Index<Node> getOrCreateIndexForNodes(String indexName){
+	public Iterable<Node> getAllNodes(){
+		return GlobalGraphOperations.at(graphDB).getAllNodes();
+	}
+	
+	//index handling
+	public NodeIndexShell getIndexForNodes(String indexName){
 		Transaction tx = graphDB.beginTx();
 		try{
 			Index<Node> index = graphDB.index().forNodes(indexName);
 			tx.success();
-			return index;
+			return new NodeIndexShell(index, this);
 		}finally{
 			tx.finish();
 		}
 	}
 	
-	/*
-	private static String createConcatenatedKey(){
-		String concatKey = NODE_TYPE + "," + Record.NAME;
-		for(RecordKey k: RecordKey.values()){
-			concatKey = concatKey + "," + k;
-		}
-		return concatKey;
-	}
-	*/
 }

@@ -75,16 +75,16 @@ public class TestCase {
 		}
 	}
 	
-	public static List<TestCase> findTestCases(int topK){
+	/*public static List<TestCase> findTestCases(int topK){
 		List<TestCase> testCases = new ArrayList<TestCase>();
 		RecordHits allRecords = Record.getAllRecords();
 		int count = 0;
 		for(Record record: allRecords){
 			log.info("Checking record #" + (++count));
 			//turn this on for WAIM method
-			/*if(record.getCitationType() != Record.CitationType.NUMBER){
+			if(record.getCitationType() != Record.CitationType.NUMBER){
 				continue;
-			}*/
+			}
 			
 			testCases.add(new TestCase(record));
 			Collections.sort(testCases, new BaseRecordComparator());
@@ -99,7 +99,7 @@ public class TestCase {
 		}
 		
 		return testCases;
-	}
+	}*/
 	
 	/*public static TestCase getSingleTestCase(){
 		TestCase testCase = null;

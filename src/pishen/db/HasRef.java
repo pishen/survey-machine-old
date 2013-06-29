@@ -11,8 +11,8 @@ public class HasRef extends RelationshipShell{
 	
 	//private Relationship rel;
 	
-	protected HasRef(Relationship rel){
-		super(rel);
+	protected HasRef(Relationship rel, DBHandler dbHandler){
+		super(rel, dbHandler);
 		if(!rel.isType(RelType.HAS_REF)){
 			throw new IllegalOperationException("[HAS_REF CONNECT] TYPE is wrong");
 		}
@@ -24,11 +24,11 @@ public class HasRef extends RelationshipShell{
 	}
 	
 	public String getCitation(){
-		return super.getStringProperty(CITATION);
+		return super.getProperty(CITATION);
 	}
 	
 	public Reference getReference(){
-		return new Reference(super.getEndNode());
+		return new Reference(super.getEndNode(), dbHandler);
 	}
 	
 }

@@ -27,9 +27,9 @@ public class Record extends NodeShell {
 	
 	private static final Logger log = Logger.getLogger(Record.class);
 	//node type
-	private static final String TYPE = "RECORD";
+	//public static final String TYPE = "RECORD";
 	//DB keys (also used as index keys)
-	private static final String NAME = "NAME"; //indexed, required, unique
+	public static final String NAME = "NAME"; //indexed, required, unique key
 	private static final String EE = "EE"; //indexed, required
 	private static final String TITLE = "TITLE"; //indexed, required
 	private static final String YEAR = "YEAR"; //required
@@ -39,13 +39,11 @@ public class Record extends NodeShell {
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";
 	//index name
-	private static final String INDEX_NAME = "RECORD_INDEX";
+	public static final String RECORD_INDEX = "RECORD_INDEX";
 	//index key
-	private static final String IS_RECORD = "IS_RECORD"; //indexed, required, value=true
+	//private static final String IS_RECORD = "IS_RECORD"; //indexed, required, value=true
 	
-	private static NodeIndexShell recordIndex;
-	
-	private Node node;
+	//private static NodeIndexShell recordIndex;
 	
 	static{
 		//create the directories for text and PDF records
@@ -54,11 +52,11 @@ public class Record extends NodeShell {
 	}
 	
 	//called by DBHandler when the database is ready
-	public static void connectNodeIndex(){
-		recordIndex = new NodeIndexShell(DBHandler.getOrCreateIndexForNodes(Record.INDEX_NAME));
-	}
+	/*public static void connectNodeIndex(DBHandler dbHandler){
+		recordIndex = new NodeIndexShell(dbHandler.getOrCreateRecordIndex());
+	}*/
 	
-	public static void reCreateNodeIndex(){
+	/*public static void reCreateNodeIndex(){
 		recordIndex.delete();
 		connectNodeIndex();
 		int count = 0;
@@ -75,12 +73,12 @@ public class Record extends NodeShell {
 				log.info("not record");
 			}
 		}
-	}
+	}*/
 	
-	public static Record getOrCreateRecord(String recordName){
+	/*public static Record getOrCreateRecord(String recordName){
 		Node node = recordIndex.get(NAME, recordName).getSingle();
 		if(node == null){
-			Transaction tx = DBHandler.getTransaction();
+			Transaction tx = dbHandler.getTransaction();
 			try{
 				//atomic: create the node and initialize it
 				node = DBHandler.createNode();
@@ -93,9 +91,9 @@ public class Record extends NodeShell {
 		}else{
 			return new Record(node);
 		}
-	}
+	}*/
 	
-	public static RecordHits getAllRecords(){
+	/*public static RecordHits getAllRecords(){
 		return getRecords(IS_RECORD, true);
 	}
 	
@@ -110,96 +108,81 @@ public class Record extends NodeShell {
 	private static RecordHits getRecords(String key, Object value){
 		IndexHits<Node> hits = recordIndex.get(key, value);
 		return new RecordHits(hits);
-	}
+	}*/
 	
-	public Record(Node node){
+	public Record(Node node, DBHandler dbHandler){
 		//connect already exists Record
-		super(node);
-		this.node = node;
-		//TODO add more detailed checking if needed
-		if(!super.hasType() || !super.getType().equals(Record.TYPE)){
-			throw new IllegalOperationException("[RECORD_CONNECT] TYPE is wrong");
-		}
+		super(node, dbHandler);
 	}
 	
-	public Record(Node node, String name){
+	public Record(Node node, DBHandler dbHandler, String recordName){
 		//initialize the node to Record
-		super(node);
-		this.node = node;
-		//make sure the new node is clean
-		if(!super.isEmpty()){
-			throw new IllegalOperationException("[RECORD_INIT] node is not empty");
-		}
-		super.setType(TYPE);
-		super.setProperty(NAME, name);
-		super.setProperty(REF_FETCHED, false);
+		super(node, dbHandler);
 		
-		recordIndex.add(node, IS_RECORD, true); //default key-value pair for all Records
-		recordIndex.add(node, NAME, name);
+		super.setProperty(NAME, recordName);
+		super.setProperty(REF_FETCHED, "false");
+		
+		//recordIndex.add(node, IS_RECORD, true); //default key-value pair for all Records
+		dbHandler.getIndexForNodes(RECORD_INDEX).add(node, NAME, recordName);
 	}
 	
 	public String getName(){
-		return super.getStringProperty(NAME);
+		return super.getProperty(NAME);
 	}
 	
 	public void setEE(URL eeURL){
 		super.setProperty(EE, eeURL.toString());
-		recordIndex.add(node, EE, eeURL.toString());
+		dbHandler.getIndexForNodes(RECORD_INDEX).add(node, EE, eeURL.toString());
 	}
 	
 	public URL getEE(){
 		try {
-			return new URL(super.getStringProperty(EE));
+			return new URL(super.getProperty(EE));
 		} catch (MalformedURLException e) {
 			log.error("EE is not valid", e);
-			throw new IllegalOperationException("Stored EE shouldn't be wrong");
+			throw new RecordRuntimeException("Stored EE shouldn't be wrong");
 		}
 	}
 	
 	public void setTitle(String title){
 		super.setProperty(TITLE, title);
-		recordIndex.add(node, TITLE, title);
+		dbHandler.getIndexForNodes(RECORD_INDEX).add(node, TITLE, title);
 	}
 	
 	public String getTitle(){
-		return super.getStringProperty(TITLE);
+		return super.getProperty(TITLE);
 	}
 	
 	public void setYear(String year){
 		super.setProperty(YEAR, year);
 	}
 	
-	public int getYear(){
-		return Integer.parseInt(super.getStringProperty(YEAR));
+	public Integer getYear(){
+		return Integer.parseInt(super.getProperty(YEAR));
 	}
 	
-	public void setEmb(boolean emb){
-		super.setProperty(EMB, emb);
+	public void setEmb(boolean value){
+		super.setProperty(EMB, new Boolean(value).toString());
 	}
 	
-	public Boolean isEmb(){
-		if(super.hasProperty(EMB)){
-			return super.getBooleanProperty(EMB);
-		}else{
-			return null;
-		}
+	public Boolean getEmb(){
+		return new Boolean(super.getProperty(EMB));
 	}
 	
-	public void setRefFetched(boolean refFetched){
-		super.setProperty(REF_FETCHED, refFetched);
+	public void setRefFetched(boolean value){
+		super.setProperty(REF_FETCHED, new Boolean(value).toString());
 	}
 	
-	public Boolean isRefFetched(){
-		return super.getBooleanProperty(REF_FETCHED);
+	public Boolean getRefFetched(){
+		return new Boolean(super.getProperty(REF_FETCHED));
 	}
 	
 	//TODO add "citationMark" as an argument, change it to atomic
-	public HasRef createHasRefTo(Reference targetRef){
+	/*public HasRef createHasRefTo(Reference targetRef){
 		Relationship rel = super.createRelationshipTo(targetRef, RelType.HAS_REF);
 		return new HasRef(rel);
-	}
+	}*/
 	
-	@SuppressWarnings("unused")
 	public int getRefCount(){
 		int count = 0;
 		for(HasRef hasRef: getHasRefs()){
@@ -209,14 +192,14 @@ public class Record extends NodeShell {
 	}
 
 	public HasRefHits getHasRefs(){
-		return new HasRefHits(super.getRelationships(RelType.HAS_REF));
+		return new HasRefHits(super.getRelationships(RelType.HAS_REF), dbHandler);
 	}
 	
 	public Cite createCiteTo(Record targetRecord, String citation){
-		Transaction tx = DBHandler.getTransaction();
+		Transaction tx = dbHandler.getTransaction();
 		try{
 			Relationship rel = super.createRelationshipTo(targetRecord, RelType.CITE);
-			Cite newCite = new Cite(rel, citation); 
+			Cite newCite = new Cite(rel, dbHandler, citation); 
 			tx.success();
 			return newCite;
 		}finally{
@@ -277,19 +260,19 @@ public class Record extends NodeShell {
 	}
 
 	public CiteHits getOutgoingCites(){
-		return new CiteHits(super.getRelationships(RelType.CITE, Direction.OUTGOING));
+		return new CiteHits(super.getRelationships(RelType.CITE, Direction.OUTGOING), dbHandler);
 	}
 	
 	public CiteHits getIncomingCites(){
-		return new CiteHits(super.getRelationships(RelType.CITE, Direction.INCOMING));
+		return new CiteHits(super.getRelationships(RelType.CITE, Direction.INCOMING), dbHandler);
 	}
 	
-	public long getId(){
+	/*public long getId(){
 		return node.getId();
-	}
+	}*/
 
-	public void delete(){
-		Transaction tx = DBHandler.getTransaction();
+	/*public void delete(){
+		Transaction tx = dbHandler.getTransaction();
 		try{
 			recordIndex.remove(node);
 			super.delete();
@@ -297,7 +280,7 @@ public class Record extends NodeShell {
 		}finally{
 			tx.finish();
 		}
-	}
+	}*/
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -320,6 +303,13 @@ public class Record extends NodeShell {
 		File dir = new File(filename);
 		if(!dir.exists()){
 			dir.mkdir();
+		}
+	}
+	
+	public class RecordRuntimeException extends RuntimeException{
+		private static final long serialVersionUID = 1L;
+		public RecordRuntimeException(String message){
+			super(message);
 		}
 	}
 	

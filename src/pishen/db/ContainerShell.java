@@ -4,19 +4,33 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
 
 abstract class ContainerShell {
-	private PropertyContainer container;
+	protected PropertyContainer container;
+	protected DBHandler dbHandler;
 	
-	protected ContainerShell(PropertyContainer container){
+	protected ContainerShell(PropertyContainer container, DBHandler dbHandler){
 		this.container = container;
+		this.dbHandler = dbHandler;
 	}
 	
-	protected boolean isEmpty(){
+	/*protected boolean isEmpty(){
 		return !container.getPropertyKeys().iterator().hasNext();
+	}*/
+	
+	protected void setProperty(String key, String value){
+		if(value != null){
+			Transaction tx = dbHandler.getTransaction();
+			try {
+				container.setProperty(key, value);
+				tx.success();
+			} finally {
+				tx.finish();
+			}
+		}
 	}
 	
-	protected void setProperty(String key, Object value){
+	protected void setArrayProperty(String key, String[] value){
 		if(value != null){
-			Transaction tx = DBHandler.getTransaction();
+			Transaction tx = dbHandler.getTransaction();
 			try {
 				container.setProperty(key, value);
 				tx.success();
@@ -27,7 +41,7 @@ abstract class ContainerShell {
 	}
 	
 	protected void removeProperty(String key){
-		Transaction tx = DBHandler.getTransaction();
+		Transaction tx = dbHandler.getTransaction();
 		try {
 			container.removeProperty(key);
 			tx.success();
@@ -40,23 +54,11 @@ abstract class ContainerShell {
 		return container.hasProperty(key);
 	}
 	
-	protected String getStringProperty(String key){
-		return (String)getProperty(key);
+	protected String getProperty(String key){
+		return (String)container.getProperty(key, null); //return null if property not exist
 	}
 	
-	protected String[] getStringArrayProperty(String key){
-		return (String[])getProperty(key);
-	}
-	
-	protected boolean getBooleanProperty(String key){
-		return (Boolean)getProperty(key);
-	}
-	
-	protected int getIntProperty(String key){
-		return (Integer)getProperty(key);
-	}
-	
-	protected Object getProperty(String key){
-		return container.getProperty(key, null); //return null if property not exist
+	protected String[] getArrayProperty(String key){
+		return (String[])container.getProperty(key, null); //return null if property not exist
 	}
 }

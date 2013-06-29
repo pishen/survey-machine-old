@@ -28,22 +28,26 @@ public class RuleHandler {
 	}
 	
 	public static RefFetcherACM getRefFetcher(Record record) throws RuleNotFoundException{
-		URL eeURL = record.getEE();
+		//TODO fix
+		return null;
+		/*URL eeURL = record.getEE();
 		
 		if(eeURL.getHost().equals("doi.acm.org")){
 			return new RefFetcherACM(record);
 		}else{
 			throw new RuleNotFoundException();
-		}
+		}*/
 	}
 	
 	public static RecordConnectorACM getRecordConnector(Record record) throws RuleNotFoundException{
-		URL eeURL = record.getEE();
+		//TODO fix
+		return null;
+		/*URL eeURL = record.getEE();
 		
 		if(eeURL.getHost().equals("doi.acm.org")){
 			return new RecordConnectorACM(record);
 		}else{
 			throw new RuleNotFoundException();
-		}
+		}*/
 	}
 }

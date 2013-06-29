@@ -9,16 +9,16 @@ import pishen.exception.IllegalOperationException;
 
 public abstract class NodeShell extends ContainerShell {
 	//Key
-	private static final String TYPE = "TYPE";
+	//private static final String TYPE = "TYPE";
 	
-	private Node node;
+	protected Node node;
 	
-	protected NodeShell(Node node){
-		super(node);
+	protected NodeShell(Node node, DBHandler dbHandler){
+		super(node, dbHandler);
 		this.node = node;
 	}
 	
-	protected void setType(String type){
+	/*protected void setType(String type){
 		if(hasType()){
 			throw new IllegalOperationException("Cannot change a set type");
 		}else{
@@ -32,10 +32,10 @@ public abstract class NodeShell extends ContainerShell {
 	
 	protected String getType(){
 		return super.getStringProperty(TYPE);
-	}
+	}*/
 	
 	protected Relationship createRelationshipTo(NodeShell targetNodeShell, RelType relType){
-		Transaction tx = DBHandler.getTransaction();
+		Transaction tx = dbHandler.getTransaction();
 		try {
 			Relationship rel = node.createRelationshipTo(targetNodeShell.node, relType);
 			tx.success();
@@ -54,7 +54,7 @@ public abstract class NodeShell extends ContainerShell {
 	}
 	
 	protected void delete(){
-		Transaction tx = DBHandler.getTransaction();
+		Transaction tx = dbHandler.getTransaction();
 		try {
 			for(Relationship rel: node.getRelationships()){
 				rel.delete();

@@ -22,16 +22,19 @@ import pishen.tool.Downloader;
 public class RefFetcherACM {
 	private static final Logger log = Logger.getLogger(RefFetcherACM.class);
 	private Record record;
+	private DBHandler dbHandler;
 	private OutputStream outputBuffer;
 	
-	public RefFetcherACM(Record record){
+	//TODO fix
+	/*public RefFetcherACM(Record record, DBHandler dbHandler){
 		this.record = record;
+		this.dbHandler = dbHandler;
 	}
 	
 	public void fetchRef(){
 		//HAS_REF==true: all references are parsed and added
 		//HAS_REF==false: no reference available
-		if(record.isRefFetched() == false){
+		if(record.getRefFetched() == false){
 			try {
 				downloadRefPage();
 				parseRefPage();
@@ -73,7 +76,7 @@ public class RefFetcherACM {
 				record.setRefFetched(true);
 			}else{
 				//make the whole section atomic
-				Transaction tx = DBHandler.getTransaction();
+				Transaction tx = dbHandler.getTransaction();
 				try {
 					parseTable(table);
 					record.setRefFetched(true);
@@ -108,6 +111,6 @@ public class RefFetcherACM {
 			}
 			ref.setLinks(linkStrings);
 		}
-	}
+	}*/
 
 }

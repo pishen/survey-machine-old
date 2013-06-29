@@ -17,7 +17,8 @@ public class RecordConnectorACM {
 	private ArrayList<Cite> citeList = new ArrayList<Cite>();
 	//private ArrayList<String> incomingRecordNameList = new ArrayList<String>(); //names of Records that cite this record 
 	
-	public RecordConnectorACM(Record record){
+	//TODO fix
+	/*public RecordConnectorACM(Record record){
 		this.record = record;
 	}
 	
@@ -31,9 +32,9 @@ public class RecordConnectorACM {
 		for(Cite cite: record.getOutgoingCites()){
 			citeList.add(cite);
 		}
-		/*for(Cite incomingCite: record.getIncomingCites()){
+		for(Cite incomingCite: record.getIncomingCites()){
 			incomingRecordNameList.add(incomingCite.getStartRecord().getName());
-		}*/
+		}
 		
 		for(HasRef hasRef: record.getHasRefs()){
 			try {
@@ -115,7 +116,7 @@ public class RecordConnectorACM {
 		if(targetRecord.getYear() > record.getYear()){
 			throw new Exception("citing future paper");
 		}
-	}
+	}*/
 	
 	/*private void detectLoop(Record targetRecord) throws Exception{
 		if(incomingRecordNameList.contains(targetRecord.getName())){

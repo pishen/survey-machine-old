@@ -14,7 +14,7 @@ public class Controller {
 	private static final String XML_FILENAME = "dblp.xml";
 	private static RecordHits allRecordsHits;
 	
-	public static void startGraphDB(){
+	/*public static void startGraphDB(){
 		DBHandler.startGraphDB();
 	}
 	
@@ -81,6 +81,6 @@ public class Controller {
 	public static void eval(){
 		TestCase.findTestCases(10);
 		
-	}
+	}*/
 	
 }

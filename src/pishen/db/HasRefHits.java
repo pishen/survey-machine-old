@@ -8,8 +8,9 @@ import pishen.exception.IllegalOperationException;
 
 public class HasRefHits implements Iterator<HasRef>, Iterable<HasRef> {
 	private Iterator<Relationship> iterator;
+	private DBHandler dbHandler;
 	
-	public HasRefHits(Iterable<Relationship> iterable){
+	public HasRefHits(Iterable<Relationship> iterable, DBHandler dbHandler){
 		this.iterator = iterable.iterator();
 	}
 
@@ -25,7 +26,7 @@ public class HasRefHits implements Iterator<HasRef>, Iterable<HasRef> {
 
 	@Override
 	public HasRef next() {
-		return new HasRef(iterator.next());
+		return new HasRef(iterator.next(), dbHandler);
 	}
 
 	@Override

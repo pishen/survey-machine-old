@@ -8,17 +8,19 @@ import org.neo4j.graphdb.index.IndexHits;
 
 public class NodeIndexShell {
 	private Index<Node> index;
+	private DBHandler dbHandler;
 	
-	public NodeIndexShell(Index<Node> index){
+	public NodeIndexShell(Index<Node> index, DBHandler dbHandler){
 		this.index = index;
+		this.dbHandler = dbHandler;
 	}
 	
-	public IndexHits<Node> get(String key, Object value){
+	public IndexHits<Node> get(String key, String value){
 		return index.get(key, value);
 	}
 	
-	public void add(Node node, String key, Object value){
-		Transaction tx = DBHandler.getTransaction();
+	public void add(Node node, String key, String value){
+		Transaction tx = dbHandler.getTransaction();
 		try{
 			index.remove(node, key);
 			index.add(node, key, value);
@@ -29,7 +31,7 @@ public class NodeIndexShell {
 	}
 	
 	public void remove(Node node){
-		Transaction tx = DBHandler.getTransaction();
+		Transaction tx = dbHandler.getTransaction();
 		try{
 			index.remove(node);
 			tx.success();
@@ -38,14 +40,14 @@ public class NodeIndexShell {
 		}
 	}
 	
-	public void delete(){
-		Transaction tx = DBHandler.getTransaction();
+	/*public void delete(){
+		Transaction tx = dbHandler.getTransaction();
 		try{
 			index.delete();
 			tx.success();
 		}finally{
 			tx.finish();
 		}
-	}
+	}*/
 
 }

@@ -13,14 +13,14 @@ public class Reference extends NodeShell{
 	private static final String CONTENT = "CONTENT";
 	private static final String LINKS = "LINKS";
 	
-	public static Reference createReference(){
+	/*public static Reference createReference(){
 		Node node = DBHandler.createNode();
 		return new Reference(node);
-	}
+	}*/
 	
-	public Reference(Node node){
-		super(node);
-		if(super.isEmpty()){
+	public Reference(Node node, DBHandler dbHandler){
+		super(node, dbHandler);
+		/*if(super.isEmpty()){
 			//initialize a new Reference
 			super.setType(Reference.TYPE);
 		}else{
@@ -28,7 +28,7 @@ public class Reference extends NodeShell{
 			if(!super.hasType() || !super.getType().equals(Reference.TYPE)){
 				throw new IllegalOperationException("[REFERENCE_CONNECT] TYPE is wrong");
 			}
-		}
+		}*/
 	}
 	
 	public void setContent(String content){
@@ -36,15 +36,15 @@ public class Reference extends NodeShell{
 	}
 	
 	public String getContent(){
-		return super.getStringProperty(CONTENT);
+		return super.getProperty(CONTENT);
 	}
 	
 	public void setLinks(String[] links){
-		super.setProperty(LINKS, links);
+		super.setArrayProperty(LINKS, links);
 	}
 	
 	public String[] getLinks(){
-		return super.getStringArrayProperty(LINKS);
+		return super.getArrayProperty(LINKS);
 	}
 	
 	public void delete(){

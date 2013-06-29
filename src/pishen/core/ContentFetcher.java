@@ -14,7 +14,7 @@ import pishen.db.Record;
 import pishen.exception.DownloadFailException;
 import pishen.exception.RuleNotFoundException;
 import pishen.tool.Downloader;
-import pishen.tool.Executor;
+import pishen.tool.CommandExecutor;
 
 public class ContentFetcher {
 	private static final Logger log = Logger.getLogger(ContentFetcher.class);
@@ -64,7 +64,7 @@ public class ContentFetcher {
 		
 		try {
 			//get output of pdffonts
-			Executor.execWithTimeout(cmdLineStr, pdffontsOutput);
+			CommandExecutor.exec(cmdLineStr, pdffontsOutput);
 		} catch (IOException e) {
 			log.error("error when executing pdffonts");
 			return;
@@ -113,7 +113,7 @@ public class ContentFetcher {
 		String cmdLineStr = "pdftotext " + pdfFile.getPath() + " " + textFile.getPath();
 		
 		try {
-			Executor.execWithTimeout(cmdLineStr, System.out);
+			CommandExecutor.exec(cmdLineStr, System.out);
 		} catch (IOException e) {
 			textFile.delete();
 			log.error("error when executing pdftotext");

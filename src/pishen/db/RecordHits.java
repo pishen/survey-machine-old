@@ -11,10 +11,12 @@ import pishen.exception.IllegalOperationException;
 
 public class RecordHits implements Iterator<Record>, Iterable<Record> {
 	private IndexHits<Node> indexHits;
+	private DBHandler dbHandler;
 	private int count;
 
-	public RecordHits(IndexHits<Node> nodeIter){
+	public RecordHits(IndexHits<Node> nodeIter, DBHandler dbHandler){
 		this.indexHits = nodeIter;
+		this.dbHandler = dbHandler;
 	}
 	
 	@Override
@@ -29,7 +31,7 @@ public class RecordHits implements Iterator<Record>, Iterable<Record> {
 
 	@Override
 	public Record next() {
-		return new Record(indexHits.next());
+		return new Record(indexHits.next(), dbHandler);
 	}
 
 	@Override
