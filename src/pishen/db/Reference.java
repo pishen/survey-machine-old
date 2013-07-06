@@ -10,25 +10,20 @@ public class Reference extends NodeShell{
 	//node type
 	private static final String TYPE = "REFERENCE";
 	//DB keys
+	private static final String REF_INDEX = "REF_INDEX";
 	private static final String CONTENT = "CONTENT";
 	private static final String LINKS = "LINKS";
 	
-	/*public static Reference createReference(){
-		Node node = DBHandler.createNode();
-		return new Reference(node);
-	}*/
-	
 	public Reference(Node node, DBHandler dbHandler){
 		super(node, dbHandler);
-		/*if(super.isEmpty()){
-			//initialize a new Reference
-			super.setType(Reference.TYPE);
-		}else{
-			//connect an existed Reference
-			if(!super.hasType() || !super.getType().equals(Reference.TYPE)){
-				throw new IllegalOperationException("[REFERENCE_CONNECT] TYPE is wrong");
-			}
-		}*/
+	}
+	
+	public void setIndex(int index){
+		super.setProperty(REF_INDEX, Integer.toString(index));
+	}
+	
+	public int getIndex(){
+		return Integer.parseInt(super.getProperty(REF_INDEX));
 	}
 	
 	public void setContent(String content){
@@ -45,9 +40,5 @@ public class Reference extends NodeShell{
 	
 	public String[] getLinks(){
 		return super.getArrayProperty(LINKS);
-	}
-	
-	public void delete(){
-		super.delete();
 	}
 }

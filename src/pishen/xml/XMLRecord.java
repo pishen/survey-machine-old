@@ -9,7 +9,8 @@ import pishen.db.Record;
 
 public class XMLRecord {
 	private static final Logger log = Logger.getLogger(XMLRecord.class);
-	private String name, title, year;
+	private String name, title;
+	private Integer year;
 	private URL eeURL;
 	
 	protected XMLRecord(String name){
@@ -42,11 +43,11 @@ public class XMLRecord {
 	
 	protected void setYear(String year){
 		try{
-			Integer.parseInt(year);
+			this.year = new Integer(year);
 		}catch(NumberFormatException e){
 			log.error("year is not valid");
+			throw e;
 		}
-		this.year = year;
 	}
 	
 	protected boolean isValid(){

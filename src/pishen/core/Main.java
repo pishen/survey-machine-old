@@ -10,7 +10,9 @@ import org.apache.log4j.PatternLayout;
 import org.neo4j.graphdb.Node;
 
 import pishen.db.DBHandler;
+import pishen.db.HasRef;
 import pishen.db.Record;
+import pishen.db.Reference;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 
@@ -31,6 +33,14 @@ public class Main {
 		
 		options = CliFactory.parseArguments(CLIOptions.class, args);
 		
+		try{
+			mainWithCatch();
+		}catch(RuntimeException e){
+			log.error("RuntimeException", e);
+		}
+	}
+	
+	public static void mainWithCatch(){
 		DBHandler oldDB = new DBHandler("graph-db");
 		DBHandler newDB = new DBHandler("new-graph-db");
 		
@@ -38,22 +48,23 @@ public class Main {
 		for(Node node: oldDB.getAllNodes()){
 			if(node.getProperty("TYPE").equals("RECORD")){
 				Record oldRecord = new Record(node, oldDB);
-				log.info("Copy Record: " + oldRecord.getName());
+				log.info("Check Record: " + oldRecord.getName());
 				Record newRecord = newDB.getOrCreateRecord(oldRecord.getName());
 				
-				newRecord.setEE(oldRecord.getEE());
-				if(node.hasProperty("EMB")){
-					newRecord.setEmb((Boolean)node.getProperty("EMB"));
-				}else{
-					log.error("EMB not set");
+				if(!node.hasProperty("EMB")){
+					log.info("Fill default EMB as false");
+					newRecord.setEmb(false);
 				}
-				if(node.hasProperty("REF_FETCHED")){
-					newRecord.setRefFetched((Boolean)node.getProperty("REF_FETCHED"));
-				}else{
-					log.error("REF_FETCHED not set");
+				
+				for(HasRef hasRef: oldRecord.getHasRefs()){
+					log.info("create and link Reference " + hasRef.getCitation());
+					Reference oldReference = hasRef.getReference();
+					Reference newReference = newDB.createReference();
+					newReference.setIndex(Integer.parseInt(hasRef.getCitation()));
+					newReference.setContent(oldReference.getContent());
+					newReference.setLinks(oldReference.getLinks());
+					newRecord.createRefTo(newReference, newReference.getIndex());
 				}
-				newRecord.setTitle(oldRecord.getTitle());
-				newRecord.setYear(((Integer)node.getProperty("YEAR")).toString());
 			}
 		}
 		
@@ -100,6 +111,4 @@ public class Main {
 			System.exit(0);
 		}*/
 	}
-	
-	
 }

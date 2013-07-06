@@ -12,10 +12,8 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.index.IndexHits;
 
 import pishen.core.CitationMark;
-import pishen.exception.IllegalOperationException;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -41,9 +39,10 @@ public class Record extends NodeShell {
 	//index name
 	public static final String RECORD_INDEX = "RECORD_INDEX";
 	//index key
-	//private static final String IS_RECORD = "IS_RECORD"; //indexed, required, value=true
+	private static final String REF_INDEX = "REF_INDEX";
 	
 	//private static NodeIndexShell recordIndex;
+	private NodeIndexShell singleRecordIndex;
 	
 	static{
 		//create the directories for text and PDF records
@@ -110,20 +109,22 @@ public class Record extends NodeShell {
 		return new RecordHits(hits);
 	}*/
 	
+	//connect exist Record
 	public Record(Node node, DBHandler dbHandler){
-		//connect already exists Record
 		super(node, dbHandler);
+		singleRecordIndex = dbHandler.getIndexForNodes(super.getProperty(NAME));
 	}
 	
+	//initialize new Record
 	public Record(Node node, DBHandler dbHandler, String recordName){
-		//initialize the node to Record
 		super(node, dbHandler);
 		
 		super.setProperty(NAME, recordName);
 		super.setProperty(REF_FETCHED, "false");
 		
-		//recordIndex.add(node, IS_RECORD, true); //default key-value pair for all Records
 		dbHandler.getIndexForNodes(RECORD_INDEX).add(node, NAME, recordName);
+		
+		singleRecordIndex = dbHandler.getIndexForNodes(recordName);
 	}
 	
 	public String getName(){
@@ -153,35 +154,34 @@ public class Record extends NodeShell {
 		return super.getProperty(TITLE);
 	}
 	
-	public void setYear(String year){
-		super.setProperty(YEAR, year);
+	public void setYear(int year){
+		super.setProperty(YEAR, Integer.toString(year));
 	}
 	
-	public Integer getYear(){
+	public int getYear(){
 		return Integer.parseInt(super.getProperty(YEAR));
 	}
 	
 	public void setEmb(boolean value){
-		super.setProperty(EMB, new Boolean(value).toString());
+		super.setProperty(EMB, Boolean.toString(value));
 	}
 	
-	public Boolean getEmb(){
-		return new Boolean(super.getProperty(EMB));
+	public boolean getEmb(){
+		return Boolean.parseBoolean(super.getProperty(EMB));
 	}
 	
 	public void setRefFetched(boolean value){
-		super.setProperty(REF_FETCHED, new Boolean(value).toString());
+		super.setProperty(REF_FETCHED, Boolean.toString(value));
 	}
 	
-	public Boolean getRefFetched(){
-		return new Boolean(super.getProperty(REF_FETCHED));
+	public boolean getRefFetched(){
+		return Boolean.parseBoolean(super.getProperty(REF_FETCHED));
 	}
 	
-	//TODO add "citationMark" as an argument, change it to atomic
-	/*public HasRef createHasRefTo(Reference targetRef){
-		Relationship rel = super.createRelationshipTo(targetRef, RelType.HAS_REF);
-		return new HasRef(rel);
-	}*/
+	public void createRefTo(Reference targetReference, int index){
+		super.createRelationshipTo(targetReference, RelType.REF);
+		singleRecordIndex.add(targetReference.node, REF_INDEX, Integer.toString(index));
+	}
 	
 	public int getRefCount(){
 		int count = 0;

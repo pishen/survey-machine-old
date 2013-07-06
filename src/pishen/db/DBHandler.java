@@ -15,6 +15,7 @@ public class DBHandler {
 	private static final String TYPE_INDEX = "TYPE_INDEX";
 	private static final String TYPE = "TYPE";
 	private static final String RECORD = "RECORD";
+	private static final String REFERENCE = "REFERENCE";
 	
 	private GraphDatabaseService graphDB;
 
@@ -62,6 +63,21 @@ public class DBHandler {
 			}
 		}else{
 			return new Record(node, this);
+		}
+	}
+	
+	public Reference createReference(){
+		Transaction tx = graphDB.beginTx();
+		try{
+			log.info("create Reference");
+			Node node = graphDB.createNode();
+			node.setProperty(TYPE, REFERENCE);
+			typeIndex.add(node, TYPE, REFERENCE);
+			Reference newReference = new Reference(node, this);
+			tx.success();
+			return newReference;
+		}finally{
+			tx.finish();
 		}
 	}
 	
