@@ -22,7 +22,7 @@ public class Main {
 	private static final Logger log = Logger.getLogger(Main.class);
 	
 	public static void main(String[] args){
-		Logger.getRootLogger().setLevel(Level.INFO);
+		Logger.getRootLogger().setLevel(Level.DEBUG);
 		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n")));
 		try {
 			Logger.getRootLogger().addAppender(new FileAppender(
@@ -49,6 +49,10 @@ public class Main {
 			if(node.getProperty("TYPE").equals("RECORD")){
 				Record oldRecord = new Record(node, oldDB);
 				log.info("Check Record: " + oldRecord.getName());
+				if(oldRecord.getName().equals("journals-toit-TsoiHS06")){
+					log.debug("skip");
+					continue;
+				}
 				Record newRecord = newDB.getOrCreateRecord(oldRecord.getName());
 				
 				if(!node.hasProperty("EMB")){
