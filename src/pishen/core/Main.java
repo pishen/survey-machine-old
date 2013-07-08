@@ -49,10 +49,6 @@ public class Main {
 			if(node.getProperty("TYPE").equals("RECORD")){
 				Record oldRecord = new Record(node, oldDB);
 				log.info("Check Record: " + oldRecord.getName());
-				if(oldRecord.getName().equals("journals-toit-TsoiHS06")){
-					log.debug("skip");
-					continue;
-				}
 				Record newRecord = newDB.getOrCreateRecord(oldRecord.getName());
 				
 				if(!node.hasProperty("EMB")){

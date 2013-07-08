@@ -42,7 +42,6 @@ public class Record extends NodeShell {
 	private static final String REF_INDEX = "REF_INDEX";
 	
 	//private static NodeIndexShell recordIndex;
-	private NodeIndexShell singleRecordIndex;
 	
 	static{
 		//create the directories for text and PDF records
@@ -112,7 +111,6 @@ public class Record extends NodeShell {
 	//connect exist Record
 	public Record(Node node, DBHandler dbHandler){
 		super(node, dbHandler);
-		singleRecordIndex = dbHandler.getIndexForNodes(super.getProperty(NAME));
 	}
 	
 	//initialize new Record
@@ -123,8 +121,6 @@ public class Record extends NodeShell {
 		super.setProperty(REF_FETCHED, "false");
 		
 		dbHandler.getIndexForNodes(RECORD_INDEX).add(node, NAME, recordName);
-		
-		singleRecordIndex = dbHandler.getIndexForNodes(recordName);
 	}
 	
 	public String getName(){
@@ -180,7 +176,7 @@ public class Record extends NodeShell {
 	
 	public void createRefTo(Reference targetReference, int index){
 		super.createRelationshipTo(targetReference, RelType.REF);
-		singleRecordIndex.add(targetReference.node, REF_INDEX, Integer.toString(index));
+		dbHandler.getIndexForNodes(super.getProperty(NAME)).add(targetReference.node, REF_INDEX, Integer.toString(index));
 	}
 	
 	public int getRefCount(){
