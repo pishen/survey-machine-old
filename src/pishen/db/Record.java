@@ -176,7 +176,6 @@ public class Record extends NodeShell {
 	
 	public void createRefTo(Reference targetReference, int index){
 		super.createRelationshipTo(targetReference, RelType.REF);
-		dbHandler.getIndexForNodes(super.getProperty(NAME)).add(targetReference.node, REF_INDEX, Integer.toString(index));
 	}
 	
 	public int getRefCount(){
