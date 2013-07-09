@@ -8,6 +8,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 
 import pishen.db.DBHandler;
 import pishen.db.HasRef;
@@ -56,14 +57,20 @@ public class Main {
 					newRecord.setEmb(false);
 				}
 				
-				for(HasRef hasRef: oldRecord.getHasRefs()){
-					//log.info("create and link Reference " + hasRef.getCitation());
-					Reference oldReference = hasRef.getReference();
-					Reference newReference = newDB.createReference();
-					newReference.setIndex(Integer.parseInt(hasRef.getCitation()));
-					newReference.setContent(oldReference.getContent());
-					newReference.setLinks(oldReference.getLinks());
-					newRecord.createRefTo(newReference);
+				Transaction tx = newDB.getTransaction();
+				try{
+					for(HasRef hasRef: oldRecord.getHasRefs()){
+						//log.info("create and link Reference " + hasRef.getCitation());
+						Reference oldReference = hasRef.getReference();
+						Reference newReference = newDB.createReference();
+						newReference.setIndex(Integer.parseInt(hasRef.getCitation()));
+						newReference.setContent(oldReference.getContent());
+						newReference.setLinks(oldReference.getLinks());
+						newRecord.createRefTo(newReference);
+					}
+					tx.success();
+				}finally{
+					tx.finish();
 				}
 			}
 		}
