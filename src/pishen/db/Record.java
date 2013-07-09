@@ -174,7 +174,7 @@ public class Record extends NodeShell {
 		return Boolean.parseBoolean(super.getProperty(REF_FETCHED));
 	}
 	
-	public void createRefTo(Reference targetReference, int index){
+	public void createRefTo(Reference targetReference){
 		super.createRelationshipTo(targetReference, RelType.REF);
 	}
 	

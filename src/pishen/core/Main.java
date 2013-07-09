@@ -26,7 +26,7 @@ public class Main {
 		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n")));
 		try {
 			Logger.getRootLogger().addAppender(new FileAppender(
-					new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n"), "survey-machine.log"));
+					new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n"), "survey-machine.log", false));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -57,13 +57,13 @@ public class Main {
 				}
 				
 				for(HasRef hasRef: oldRecord.getHasRefs()){
-					log.info("create and link Reference " + hasRef.getCitation());
+					//log.info("create and link Reference " + hasRef.getCitation());
 					Reference oldReference = hasRef.getReference();
 					Reference newReference = newDB.createReference();
 					newReference.setIndex(Integer.parseInt(hasRef.getCitation()));
 					newReference.setContent(oldReference.getContent());
 					newReference.setLinks(oldReference.getLinks());
-					newRecord.createRefTo(newReference, newReference.getIndex());
+					newRecord.createRefTo(newReference);
 				}
 			}
 		}

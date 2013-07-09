@@ -69,7 +69,6 @@ public class DBHandler {
 	public Reference createReference(){
 		Transaction tx = graphDB.beginTx();
 		try{
-			log.info("create Reference");
 			Node node = graphDB.createNode();
 			node.setProperty(TYPE, REFERENCE);
 			typeIndex.add(node, TYPE, REFERENCE);
