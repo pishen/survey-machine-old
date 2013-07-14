@@ -5,8 +5,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 
-import pishen.exception.IllegalOperationException;
-
 public abstract class NodeShell extends ContainerShell {
 	//Key
 	//private static final String TYPE = "TYPE";

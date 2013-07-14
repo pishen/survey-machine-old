@@ -15,10 +15,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import pishen.exception.ConnectionFailException;
-import pishen.exception.DownloadFailException;
-import pishen.exception.WrongContentTypeException;
-
 public class Downloader {
 	private static final Logger log = Logger.getLogger(Downloader.class);
 	private static final List<Proxy> proxyList = new ArrayList<Proxy>();
@@ -128,6 +124,45 @@ public class Downloader {
 		} catch (Exception e) {
 			log.error("error on reading proxy-list", e);
 			System.exit(0);
+		}
+	}
+	
+	private static class DownloadFailException extends Exception{
+		private static final long serialVersionUID = 1L;
+	}
+	
+	private static class ConnectionFailException extends Exception{
+		private static final long serialVersionUID = 1L;
+		private HttpURLConnection failConnection;
+		
+		public ConnectionFailException(HttpURLConnection urlc){
+			failConnection = urlc;
+		}
+		
+		public HttpURLConnection getFailConnection(){
+			return failConnection;
+		}
+		
+		public String getResponseCode(){
+			try {
+				int responseCode = failConnection.getResponseCode();
+				return "" + responseCode;
+			} catch (IOException e) {
+				return "cannot access";
+			}
+		}
+	}
+	
+	private static class WrongContentTypeException extends Exception{
+		private static final long serialVersionUID = 1L;
+		private String contentType;
+		
+		public WrongContentTypeException(String contentType){
+			this.contentType = contentType;
+		}
+		
+		public String getContentType(){
+			return contentType;
 		}
 	}
 }

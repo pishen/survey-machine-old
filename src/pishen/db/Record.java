@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.index.IndexHits;
 
 import pishen.core.CitationMark;
 
@@ -24,10 +26,10 @@ public class Record extends NodeShell {
 	}
 	
 	private static final Logger log = Logger.getLogger(Record.class);
-	//node type
-	//public static final String TYPE = "RECORD";
+	//type
+	private static final String RECORD = "RECORD";
 	//DB keys (also used as index keys)
-	public static final String NAME = "NAME"; //indexed, required, unique key
+	private static final String NAME = "NAME"; //indexed, required, unique key
 	private static final String EE = "EE"; //indexed, required
 	private static final String TITLE = "TITLE"; //indexed, required
 	private static final String YEAR = "YEAR"; //required
@@ -37,22 +39,15 @@ public class Record extends NodeShell {
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";
 	//index name
-	public static final String RECORD_INDEX = "RECORD_INDEX";
+	private static final String RECORD_INDEX = "RECORD_INDEX";
 	//index key
-	private static final String REF_INDEX = "REF_INDEX";
-	
-	//private static NodeIndexShell recordIndex;
+	//private static final String REF_INDEX = "REF_INDEX";
 	
 	static{
 		//create the directories for text and PDF records
 		createDirIfNotExist(PDF_DIR);
 		createDirIfNotExist(TEXT_DIR);
 	}
-	
-	//called by DBHandler when the database is ready
-	/*public static void connectNodeIndex(DBHandler dbHandler){
-		recordIndex = new NodeIndexShell(dbHandler.getOrCreateRecordIndex());
-	}*/
 	
 	/*public static void reCreateNodeIndex(){
 		recordIndex.delete();
@@ -73,33 +68,35 @@ public class Record extends NodeShell {
 		}
 	}*/
 	
-	/*public static Record getOrCreateRecord(String recordName){
-		Node node = recordIndex.get(NAME, recordName).getSingle();
+	public static Record getOrCreateRecord(DBHandler dbHandler, String recordName){
+		Node node = dbHandler.getIndexForNodes(RECORD_INDEX).get(NAME, recordName).getSingle();
 		if(node == null){
 			Transaction tx = dbHandler.getTransaction();
 			try{
-				//atomic: create the node and initialize it
-				node = DBHandler.createNode();
-				Record newRecord = new Record(node, recordName);
+				//atomic: create the node and initialize it with TYPE and NAME
+				log.info("create new Record with name: " + recordName);
+				node = dbHandler.createNode();
+				dbHandler.setNodeType(node, RECORD);
+				Record newRecord = new Record(node, dbHandler, recordName);
 				tx.success();
 				return newRecord;
 			}finally{
 				tx.finish();
 			}
 		}else{
-			return new Record(node);
+			return new Record(node, dbHandler);
 		}
-	}*/
-	
-	/*public static RecordHits getAllRecords(){
-		return getRecords(IS_RECORD, true);
 	}
 	
-	public static RecordHits getRecordsWithEE(String ee){
-		return getRecords(EE, ee);
+	public static RecordHits getAllRecords(DBHandler dbHandler){
+		return new RecordHits(dbHandler.getNodesWithType(RECORD), dbHandler);
 	}
 	
-	public static RecordHits getRecordsWithTitle(String title){
+	public static RecordHits getRecordsWithEE(DBHandler dbHandler, URL eeURL){
+		return new RecordHits(dbHandler.getIndexForNodes(RECORD_INDEX).get(EE, eeURL.toString()), dbHandler);
+	}
+	
+	/*public static RecordHits getRecordsWithTitle(String title){
 		return getRecords(TITLE, title);
 	}
 	
@@ -107,6 +104,34 @@ public class Record extends NodeShell {
 		IndexHits<Node> hits = recordIndex.get(key, value);
 		return new RecordHits(hits);
 	}*/
+	
+	private static class RecordHits implements Iterator<Record>, Iterable<Record>{
+		private IndexHits<Node> indexHits;
+		private DBHandler dbHandler;
+
+		public RecordHits(IndexHits<Node> nodeIter, DBHandler dbHandler){
+			this.indexHits = nodeIter;
+			this.dbHandler = dbHandler;
+		}
+		
+		@Override
+		public Iterator<Record> iterator() {
+			return this;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return indexHits.hasNext();
+		}
+
+		@Override
+		public Record next() {
+			return new Record(indexHits.next(), dbHandler);
+		}
+
+		@Override
+		public void remove() {}
+	}
 	
 	//connect exist Record
 	public Record(Node node, DBHandler dbHandler){
@@ -116,10 +141,8 @@ public class Record extends NodeShell {
 	//initialize new Record
 	public Record(Node node, DBHandler dbHandler, String recordName){
 		super(node, dbHandler);
-		
 		super.setProperty(NAME, recordName);
 		super.setProperty(REF_FETCHED, "false");
-		
 		dbHandler.getIndexForNodes(RECORD_INDEX).add(node, NAME, recordName);
 	}
 	
@@ -178,28 +201,40 @@ public class Record extends NodeShell {
 		super.createRelationshipTo(targetReference, RelType.REF);
 	}
 	
-	public int getRefCount(){
-		int count = 0;
-		for(HasRef hasRef: getHasRefs()){
-			count++;
-		}
-		return count;
+	public ReferenceHits getReferences(Direction direction){
+		return new ReferenceHits(node.getRelationships(RelType.REF, direction), direction);
 	}
 
-	public HasRefHits getHasRefs(){
-		return new HasRefHits(super.getRelationships(RelType.HAS_REF), dbHandler);
-	}
-	
-	public Cite createCiteTo(Record targetRecord, String citation){
-		Transaction tx = dbHandler.getTransaction();
-		try{
-			Relationship rel = super.createRelationshipTo(targetRecord, RelType.CITE);
-			Cite newCite = new Cite(rel, dbHandler, citation); 
-			tx.success();
-			return newCite;
-		}finally{
-			tx.finish();
+	private class ReferenceHits implements Iterator<Reference>, Iterable<Reference>{
+		private Iterator<Relationship> iterator;
+		private Direction direction;
+		
+		public ReferenceHits(Iterable<Relationship> iterable, Direction direction){
+			iterator = iterable.iterator();
+			this.direction = direction;
 		}
+		
+		@Override
+		public Iterator<Reference> iterator() {
+			return this;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return iterator.hasNext();
+		}
+
+		@Override
+		public Reference next() {
+			if(direction == Direction.OUTGOING){
+				return new Reference(iterator.next().getEndNode(), dbHandler);
+			}else{
+				return new Reference(iterator.next().getStartNode(), dbHandler);
+			}
+		}
+
+		@Override
+		public void remove() {}
 	}
 	
 	//TODO write CitationType to DB, update it (for UNKNOWN) if the rule change?
@@ -209,7 +244,12 @@ public class Record extends NodeShell {
 			return CitationType.UNKNOWN;
 		}
 		
-		if(this.getRefCount() == 0){
+		int referenceCount = 0;
+		for(Reference reference: this.getReferences(Direction.OUTGOING)){
+			referenceCount++;
+		}
+		
+		if(referenceCount == 0){
 			return CitationType.NO_MARK;
 		}
 		
@@ -223,7 +263,7 @@ public class Record extends NodeShell {
 		Pattern pattern = Pattern.compile("\\[([^\\[\\]]*)\\]");
 		Matcher matcher = pattern.matcher(recordContent);
 		
-		boolean[] citationCheck = new boolean[getRefCount()];
+		boolean[] citationCheck = new boolean[referenceCount];
 		boolean hasMark = false;
 		
 		while(matcher.find()){
@@ -253,29 +293,6 @@ public class Record extends NodeShell {
 		
 		return CitationType.NUMBER;
 	}
-
-	public CiteHits getOutgoingCites(){
-		return new CiteHits(super.getRelationships(RelType.CITE, Direction.OUTGOING), dbHandler);
-	}
-	
-	public CiteHits getIncomingCites(){
-		return new CiteHits(super.getRelationships(RelType.CITE, Direction.INCOMING), dbHandler);
-	}
-	
-	/*public long getId(){
-		return node.getId();
-	}*/
-
-	/*public void delete(){
-		Transaction tx = dbHandler.getTransaction();
-		try{
-			recordIndex.remove(node);
-			super.delete();
-			tx.success();
-		}finally{
-			tx.finish();
-		}
-	}*/
 	
 	@Override
 	public boolean equals(Object obj) {

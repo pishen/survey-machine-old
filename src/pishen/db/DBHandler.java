@@ -6,6 +6,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.tooling.GlobalGraphOperations;
 
 
@@ -14,8 +15,6 @@ public class DBHandler {
 	
 	private static final String TYPE_INDEX = "TYPE_INDEX";
 	private static final String TYPE = "TYPE";
-	private static final String RECORD = "RECORD";
-	private static final String REFERENCE = "REFERENCE";
 	
 	private GraphDatabaseService graphDB;
 
@@ -41,40 +40,16 @@ public class DBHandler {
 	}
 	
 	//node handling
-	public Record getOrCreateRecord(String recordName){
-		Node node = getIndexForNodes(Record.RECORD_INDEX).get(Record.NAME, recordName).getSingle();
-		if(node == null){
-			Transaction tx = graphDB.beginTx();
-			try{
-				//atomic: create the node and initialize it with TYPE and NAME
-				log.info("create new Record with name: " + recordName);
-				
-				node = graphDB.createNode();
-				
-				node.setProperty(TYPE, RECORD);
-				typeIndex.add(node, TYPE, RECORD);
-				
-				Record newRecord = new Record(node, this, recordName);
-				
-				tx.success();
-				return newRecord;
-			}finally{
-				tx.finish();
-			}
-		}else{
-			return new Record(node, this);
-		}
+	public IndexHits<Node> getNodesWithType(String type){
+		return typeIndex.get(TYPE, type);
 	}
 	
-	public Reference createReference(){
+	public Node createNode(){
 		Transaction tx = graphDB.beginTx();
 		try{
 			Node node = graphDB.createNode();
-			node.setProperty(TYPE, REFERENCE);
-			typeIndex.add(node, TYPE, REFERENCE);
-			Reference newReference = new Reference(node, this);
 			tx.success();
-			return newReference;
+			return node;
 		}finally{
 			tx.finish();
 		}
@@ -85,6 +60,17 @@ public class DBHandler {
 	}
 	
 	//index handling
+	public void setNodeType(Node node, String type){
+		Transaction tx = graphDB.beginTx();
+		try{
+			node.setProperty(TYPE, type);
+			typeIndex.add(node, TYPE, type);
+			tx.success();
+		}finally{
+			tx.finish();
+		}
+	}
+	
 	public NodeIndexShell getIndexForNodes(String indexName){
 		Transaction tx = graphDB.beginTx();
 		try{

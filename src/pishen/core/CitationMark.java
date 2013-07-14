@@ -2,8 +2,6 @@ package pishen.core;
 
 import java.util.ArrayList;
 
-import pishen.exception.IllegalOperationException;
-
 
 public class CitationMark {
 	//private static final Logger log = Logger.getLogger(CitationMark.class);
@@ -33,7 +31,7 @@ public class CitationMark {
 			}
 			return intCitations;
 		}else{
-			throw new IllegalOperationException("should not get int citation from non-NUMBER CitationMark");
+			return null;
 		}
 	}
 	

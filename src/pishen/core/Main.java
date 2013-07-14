@@ -1,17 +1,17 @@
 package pishen.core;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.Direction;
 
 import pishen.db.DBHandler;
-import pishen.db.HasRef;
 import pishen.db.Record;
 import pishen.db.Reference;
 
@@ -23,6 +23,7 @@ public class Main {
 	private static final Logger log = Logger.getLogger(Main.class);
 	
 	public static void main(String[] args){
+		//setting log4j
 		Logger.getRootLogger().setLevel(Level.DEBUG);
 		Logger.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{MM-dd HH:mm:ss} [%p] %m%n")));
 		try {
@@ -32,8 +33,10 @@ public class Main {
 			e.printStackTrace();
 		}
 		
+		//setting options
 		options = CliFactory.parseArguments(CLIOptions.class, args);
 		
+		//main process with RuntimeException catched
 		try{
 			mainWithCatch();
 		}catch(RuntimeException e){
@@ -42,80 +45,27 @@ public class Main {
 	}
 	
 	public static void mainWithCatch(){
-		DBHandler oldDB = new DBHandler("graph-db");
-		DBHandler newDB = new DBHandler("new-graph-db");
+		DBHandler dbHandler = new DBHandler("new-graph-db");
 		
-		//rebuild the graph
-		for(Node node: oldDB.getAllNodes()){
-			if(node.getProperty("TYPE").equals("RECORD")){
-				Record oldRecord = new Record(node, oldDB);
-				log.info("Check Record: " + oldRecord.getName());
-				Record newRecord = newDB.getOrCreateRecord(oldRecord.getName());
-				
-				if(!node.hasProperty("EMB")){
-					log.info("Fill default EMB as false");
-					newRecord.setEmb(false);
-				}
-				
-				Transaction tx = newDB.getTransaction();
-				try{
-					for(HasRef hasRef: oldRecord.getHasRefs()){
-						//log.info("create and link Reference " + hasRef.getCitation());
-						Reference oldReference = hasRef.getReference();
-						Reference newReference = newDB.createReference();
-						newReference.setIndex(Integer.parseInt(hasRef.getCitation()));
-						newReference.setContent(oldReference.getContent());
-						newReference.setLinks(oldReference.getLinks());
-						newRecord.createRefTo(newReference);
+		for(Record record: Record.getAllRecords(dbHandler)){
+			log.info("Check Record: " + record.getName());
+			for(Reference reference: record.getReferences(Direction.OUTGOING)){
+				boolean linkCreated = reference.getTargetRecord() == null ? false : true;
+				for(String link: reference.getLinks()){
+					try {
+						URL targetURL = new URL(link);
+						for(Record targetRecord: Record.getRecordsWithEE(dbHandler, targetURL)){
+							if(linkCreated == false){
+								reference.createRefTo(targetRecord);
+								log.info("link created");
+								linkCreated = true;
+							}
+						}
+					} catch (MalformedURLException e) {
+						continue;
 					}
-					tx.success();
-				}finally{
-					tx.finish();
 				}
 			}
 		}
-		
-		/*
-		Options options = new Options();
-		options.addOption("c", false, "fetch paper content");
-		options.addOption("r", true, "fetch paper ref");
-		options.addOption("l", false, "link the citation network");
-		options.addOption("t", false, "testing");
-		options.addOption("e", false, "evaluation");
-		
-		CommandLineParser parser = new PosixParser();
-		CommandLine cmd = null;
-		try {
-			cmd = parser.parse(options, args);
-		} catch (ParseException e) {
-			log.error("ParseException", e);
-			return;
-		}
-		
-		Controller.startGraphDB();
-		
-		try {
-			if(cmd.hasOption("c")){
-				//Controller.downloadRecords();
-			}
-			if(cmd.hasOption("r")){
-				Controller.fetchRefForAllRecords(Integer.parseInt(cmd.getOptionValue("r")));
-			}
-			if(cmd.hasOption("l")){
-				Controller.connectRecords();
-			}
-			if(cmd.hasOption("t")){
-				Controller.test();
-			}
-			if(cmd.hasOption("e")){
-				Controller.eval();
-			}
-		} catch(RuntimeException e) {
-			log.error("Runtime error", e);
-			System.exit(0);
-		} catch(Exception e) {
-			log.error("Exception:", e);
-			System.exit(0);
-		}*/
 	}
 }
