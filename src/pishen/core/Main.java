@@ -10,6 +10,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Transaction;
 
 import pishen.db.DBHandler;
 import pishen.db.Record;
@@ -49,22 +50,28 @@ public class Main {
 		
 		for(Record record: Record.getAllRecords(dbHandler)){
 			log.info("Check Record: " + record.getName());
-			for(Reference reference: record.getReferences(Direction.OUTGOING)){
-				boolean linkCreated = reference.getTargetRecord() == null ? false : true;
-				for(String link: reference.getLinks()){
-					try {
-						URL targetURL = new URL(link);
-						for(Record targetRecord: Record.getRecordsWithEE(dbHandler, targetURL)){
-							if(linkCreated == false){
-								reference.createRefTo(targetRecord);
-								log.info("link created");
-								linkCreated = true;
+			Transaction tx = dbHandler.getTransaction();
+			try{
+				for(Reference reference: record.getReferences(Direction.OUTGOING)){
+					boolean linkCreated = reference.getTargetRecord() == null ? false : true;
+					for(String link: reference.getLinks()){
+						try {
+							URL targetURL = new URL(link);
+							for(Record targetRecord: Record.getRecordsWithEE(dbHandler, targetURL)){
+								if(linkCreated == false){
+									reference.createRefTo(targetRecord);
+									log.info("link created");
+									linkCreated = true;
+								}
 							}
+						} catch (MalformedURLException e) {
+							continue;
 						}
-					} catch (MalformedURLException e) {
-						continue;
 					}
 				}
+				tx.success();
+			}finally{
+				tx.finish();
 			}
 		}
 	}
