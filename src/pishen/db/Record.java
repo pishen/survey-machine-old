@@ -105,7 +105,7 @@ public class Record extends NodeShell {
 		return new RecordHits(hits);
 	}*/
 	
-	private static class RecordHits implements Iterator<Record>, Iterable<Record>{
+	public static class RecordHits implements Iterator<Record>, Iterable<Record>{
 		private IndexHits<Node> indexHits;
 		private DBHandler dbHandler;
 
@@ -205,7 +205,7 @@ public class Record extends NodeShell {
 		return new ReferenceHits(node.getRelationships(RelType.REF, direction), direction);
 	}
 
-	private class ReferenceHits implements Iterator<Reference>, Iterable<Reference>{
+	public class ReferenceHits implements Iterator<Reference>, Iterable<Reference>{
 		private Iterator<Relationship> iterator;
 		private Direction direction;
 		
