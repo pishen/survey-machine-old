@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,14 +21,7 @@ import org.neo4j.graphdb.index.IndexHits;
 
 import pishen.core.CitationMark;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
 public class Record extends NodeShell {
-	public static enum CitationType{
-		NO_MARK, NUMBER, OVERFLOW, UNKNOWN
-	}
-	
 	private static final Logger log = Logger.getLogger(Record.class);
 	//type
 	private static final String RECORD = "RECORD";
@@ -35,6 +32,7 @@ public class Record extends NodeShell {
 	private static final String YEAR = "YEAR"; //required
 	private static final String EMB = "EMB";
 	private static final String REF_FETCHED = "REF_FETCHED"; //default is false
+	private static final String CITATION_TYPE = "CITATION_TYPE";
 	//directory names
 	private static final String TEXT_DIR = "text-records";
 	private static final String PDF_DIR = "pdf-records";
@@ -237,61 +235,62 @@ public class Record extends NodeShell {
 		public void remove() {}
 	}
 	
-	//TODO write CitationType to DB, update it (for UNKNOWN) if the rule change?
-	public CitationType getCitationType(){
-		File textFile = getTextFile();
-		if(textFile.exists() == false){
-			return CitationType.UNKNOWN;
+	private void setCitationType(CitationMark.Type citationMarkType){
+		super.setProperty(CITATION_TYPE, citationMarkType.toString());
+	}
+	
+	public CitationMark.Type getCitationType(){
+		return CitationMark.Type.valueOf(super.getProperty(CITATION_TYPE));
+	}
+	
+	@SuppressWarnings("unused")
+	public void updateCitationType() throws IOException{
+		//go through the References of Record and create a checkList 
+		ArrayList<Boolean> checkList = new ArrayList<Boolean>();
+		for(Reference reference: getReferences(Direction.OUTGOING)){
+			checkList.add(new Boolean(false));
+		}
+		if(checkList.isEmpty()){
+			setCitationType(CitationMark.Type.UNKNOWN);
+			return;
 		}
 		
-		int referenceCount = 0;
-		for(Reference reference: this.getReferences(Direction.OUTGOING)){
-			referenceCount++;
+		//get the text file of Record and setup the regex parser
+		Path textRecordPath = Paths.get(TEXT_DIR, getName());
+		if(Files.notExists(textRecordPath)){
+			setCitationType(CitationMark.Type.UNKNOWN);
+			return;
 		}
-		
-		if(referenceCount == 0){
-			return CitationType.NO_MARK;
-		}
-		
-		String recordContent;
-		try {
-			recordContent = Files.toString(textFile, Charsets.UTF_8);
-		} catch (IOException e) {
-			log.error("error when reading textfile", e);
-			return null;
-		}
+		String textRecordContent = new String(Files.readAllBytes(textRecordPath));
+		textRecordContent = textRecordContent.replaceAll("\n", "");
+		//find "[...]"
 		Pattern pattern = Pattern.compile("\\[([^\\[\\]]*)\\]");
-		Matcher matcher = pattern.matcher(recordContent);
+		Matcher matcher = pattern.matcher(textRecordContent);
 		
-		boolean[] citationCheck = new boolean[referenceCount];
-		boolean hasMark = false;
-		
+		//check the citationMarks (each citationMark contains one or more citations)
+		//see if all the numbers in checkList are matched by at least one citation in text
+		//and there's no number in text which exceed the checkList's range
 		while(matcher.find()){
-			hasMark = true;
 			String stringInBrackets = matcher.group(1);
 			CitationMark mark = new CitationMark(stringInBrackets);
 			if(mark.getType() == CitationMark.Type.NUMBER){
-				for(int citation: mark.getIntCitations()){
-					if(citation > citationCheck.length){
-						return CitationType.OVERFLOW;
+				for(String citationString: mark){
+					int citationInt = Integer.parseInt(citationString);
+					if(citationInt > checkList.size()){
+						setCitationType(CitationMark.Type.UNKNOWN);
 					}else{
-						citationCheck[citation - 1] = true;
+						checkList.set(citationInt - 1, new Boolean(true));
 					}
 				}
 			}
 		}
-		
-		if(hasMark == false){
-			return CitationType.NO_MARK;
-		}
-		
-		for(boolean check: citationCheck){
+		for(Boolean check: checkList){
 			if(check == false){
-				return CitationType.UNKNOWN;
+				setCitationType(CitationMark.Type.UNKNOWN);
 			}
 		}
 		
-		return CitationType.NUMBER;
+		setCitationType(CitationMark.Type.NUMBER);
 	}
 	
 	@Override
@@ -301,14 +300,6 @@ public class Record extends NodeShell {
 		}
 		Record targetRecord = (Record)obj;
 		return this.getName().equals(targetRecord.getName());
-	}
-
-	public File getPDFFile(){
-		return new File(PDF_DIR + "/" + getName() + ".pdf");
-	}
-	
-	public File getTextFile(){
-		return new File(TEXT_DIR + "/" + getName());
 	}
 	
 	private static void createDirIfNotExist(String filename){

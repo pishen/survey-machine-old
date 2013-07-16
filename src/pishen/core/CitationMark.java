@@ -1,9 +1,10 @@
 package pishen.core;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 
-public class CitationMark {
+public class CitationMark implements Iterable<String>{
 	//private static final Logger log = Logger.getLogger(CitationMark.class);
 	public static enum Type{
 		NUMBER, TEXT, UNKNOWN
@@ -23,16 +24,9 @@ public class CitationMark {
 		return type;
 	}
 	
-	public ArrayList<Integer> getIntCitations(){
-		if(type == Type.NUMBER){
-			ArrayList<Integer> intCitations = new ArrayList<Integer>();
-			for(String citation: citations){
-				intCitations.add(Integer.parseInt(citation));
-			}
-			return intCitations;
-		}else{
-			return null;
-		}
+	@Override
+	public Iterator<String> iterator() {
+		return citations.iterator();
 	}
 	
 	private void splitContent(){
@@ -44,7 +38,7 @@ public class CitationMark {
 					int start = Integer.parseInt(dashSeperatedStrs[0]);
 					int end = Integer.parseInt(dashSeperatedStrs[1]);
 					for(int i = start; i <= end; i++){
-						citations.add("" + i);
+						citations.add(Integer.toString(i));
 					}
 				}else{
 					citations.add(commaSeperatedStr);

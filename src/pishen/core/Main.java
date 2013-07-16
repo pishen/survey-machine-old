@@ -1,20 +1,15 @@
 package pishen.core;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Transaction;
 
 import pishen.db.DBHandler;
 import pishen.db.Record;
-import pishen.db.Reference;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 
@@ -50,28 +45,10 @@ public class Main {
 		
 		for(Record record: Record.getAllRecords(dbHandler)){
 			log.info("Check Record: " + record.getName());
-			Transaction tx = dbHandler.getTransaction();
-			try{
-				for(Reference reference: record.getReferences(Direction.OUTGOING)){
-					boolean linkCreated = reference.getTargetRecord() == null ? false : true;
-					for(String link: reference.getLinks()){
-						try {
-							URL targetURL = new URL(link);
-							for(Record targetRecord: Record.getRecordsWithEE(dbHandler, targetURL)){
-								if(linkCreated == false){
-									reference.createRefTo(targetRecord);
-									log.info("link created");
-									linkCreated = true;
-								}
-							}
-						} catch (MalformedURLException e) {
-							continue;
-						}
-					}
-				}
-				tx.success();
-			}finally{
-				tx.finish();
+			try {
+				record.updateCitationType();
+			} catch (IOException e) {
+				log.error("error reading textRecord", e);
 			}
 		}
 	}
