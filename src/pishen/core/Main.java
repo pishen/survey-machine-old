@@ -47,6 +47,7 @@ public class Main {
 			log.info("Check Record: " + record.getName());
 			try {
 				record.updateCitationType();
+				log.info("citationType: " + record.getCitationType());
 			} catch (IOException e) {
 				log.error("error reading textRecord", e);
 			}
