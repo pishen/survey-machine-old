@@ -158,7 +158,7 @@ public class Record extends NodeShell {
 			return new URL(super.getProperty(EE));
 		} catch (MalformedURLException e) {
 			log.error("EE is not valid", e);
-			throw new RecordRuntimeException("Stored EE shouldn't be wrong");
+			throw new UnsupportedOperationException("Stored EE shouldn't be wrong");
 		}
 	}
 	
@@ -308,12 +308,4 @@ public class Record extends NodeShell {
 			dir.mkdir();
 		}
 	}
-	
-	public class RecordRuntimeException extends RuntimeException{
-		private static final long serialVersionUID = 1L;
-		public RecordRuntimeException(String message){
-			super(message);
-		}
-	}
-	
 }
