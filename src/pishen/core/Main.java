@@ -57,9 +57,12 @@ public class Main {
 		
 		for(Record record: Record.getAllRecords(dbHandler)){
 			log.info("Check Record: " + record.getName());
+			if(record.getCitationType() != CitationMark.Type.NUMBER){
+				continue;
+			}
 			int refCount = 0;
 			for(Reference ref: record.getReferences(Direction.OUTGOING)){
-				if(ref.getEndRecord() != null){
+				if(ref.getEndRecord() != null && ref.getEndRecord().getCitationType() == CitationMark.Type.NUMBER){
 					refCount++;
 				}
 			}
