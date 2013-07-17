@@ -1,5 +1,7 @@
 package pishen.db;
 
+import java.util.Iterator;
+
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -60,11 +62,18 @@ public class Reference extends NodeShell{
 		super.createRelationshipTo(targetRecord, RelType.REF);
 	}
 	
-	public Record getTargetRecord(){
-		Record targetRecord = null;
-		for(Relationship rel: super.getRelationships(RelType.REF, Direction.OUTGOING)){
-			targetRecord = new Record(rel.getEndNode(), dbHandler);
+	public Record getStartRecord(){
+		Relationship rel = super.getRelationships(RelType.REF, Direction.INCOMING).iterator().next();
+		return new Record(rel.getStartNode(), dbHandler);
+	}
+	
+	public Record getEndRecord(){
+		Record endRecord = null;
+		Iterator<Relationship> iter = super.getRelationships(RelType.REF, Direction.OUTGOING).iterator();
+		if(iter.hasNext()){
+			Relationship rel = iter.next();
+			endRecord = new Record(rel.getEndNode(), dbHandler);
 		}
-		return targetRecord;
+		return endRecord;
 	}
 }

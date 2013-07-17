@@ -43,14 +43,6 @@ public class Main {
 	public static void mainWithCatch(){
 		DBHandler dbHandler = new DBHandler("new-graph-db");
 		
-		for(Record record: Record.getAllRecords(dbHandler)){
-			log.info("Check Record: " + record.getName());
-			try {
-				record.updateCitationType();
-				log.info("citationType: " + record.getCitationType());
-			} catch (IOException e) {
-				log.error("error reading textRecord", e);
-			}
-		}
+		
 	}
 }
