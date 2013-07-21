@@ -48,33 +48,6 @@ public class Main {
 	public static void mainWithCatch(){
 		DBHandler dbHandler = new DBHandler("new-graph-db");
 		
-		TreeMap<Integer, Integer> degreeCountMap = new TreeMap<Integer, Integer>(new Comparator<Integer>(){
-			@Override
-			public int compare(Integer o1, Integer o2) {
-				return o2.intValue() - o1.intValue();
-			}
-		});
 		
-		for(Record record: Record.getAllRecords(dbHandler)){
-			log.info("Check Record: " + record.getName());
-			if(record.getCitationType() != CitationMark.Type.NUMBER){
-				continue;
-			}
-			int refCount = 0;
-			for(Reference ref: record.getReferences(Direction.OUTGOING)){
-				if(ref.getEndRecord() != null && ref.getEndRecord().getCitationType() == CitationMark.Type.NUMBER){
-					refCount++;
-				}
-			}
-			if(degreeCountMap.containsKey(refCount)){
-				degreeCountMap.put(refCount, degreeCountMap.get(refCount).intValue() + 1);
-			}else{
-				degreeCountMap.put(refCount, 1);
-			}
-		}
-		
-		for(Integer refCount: degreeCountMap.navigableKeySet()){
-			log.info("refCount: " + refCount + " recordCount: " + degreeCountMap.get(refCount));
-		}
 	}
 }
