@@ -16,6 +16,10 @@ public abstract class NodeShell extends ContainerShell {
 		this.node = node;
 	}
 	
+	public long getId(){
+		return node.getId();
+	}
+	
 	/*protected void setType(String type){
 		if(hasType()){
 			throw new IllegalOperationException("Cannot change a set type");

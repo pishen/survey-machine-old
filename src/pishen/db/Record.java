@@ -299,7 +299,7 @@ public class Record extends NodeShell {
 			return false;
 		}
 		Record targetRecord = (Record)obj;
-		return this.getName().equals(targetRecord.getName());
+		return this.getId() == targetRecord.getId();
 	}
 	
 	private static void createDirIfNotExist(String filename){
