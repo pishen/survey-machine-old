@@ -33,15 +33,23 @@ public class TestCase {
 				seedRecords.add(referencedBySource.get(i));
 			}
 		}
-		TestCase testCase = new TestCase(ansRecords, seedRecords);
+		TestCase testCase = new TestCase(ansRecords, seedRecords, sourceRecord);
 		
 		List<TestCase> testCases = new ArrayList<TestCase>();
 		testCases.add(testCase);
 		return testCases;
 	}
 	
-	public TestCase(List<Record> ansRecords, List<Record> seedRecords){
+	public TestCase(List<Record> ansRecords, List<Record> seedRecords, Record sourceRecord){
 		this.ansRecords = ansRecords;
-		
+		rankRecords = new Cocitation().rankOn(seedRecords, sourceRecord);
+	}
+	
+	public List<Record> getAnsRecords(){
+		return ansRecords;
+	}
+	
+	public List<Record> getRankRecords(){
+		return rankRecords;
 	}
 }
