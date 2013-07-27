@@ -24,10 +24,12 @@ public class Cocitation implements RankingAlgo{
 						&& newerRecord.getCitationType() == CitationMark.Type.NUMBER){
 					for(Reference ref2: newerRecord.getReferences(Direction.OUTGOING)){
 						Record candidateRecord = ref2.getEndRecord();
-						if(candidateRecord != null 
-								&& candidateRecord.getCitationType() == CitationMark.Type.NUMBER
-								&& candidateRecord.equals(sourceRecord) == false //filter out sourceRecord
-								&& seedRecords.contains(candidateRecord) == false){
+						if(candidateRecord != null && 
+								candidateRecord.getCitationType() == CitationMark.Type.NUMBER &&
+								//filter out sourceRecord
+								candidateRecord.equals(sourceRecord) == false && 
+								seedRecords.contains(candidateRecord) == false &&
+								candidateRecord.getYear() < sourceRecord.getYear()){
 							if(countMap.containsKey(candidateRecord)){
 								countMap.put(candidateRecord, countMap.get(candidateRecord).intValue() + 1);
 							}else{
