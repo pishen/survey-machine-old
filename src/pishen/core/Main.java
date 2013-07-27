@@ -1,9 +1,7 @@
 package pishen.core;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.TreeMap;
+import java.util.List;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
@@ -48,6 +46,29 @@ public class Main {
 	public static void mainWithCatch(){
 		DBHandler dbHandler = new DBHandler("new-graph-db");
 		
+		Record sourceRecord = null;
 		
+		for(Record record: Record.getAllRecords(dbHandler)){
+			log.info("Check Record " + record.getName());
+			int count = 0;
+			for(Reference ref: record.getReferences(Direction.OUTGOING)){
+				Record targetRecord = ref.getEndRecord();
+				if(targetRecord != null && targetRecord.getCitationType() == CitationMark.Type.NUMBER){
+					count++;
+				}
+			}
+			if(count == 157){
+				sourceRecord = record;
+				break;
+			}
+		}
+		
+		if(sourceRecord != null){
+			List<TestCase> testCases = TestCase.createTestCaseList(sourceRecord, 0.1);
+			double map = new MAPComputer(50).computeMAPOn(testCases);
+			log.info("MAP=" + map);
+		}else{
+			log.error("source not found");
+		}
 	}
 }
