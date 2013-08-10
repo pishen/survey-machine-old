@@ -8,11 +8,9 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.neo4j.graphdb.Direction;
 
 import pishen.db.DBHandler;
 import pishen.db.Record;
-import pishen.db.Reference;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 
@@ -49,7 +47,20 @@ public class Main {
 		Record sourceRecord = Record.getOrCreateRecord(dbHandler, "journals-sigir-Aoe90a");
 		
 		List<TestCase> testCases = TestCase.createTestCaseList(sourceRecord, options.getHideRatio());
-		double map = new MAPComputer(options.getTopK()).computeMAPOn(testCases);
-		log.info("MAP=" + map);
+		int count = 0;
+		for(TestCase testCase: testCases){
+			log.info("testCase " + (++count) + " of source " + sourceRecord.getName());
+			log.info("computing cocitation");
+			testCase.computeRankForCocitation();
+			log.info("computeing Katz");
+			testCase.computeRankForKatz(options.getKatzDepth(), options.getDecay());
+		}
+		
+		log.info("computing MAP for cocitation");
+		double map = new MAPComputer(options.getTopK()).computeMAPOn(testCases, RankingAlgo.Type.Cocitation);
+		log.info("MAP of Cocitation: " + map);
+		log.info("computing MAP for Katz");
+		map = new MAPComputer(options.getTopK()).computeMAPOn(testCases, RankingAlgo.Type.Katz);
+		log.info("MAP of Katz: " + map);
 	}
 }

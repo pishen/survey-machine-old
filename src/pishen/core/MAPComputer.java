@@ -12,10 +12,10 @@ public class MAPComputer {
 		this.threshold = threshold;
 	}
 	
-	public double computeMAPOn(List<TestCase> testCases){
+	public double computeMAPOn(List<TestCase> testCases, RankingAlgo.Type type){
 		double apSum = 0.0;
 		for(TestCase testCase: testCases){
-			apSum += computeAPOn(testCase.getRankRecords(), testCase.getAnsRecords());
+			apSum += computeAPOn(testCase.getRankRecords(type), testCase.getAnsRecords());
 		}
 		return apSum / (double)testCases.size();
 	}

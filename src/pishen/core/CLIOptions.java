@@ -8,4 +8,11 @@ public interface CLIOptions {
 	
 	@Option
 	int getTopK();
+	
+	@Option
+	int getKatzDepth();
+	
+	@Option
+	double getDecay();
+	
 }
