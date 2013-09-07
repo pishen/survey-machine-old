@@ -52,7 +52,7 @@ public class Main {
 			log.info("testCase " + (++count) + " of source " + sourceRecord.getName());
 			log.info("computing cocitation");
 			testCase.computeRankForCocitation();
-			log.info("computeing Katz");
+			log.info("computing Katz");
 			testCase.computeRankForKatz(options.getKatzDepth(), options.getDecay());
 		}
 		
