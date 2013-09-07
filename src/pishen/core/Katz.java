@@ -38,7 +38,13 @@ public class Katz implements RankingAlgo{
 		Collections.sort(rankRecords, new Comparator<Record>(){
 			@Override
 			public int compare(Record o1, Record o2) {
-				return rankMap.get(o2) - rankMap.get(o1) > 0 ? 1 : -1;
+				if(rankMap.get(o2) - rankMap.get(o1) > 0){
+					return 1;
+				}else if(rankMap.get(o2) - rankMap.get(o1) < 0){
+					return -1;
+				}else{
+					return 0;
+				}
 			}
 		});
 		
