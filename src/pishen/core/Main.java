@@ -1,6 +1,10 @@
 package pishen.core;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.log4j.ConsoleAppender;
@@ -48,29 +52,44 @@ public class Main {
 		double cocitationSumAP = 0.0;
 		double katzSumAp = 0.0;
 		
-		for(Record sourceRecord: Record.getAllRecords(dbHandler)){
-			log.info("Checking Record " + sourceRecord.getName());
-			List<TestCase> testCases = TestCase.createTestCaseList(sourceRecord, options.getHideRatio(), options.getMinSrcRefSize());
-			if(testCases == null){
-				continue;
+		try(PrintWriter out = new PrintWriter(Files.newBufferedWriter(Paths.get("ans-stat"), Charset.forName("UTF-8")))){
+			for(Record sourceRecord: Record.getAllRecords(dbHandler)){
+				log.info("Checking Record " + sourceRecord.getName());
+				List<TestCase> testCases = TestCase.createTestCaseList(sourceRecord, options.getHideRatio(), options.getMinSrcRefSize());
+				if(testCases == null){
+					continue;
+				}
+				
+				numOfTestCases += 1;
+				int count = 0;
+				for(TestCase testCase: testCases){
+					log.info("testCase " + (++count) + " of source " + sourceRecord.getName());
+					log.info("computing cocitation");
+					testCase.computeRankForCocitation();
+					log.info("computing Katz");
+					testCase.computeRankForKatz(options.getKatzDepth(), options.getDecay());
+					int cocitationFindableAnsCount = 0;
+					int katzFindableAnsCount = 0;
+					for(Record ansRecord: testCase.getAnsRecords()){
+						if(testCase.getRankRecords(RankingAlgo.Type.Cocitation).contains(ansRecord)){
+							cocitationFindableAnsCount += 1;
+						}
+						if(testCase.getRankRecords(RankingAlgo.Type.Katz).contains(ansRecord)){
+							katzFindableAnsCount += 1;
+						}
+					}
+					out.println(sourceRecord.getName() + "\t" + testCase.getAnsRecords().size() + "\t" + cocitationFindableAnsCount + "\t" + katzFindableAnsCount);
+				}
+				
+				log.info("computing SumAP for cocitation");
+				cocitationSumAP += new MAPComputer(options.getTopK()).computeSumAPOn(testCases, RankingAlgo.Type.Cocitation);
+				//log.info("MAP of Cocitation: " + map);
+				log.info("computing SumAP for Katz");
+				katzSumAp += new MAPComputer(options.getTopK()).computeSumAPOn(testCases, RankingAlgo.Type.Katz);
+				//log.info("MAP of Katz: " + map);
 			}
-			
-			numOfTestCases += 1;
-			int count = 0;
-			for(TestCase testCase: testCases){
-				log.info("testCase " + (++count) + " of source " + sourceRecord.getName());
-				log.info("computing cocitation");
-				testCase.computeRankForCocitation();
-				log.info("computing Katz");
-				testCase.computeRankForKatz(options.getKatzDepth(), options.getDecay());
-			}
-			
-			log.info("computing SumAP for cocitation");
-			cocitationSumAP += new MAPComputer(options.getTopK()).computeSumAPOn(testCases, RankingAlgo.Type.Cocitation);
-			//log.info("MAP of Cocitation: " + map);
-			log.info("computing SumAP for Katz");
-			katzSumAp += new MAPComputer(options.getTopK()).computeSumAPOn(testCases, RankingAlgo.Type.Katz);
-			//log.info("MAP of Katz: " + map);
+		} catch (IOException e) {
+			log.error("error writing ans-stat", e);
 		}
 		
 		log.info("Number of TestCases: " + numOfTestCases);
