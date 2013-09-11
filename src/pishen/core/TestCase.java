@@ -18,7 +18,7 @@ public class TestCase {
 	private List<Record> cocitationRankRecords;
 	private List<Record> katzRankRecords;
 	
-	public static List<TestCase> createTestCaseList(Record sourceRecord, double hidingRatio){
+	public static List<TestCase> createTestCaseList(Record sourceRecord, double hidingRatio, int minReferenceSize){
 		//find the Records referenced by sourceRecord
 		List<Record> base = new ArrayList<Record>(); 
 		for(Reference ref: sourceRecord.getReferences(Direction.OUTGOING)){
@@ -26,6 +26,10 @@ public class TestCase {
 			if(referencedRecord != null && referencedRecord.getCitationType() == CitationMark.Type.NUMBER){
 				base.add(referencedRecord);
 			}
+		}
+		
+		if(base.size() < minReferenceSize){
+			return null;
 		}
 		
 		List<TestCase> testCases = new ArrayList<TestCase>();

@@ -44,23 +44,41 @@ public class Main {
 	public static void mainWithCatch(){
 		DBHandler dbHandler = new DBHandler("new-graph-db");
 		
-		Record sourceRecord = Record.getOrCreateRecord(dbHandler, "journals-sigir-Aoe90a");
+		int numOfTestCases = 0;
+		double cocitationSumAP = 0.0;
+		double katzSumAp = 0.0;
 		
-		List<TestCase> testCases = TestCase.createTestCaseList(sourceRecord, options.getHideRatio());
-		int count = 0;
-		for(TestCase testCase: testCases){
-			log.info("testCase " + (++count) + " of source " + sourceRecord.getName());
-			log.info("computing cocitation");
-			testCase.computeRankForCocitation();
-			log.info("computing Katz");
-			testCase.computeRankForKatz(options.getKatzDepth(), options.getDecay());
+		for(Record sourceRecord: Record.getAllRecords(dbHandler)){
+			log.info("Checking Record " + sourceRecord.getName());
+			List<TestCase> testCases = TestCase.createTestCaseList(sourceRecord, options.getHideRatio(), options.getMinSrcRefSize());
+			if(testCases == null){
+				continue;
+			}
+			
+			numOfTestCases += 1;
+			int count = 0;
+			for(TestCase testCase: testCases){
+				log.info("testCase " + (++count) + " of source " + sourceRecord.getName());
+				log.info("computing cocitation");
+				testCase.computeRankForCocitation();
+				log.info("computing Katz");
+				testCase.computeRankForKatz(options.getKatzDepth(), options.getDecay());
+			}
+			
+			log.info("computing SumAP for cocitation");
+			cocitationSumAP += new MAPComputer(options.getTopK()).computeSumAPOn(testCases, RankingAlgo.Type.Cocitation);
+			//log.info("MAP of Cocitation: " + map);
+			log.info("computing SumAP for Katz");
+			katzSumAp += new MAPComputer(options.getTopK()).computeSumAPOn(testCases, RankingAlgo.Type.Katz);
+			//log.info("MAP of Katz: " + map);
 		}
 		
-		log.info("computing MAP for cocitation");
-		double map = new MAPComputer(options.getTopK()).computeMAPOn(testCases, RankingAlgo.Type.Cocitation);
-		log.info("MAP of Cocitation: " + map);
-		log.info("computing MAP for Katz");
-		map = new MAPComputer(options.getTopK()).computeMAPOn(testCases, RankingAlgo.Type.Katz);
-		log.info("MAP of Katz: " + map);
+		log.info("Number of TestCases: " + numOfTestCases);
+		log.info("MAP of Cocitation: " + (cocitationSumAP / (double)numOfTestCases));
+		log.info("MAP of Katz: " + (katzSumAp / (double)numOfTestCases));
+		
+		//Record sourceRecord = Record.getOrCreateRecord(dbHandler, "journals-sigir-Aoe90a");
+		
+		
 	}
 }

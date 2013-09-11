@@ -15,4 +15,6 @@ public interface CLIOptions {
 	@Option
 	double getDecay();
 	
+	@Option
+	int getMinSrcRefSize();
 }
