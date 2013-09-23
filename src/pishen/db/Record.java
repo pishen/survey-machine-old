@@ -302,6 +302,11 @@ public class Record extends NodeShell {
 		return this.getId() == targetRecord.getId();
 	}
 	
+	@Override
+	public int hashCode() {
+		return (int)this.getId();
+	}
+
 	private static void createDirIfNotExist(String filename){
 		File dir = new File(filename);
 		if(!dir.exists()){
